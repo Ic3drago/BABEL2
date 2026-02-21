@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BAR PRIDE POS</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="header-left">
+        <h1>BAR PRIDE POS</h1>
+        <div class="time-display" id="timeDisplay">00:00</div>
+      </div>
+      <div class="header-right">
+        <button class="btn-admin" id="btnAdmin">ADMIN</button>
+      </div>
+    </header>
+
+    <!-- VENTA SECTION -->
+    <div class="section" id="ventaSection">
+      <div class="venta-container">
+        <div class="entradas-venta">
+          <h2 style="color: #7fff00; margin: 0 0 15px 0;">📦 ENTRADAS</h2>
+          <div id="entradasVentaGrid" class="entradas-grid"></div>
+        </div>
+
+        <div class="productos-section">
+          <h2>🍾 BEBIDAS</h2>
+          <div class="productos-grid" id="productosVentaGrid"></div>
+        </div>
+
+        <div class="carrito">
+          <h2>💰 CUENTAS HOY</h2>
+          <div id="cuentasEnTiempoReal" class="carrito-items"></div>
+          <div class="carrito-total">
+            <div class="carrito-buttons">
+              <button class="btn btn-venta" id="btnCerrarCaja">CERRAR CAJA</button>
+              <button class="btn btn-limpiar" id="btnExportarCuentas">EXPORTAR EXCEL</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN SECTION -->
+    <div class="section hidden" id="adminSection">
+      <div class="admin-tabs">
+        <button class="admin-tab active" data-tab="inventario">INVENTARIO</button>
+        <button class="admin-tab" data-tab="productos">BEBIDAS</button>
+        <button class="admin-tab" data-tab="entradas">ENTRADAS</button>
+        <button class="admin-tab" data-tab="precios">PRECIOS DINÁMICOS</button>
+        <button class="admin-tab" data-tab="rendimientos">RENDIMIENTOS</button>
+        <button class="admin-tab" data-tab="promos">PROMOS</button>
+        <button class="admin-tab" data-tab="reportes">REPORTES</button>
+        <button class="btn-volver" id="btnVolverVenta">VOLVER A VENTA</button>
+      </div>
+
+      <!-- INVENTARIO TAB -->
+      <div class="admin-tab-content active" id="inventarioTab">
+        <h2>INVENTARIO INICIAL</h2>
+        <div class="form-group">
+          <select id="prodInicial">
+            <option value="">-- Selecciona bebida --</option>
+          </select>
+          <input type="number" id="botellasInicial" placeholder="Botellas" min="0" step="0.01" />
+          <input type="number" id="vasosInicial" placeholder="Vasos" min="0" step="0.01" />
+          <button class="btn btn-add" id="btnSetearInventario">GUARDAR</button>
+        </div>
+        <h2>INVENTARIO ACTUAL</h2>
+        <div id="inventarioActual" class="inventario-list"></div>
+      </div>
+
+      <!-- PRODUCTOS TAB -->
+      <div class="admin-tab-content" id="productosTab">
+        <h2>AGREGAR BEBIDA</h2>
+        <div class="form-group">
+          <input type="text" id="prodNombre" placeholder="Nombre de la bebida" />
+          <select id="prodTipo">
+            <option value="">-- Tipo --</option>
+            <option value="botella">Botella</option>
+            <option value="lata">Lata</option>
+            <option value="vaso">Vaso</option>
+            <option value="entrada">Entrada</option>
+          </select>
+          <input type="number" id="prodPrecio" placeholder="Precio base" step="0.01" />
+          <button class="btn btn-add" id="btnAgregarProd">AGREGAR</button>
+        </div>
+        <h2>BEBIDAS ACTIVAS</h2>
+        <div id="productosList" class="productos-list"></div>
+      </div>
+
+      <!-- ENTRADAS TAB -->
+      <div class="admin-tab-content" id="entradasTab">
+        <h2>CREAR ENTRADA (Paquete Fijo)</h2>
+        <div class="form-group">
+          <input type="text" id="entradaNombre" placeholder="Ej: Entrada Cerveza" />
+          <input type="text" id="entradaDescripcion" placeholder="Descripción" />
+          <input type="number" id="entradaPrecio" placeholder="Precio" step="0.01" />
+          <select id="entradaProducto">
+            <option value="">-- Producto incluido --</option>
+          </select>
+          <input type="text" id="entradaAplica" placeholder="viernes,sabado" />
+          <button class="btn btn-add" id="btnAgregarEntrada">GUARDAR</button>
+        </div>
+        <h2>ENTRADAS ACTIVAS</h2>
+        <div id="entradasList" class="entradas-list"></div>
+      </div>
+
+      <!-- PRECIOS DINÁMICOS TAB -->
+      <div class="admin-tab-content" id="preciosTab">
+        <h2>DEFINIR PRECIO DINÁMICO POR HORA</h2>
+        <div class="form-group">
+          <select id="precioProducto">
+            <option value="">-- Selecciona bebida --</option>
+          </select>
+          <input type="time" id="precioHoraIni" placeholder="Hora inicio" />
+          <input type="time" id="precioHoraFin" placeholder="Hora fin" />
+          <input type="number" id="precioPrecio" placeholder="Precio vaso" step="0.01" />
+          <input type="text" id="precioAplica" placeholder="viernes,sabado" />
+          <button class="btn btn-add" id="btnAgregarPrecio">GUARDAR</button>
+        </div>
+        <h2>PRECIOS VIGENTES</h2>
+        <div id="preciosList" class="precios-list"></div>
+      </div>
+      <div class="admin-tab-content" id="rendimientosTab">
+        <h2>DEFINIR RENDIMIENTO (Botella → Vasos)</h2>
+        <div class="form-group">
+          <select id="rendProducto">
+            <option value="">-- Selecciona botella --</option>
+          </select>
+          <select id="rendTamano">
+            <option value="">-- Tamaño de vaso --</option>
+          </select>
+          <input type="number" id="rendVasos" placeholder="Vasos por botella" step="0.01" />
+          <button class="btn btn-add" id="btnAgregarRend">GUARDAR</button>
+        </div>
+        <h2>RENDIMIENTOS REGISTRADOS</h2>
+        <div id="rendimientosList" class="rendimientos-list"></div>
+      </div>
+
+      <!-- PROMOS TAB -->
+      <div class="admin-tab-content" id="promosTab">
+        <h2>CREAR PROMOCIÓN</h2>
+        <div class="form-group">
+          <select id="promoProducto">
+            <option value="">-- Selecciona producto --</option>
+          </select>
+          <select id="promoTipo">
+            <option value="">-- Tipo --</option>
+            <option value="2x1">2 x 1</option>
+            <option value="descuento">Descuento %</option>
+          </select>
+          <input type="number" id="promoValor" placeholder="Valor (% o cantidad)" step="0.01" />
+          <input type="time" id="promoHoraIni" />
+          <input type="time" id="promoHoraFin" />
+          <button class="btn btn-add" id="btnAgregarPromo">GUARDAR PROMO</button>
+        </div>
+        <h2>PROMOS ACTIVAS</h2>
+        <div id="promosList" class="promos-list"></div>
+      </div>
+
+      <!-- REPORTES TAB -->
+      <div class="admin-tab-content" id="reportesTab">
+        <h2>REPORTES Y ANÁLISIS</h2>
+        <div class="reportes-options">
+          <button class="btn btn-success" id="btnReporteVentas">REPORTE DE VENTAS (EXCEL)</button>
+          <button class="btn btn-success" id="btnReporteInventario">REPORTE INVENTARIO (EXCEL)</button>
+          <button class="btn btn-success" id="btnReporteProductos">REPORTE PRODUCTOS (EXCEL)</button>
+        </div>
+        <div id="reporteContent" class="reporte-detalle"></div>
+      </div>
+    </div>
+
+    <!-- MODAL RESUMEN -->
+    <div class="modal" id="resumenModal">
+      <div class="modal-content modal-large">
+        <button class="btn-close" id="btnCerrarModal">&times;</button>
+        <div id="resumenCuentas"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
