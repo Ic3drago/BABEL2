@@ -6,24 +6,24 @@
   },
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/index.php?__vercel_path=/api/$1"
+      "source": "/admin",
+      "destination": "/public/admin.html"
     },
     {
       "source": "/pos",
       "destination": "/public/pos.html"
     },
     {
-      "source": "/admin",
-      "destination": "/public/admin.html"
-    },
-    {
       "source": "/planilla",
       "destination": "/public/planilla.html"
     },
     {
-      "source": "/",
-      "destination": "/public/index.html"
+      "source": "/api/(.*)",
+      "destination": "/api/index.php?__vercel_path=/api/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/public/$1"
     }
   ]
 }
