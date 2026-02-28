@@ -26,8 +26,16 @@
       "destination": "/public/planilla.html"
     },
     {
-      "source": "/(.*\\.(js|css|ico|png|svg|jpg))",
-      "destination": "/public/$1"
+      "source": "/pos.js",
+      "destination": "/public/pos.js"
+    },
+    {
+      "source": "/admin.js",
+      "destination": "/public/admin.js"
+    },
+    {
+      "source": "/app.js",
+      "destination": "/public/app.js"
     }
   ]
 }
