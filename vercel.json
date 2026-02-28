@@ -1,41 +1,43 @@
 {
-  "functions": {
-    "api/index.php": {
-      "runtime": "vercel-php@0.8.0"
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/index.php",
+      "use": "vercel-php@0.6.1"
+    },
+    {
+      "src": "public/**/*",
+      "use": "@vercel/static"
     }
-  },
-  "rewrites": [
+  ],
+  "routes": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/index.php"
+      "src": "/api/(.*)",
+      "dest": "/api/index.php"
     },
     {
-      "source": "/",
-      "destination": "/public/index.html"
+      "src": "/",
+      "dest": "/public/index.html"
     },
     {
-      "source": "/pos",
-      "destination": "/public/pos.html"
+      "src": "/pos",
+      "dest": "/public/pos.html"
     },
     {
-      "source": "/admin",
-      "destination": "/public/admin.html"
+      "src": "/admin",
+      "dest": "/public/admin.html"
     },
     {
-      "source": "/planilla",
-      "destination": "/public/planilla.html"
+      "src": "/planilla",
+      "dest": "/public/planilla.html"
     },
     {
-      "source": "/pos.js",
-      "destination": "/public/pos.js"
+      "src": "/(.*\\.js)",
+      "dest": "/public/$1"
     },
     {
-      "source": "/admin.js",
-      "destination": "/public/admin.js"
-    },
-    {
-      "source": "/app.js",
-      "destination": "/public/app.js"
+      "src": "/(.*\\.css)",
+      "dest": "/public/$1"
     }
   ]
 }
