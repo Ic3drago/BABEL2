@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planilla - BABEL</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --bg: #0a0c10; --surface: #111318; --border: #1e2330;
+            --muted: #3a4055; --text: #e8eaf0; --sub: #6b7280;
+            --green: #10b981; --blue: #3b82f6; --orange: #f97316; --red: #ef4444;
+            --purple: #a855f7; --yellow: #f59e0b;
+            --mono: 'JetBrains Mono', monospace;
+            --sans: 'DM Sans', sans-serif;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100vh; }
+
+        nav {
+            background: var(--surface); border-bottom: 1px solid var(--border);
+            padding: 14px 24px; display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 10;
+        }
+        .nav-brand { font-family: var(--mono); font-size: 0.9rem; color: var(--green); }
+        .nav-back { font-size: 0.75rem; color: var(--sub); text-decoration: none; transition: color 0.15s; }
+        .nav-back:hover { color: var(--text); }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 28px 24px; }
+
+        /* HEADER CONTROLES */
+        .header-controles {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+            padding: 16px 20px; margin-bottom: 28px; display: flex; gap: 12px; align-items: center;
+        }
+        .fecha-input {
+            background: var(--bg); border: 1px solid var(--border); border-radius: 7px;
+            padding: 7px 12px; color: var(--text); font-family: var(--mono);
+            font-size: 0.8rem; outline: none;
+        }
+        .fecha-input:focus { border-color: var(--blue); }
+        .btn { padding: 8px 16px; background: var(--blue); border: none; border-radius: 7px;
+            color: #fff; font-family: var(--mono); font-size: 0.78rem; font-weight: 700;
+            cursor: pointer; transition: all 0.15s; }
+        .btn:hover { background: #60a5fa; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* TABLA */
+        .tabla-wrap {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 12px; overflow: hidden; margin-bottom: 28px;
+        }
+        .tabla-header {
+            padding: 16px 20px; border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .tabla-header h2 { font-size: 0.82rem; font-weight: 700; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+        thead tr { background: #0d1018; }
+        th {
+            padding: 10px 12px; text-align: left;
+            font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em;
+            text-transform: uppercase; color: var(--sub);
+            border-bottom: 2px solid var(--border);
+        }
+        th.center { text-align: center; }
+        td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: rgba(255,255,255,0.015); }
+
+        /* GRUPO DE COLUMNAS */
+        .section-header {
+            font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em;
+            text-transform: uppercase; text-align: center; padding: 4px 0;
+            border-bottom: 2px solid var(--border);
+        }
+        .sec-promo  { color: var(--purple);  border-bottom-color: var(--purple); }
+        .sec-normal { color: var(--orange);  border-bottom-color: var(--orange); }
+        .sec-vaso   { color: var(--blue);    border-bottom-color: var(--blue); }
+        .sec-combo  { color: var(--green);   border-bottom-color: var(--green); }
+        .sec-entrada{ color: #06b6d4;           border-bottom-color: #06b6d4; }
+        .sec-total  { color: var(--yellow);  border-bottom-color: var(--yellow); }
+
+        /* VALORES */
+        .num { font-family: var(--mono); font-size: 0.75rem; text-align: center; }
+        .num-cant { font-weight: 700; }
+        .num-dinero { color: var(--green); font-weight: 700; }
+        .num-inicial { color: var(--blue); font-weight: 700; }
+
+        /* INPUT MANUAL (botellas abiertas) */
+        .inp-manual {
+            width: 50px; background: var(--bg); border: 1px solid var(--yellow);
+            border-radius: 5px; padding: 4px; color: var(--yellow);
+            font-family: var(--mono); font-size: 0.75rem; text-align: center;
+            outline: none;
+        }
+        .inp-manual:focus { border-color: var(--orange); }
+
+        /* TOTAL FILA */
+        tr.fila-total td {
+            background: #0d1018; font-weight: 700; border-top: 2px solid var(--border);
+        }
+
+        /* ESTADO VACÍO */
+        .estado-tabla { text-align: center; padding: 48px; color: var(--sub); }
+        .estado-tabla .icon { font-size: 2rem; margin-bottom: 10px; }
+
+        /* RESUMEN CARDS */
+        .resumen {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px; margin-bottom: 28px;
+        }
+        .card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 10px; padding: 16px;
+        }
+        .card-label { font-size: 0.65rem; color: var(--sub); letter-spacing: 0.08em;
+            text-transform: uppercase; margin-bottom: 6px; }
+        .card-value { font-family: var(--mono); font-size: 1.4rem; font-weight: 700; }
+        .card-value.green { color: var(--green); }
+        .card-value.purple { color: var(--purple); }
+
+        /* TOAST */
+        #toast {
+            position: fixed; bottom: 24px; left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            padding: 10px 20px; border-radius: 8px;
+            font-size: 0.82rem; font-weight: 600; z-index: 999;
+            transition: transform 0.3s;
+        }
+        #toast.show { transform: translateX(-50%) translateY(0); }
+        #toast.ok { background: rgba(16,185,129,.2); border: 1px solid var(--green); color: var(--green); }
+        #toast.err { background: #3b0a0a; border: 1px solid var(--red); color: var(--red); }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="nav-brand">BABEL / PLANILLA</div>
+    <a href="/" class="nav-back">← Menú principal</a>
+</nav>
+
+<div class="container">
+
+    <!-- CONTROLES -->
+    <div class="header-controles">
+        <input type="date" id="fecha-planilla" class="fecha-input">
+        <button class="btn" onclick="cargarPlanilla()">Cargar</button>
+        <button class="btn" id="btn-exportar" onclick="exportarExcel()" disabled style="background: var(--green);">
+            ⬇ Exportar Excel
+        </button>
+        <span style="font-size: 0.75rem; color: var(--sub); margin-left: auto;" id="label-fecha"></span>
+    </div>
+
+    <!-- RESUMEN -->
+    <div class="resumen" id="resumen" style="display: none;">
+        <div class="card">
+            <div class="card-label">Total Recaudado</div>
+            <div class="card-value green" id="card-total">$0.00</div>
+        </div>
+        <div class="card">
+            <div class="card-label">🎉 Promos</div>
+            <div class="card-value purple" id="card-promo">0 / $0</div>
+        </div>
+        <div class="card">
+            <div class="card-label">🥃 Normales</div>
+            <div class="card-value" style="color: var(--orange);" id="card-normal">0 / $0</div>
+        </div>
+        <div class="card">
+            <div class="card-label">🍺 Vasos</div>
+            <div class="card-value" style="color: var(--blue);" id="card-vaso">0 / $0</div>
+        </div>
+        <div class="card">
+            <div class="card-label">🚪 Entradas</div>
+            <div class="card-value" style="color: #06b6d4;" id="card-entrada">0 / $0</div>
+        </div>
+
+    </div>
+
+    <!-- TABLA -->
+    <div class="tabla-wrap">
+        <div class="tabla-header">
+            <h2>Contabilización por Apartado</h2>
+        </div>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 150px;">BOTELLA</th>
+                        <th style="width: 70px; text-align: center;">INICIAL</th>
+
+                        <th colspan="2" class="section-header sec-promo">🎉 PROMO</th>
+                        <th colspan="2" class="section-header sec-normal">🥃 NORMAL</th>
+                        <th colspan="2" class="section-header sec-vaso">🍺 VASO</th>
+                        <th colspan="2" class="section-header sec-entrada">🚪 ENTRADA</th>
+
+                        <th style="width: 70px; text-align: center; border-bottom: 2px solid var(--yellow);">
+                            <span style="color: var(--yellow);">RESTANTE</span><br>
+                            <span style="font-size: 0.55rem; color: var(--muted);">botellas llenas</span>
+                        </th>
+                        <th colspan="1" class="section-header sec-total">TOTAL $</th>
+                    </tr>
+                    <tr>
+                        <th></th><th></th>
+                        <th class="center" style="color: var(--purple);">Cant</th>
+                        <th class="center" style="color: var(--purple);">$</th>
+                        <th class="center" style="color: var(--orange);">Cant</th>
+                        <th class="center" style="color: var(--orange);">$</th>
+                        <th class="center" style="color: var(--blue);">Cant</th>
+                        <th class="center" style="color: var(--blue);">$</th>
+                        <th class="center" style="color: #06b6d4;">Cant</th>
+                        <th class="center" style="color: #06b6d4;">$</th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-planilla">
+                    <tr><td colspan="12" class="estado-tabla">
+                        <div class="icon">📋</div>
+                        <div>Seleccioná fecha y toca "Cargar"</div>
+                    </td></tr>
+                </tbody>
+                <tfoot id="tfoot-planilla"></tfoot>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<div id="toast"></div>
+
+<script>
+const API_URL = '/api';
+const API_TOKEN = 'token_secreto_bar_123';
+let planillaData = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('fecha-planilla').value = new Date().toISOString().slice(0, 10);
+});
+
+async function cargarPlanilla() {
+    const fecha = document.getElementById('fecha-planilla').value;
+    if (!fecha) { toast('Seleccioná una fecha', 'err'); return; }
+
+    const tbody = document.getElementById('tbody-planilla');
+    tbody.innerHTML = `<tr><td colspan="12" class="estado-tabla"><div class="icon">⏳</div></td></tr>`;
+
+    try {
+        const res = await fetch(`${API_URL}/planilla/${fecha}`, {
+            headers: { 'Authorization': `Bearer ${API_TOKEN}` }
+        });
+        const data = await res.json();
+
+        if (!res.ok || !data.success) {
+            tbody.innerHTML = `<tr><td colspan="12" class="estado-tabla">⚠️ ${data.error || 'Sin datos'}</td></tr>`;
+            return;
+        }
+
+        planillaData = data.filas || [];
+        renderizarTabla(planillaData, data.totales || {});
+        document.getElementById('label-fecha').textContent = new Date(fecha).toLocaleDateString('es');
+        document.getElementById('resumen').style.display = 'grid';
+        document.getElementById('btn-exportar').disabled = false;
+
+    } catch (err) {
+        console.error(err);
+        tbody.innerHTML = `<tr><td colspan="12" class="estado-tabla">❌ Error de conexión</td></tr>`;
+    }
+}
+
+function renderizarTabla(filas, totales) {
+    const tbody = document.getElementById('tbody-planilla');
+    
+    if (!filas || filas.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="12" class="estado-tabla">Sin ventas para esta fecha</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = filas.map((f, i) => `
+        <tr>
+            <td><strong>${f.nombre}</strong></td>
+            <td class="num-inicial">${parseInt(f.stock_inicial)}</td>
+
+            <!-- PROMO -->
+            <td class="num num-cant" style="color: var(--purple);">${f.promo_unidades || 0}</td>
+            <td class="num num-dinero">$${parseFloat(f.promo_recaudado || 0).toFixed(2)}</td>
+
+            <!-- NORMAL -->
+            <td class="num num-cant" style="color: var(--orange);">${f.normal_unidades || 0}</td>
+            <td class="num num-dinero">$${parseFloat(f.normal_recaudado || 0).toFixed(2)}</td>
+
+            <!-- VASO -->
+            <td class="num num-cant" style="color: var(--blue);">${f.vaso_unidades || 0}</td>
+            <td class="num num-dinero">$${parseFloat(f.vaso_recaudado || 0).toFixed(2)}</td>
+
+            <!-- ENTRADA -->
+            <td class="num num-cant" style="color: #06b6d4;">${f.entrada_unidades || 0}</td>
+            <td class="num num-dinero" style="color: #06b6d4;">$${parseFloat(f.entrada_recaudado || 0).toFixed(2)}</td>
+
+            <!-- RESTANTE (calculado: stock_inicial - promo - normal) -->
+            <td style="text-align: center; font-family: var(--mono); font-weight: 700; color: var(--yellow);">
+                ${f.restante ?? (parseInt(f.stock_inicial) - (f.promo_unidades||0) - (f.normal_unidades||0))}
+            </td>
+
+            <!-- TOTAL RECAUDADO -->
+            <td class="num num-dinero">$${parseFloat(f.total_recaudado || 0).toFixed(2)}</td>
+        </tr>
+    `).join('');
+
+    // FILA TOTAL
+    const tfoot = document.getElementById('tfoot-planilla');
+    tfoot.innerHTML = `
+        <tr class="fila-total">
+            <td><strong>TOTAL</strong></td>
+            <td class="num"></td>
+            <td class="num" style="color: var(--purple);">${totales.promo_unidades || 0}</td>
+            <td class="num" style="color: var(--green);">$${parseFloat(totales.promo_recaudado || 0).toFixed(2)}</td>
+            <td class="num" style="color: var(--orange);">${totales.normal_unidades || 0}</td>
+            <td class="num" style="color: var(--green);">$${parseFloat(totales.normal_recaudado || 0).toFixed(2)}</td>
+            <td class="num" style="color: var(--blue);">${totales.vaso_unidades || 0}</td>
+            <td class="num" style="color: var(--green);">$${parseFloat(totales.vaso_recaudado || 0).toFixed(2)}</td>
+            <td class="num" style="color: #06b6d4;">${totales.entrada_unidades || 0}</td>
+            <td class="num" style="color: #06b6d4;">$${parseFloat(totales.entrada_recaudado || 0).toFixed(2)}</td>
+            <td></td>
+            <td class="num" style="color: var(--yellow);font-size:0.9rem;">$${parseFloat(totales.total_recaudado || 0).toFixed(2)}</td>
+        </tr>
+    `;
+
+    // ACTUALIZAR CARDS
+    document.getElementById('card-total').textContent = `$${parseFloat(totales.total_recaudado || 0).toFixed(2)}`;
+    document.getElementById('card-promo').textContent = `${totales.promo_unidades || 0} / $${parseFloat(totales.promo_recaudado || 0).toFixed(2)}`;
+    document.getElementById('card-normal').textContent = `${totales.normal_unidades || 0} / $${parseFloat(totales.normal_recaudado || 0).toFixed(2)}`;
+    document.getElementById('card-vaso').textContent = `${totales.vaso_unidades || 0} / $${parseFloat(totales.vaso_recaudado || 0).toFixed(2)}`;
+    document.getElementById('card-entrada').textContent = `${totales.entrada_unidades || 0} / $${parseFloat(totales.entrada_recaudado || 0).toFixed(2)}`;
+}
+
+function exportarExcel() {
+    if (!planillaData.length) return;
+    
+    const ws_data = [
+        ['BOTELLA', 'INICIAL', 'PROMO cant', 'PROMO $', 'NORMAL cant', 'NORMAL $', 'VASO cant', 'VASO $', 'ENTRADA cant', 'ENTRADA $', 'RESTANTE', 'TOTAL $']
+    ];
+
+    planillaData.forEach(f => {
+        ws_data.push([
+            f.nombre,
+            f.stock_inicial,
+            f.promo_unidades || 0,
+            f.promo_recaudado || 0,
+            f.normal_unidades || 0,
+            f.normal_recaudado || 0,
+            f.vaso_unidades || 0,
+            f.vaso_recaudado || 0,
+            f.entrada_unidades || 0,
+            f.entrada_recaudado || 0,
+            f.restante ?? (parseInt(f.stock_inicial) - (f.promo_unidades||0) - (f.normal_unidades||0)),
+            f.total_recaudado || 0
+        ]);
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(ws_data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Planilla');
+    XLSX.writeFile(wb, `Planilla_${document.getElementById('fecha-planilla').value}.xlsx`);
+    toast('✓ Exportado', 'ok');
+}
+
+function toast(msg, tipo = 'ok') {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = `show ${tipo}`;
+    setTimeout(() => el.className = tipo, 3500);
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,33 @@
+{
+  "functions": {
+    "api/index.php": {
+      "runtime": "vercel-php@0.8.0"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index.php"
+    },
+    {
+      "source": "/",
+      "destination": "/public/index.html"
+    },
+    {
+      "source": "/pos",
+      "destination": "/public/pos.html"
+    },
+    {
+      "source": "/admin",
+      "destination": "/public/admin.html"
+    },
+    {
+      "source": "/planilla",
+      "destination": "/public/planilla.html"
+    },
+    {
+      "source": "/(.*\\.(js|css|ico|png|svg|jpg))",
+      "destination": "/public/$1"
+    }
+  ]
+}

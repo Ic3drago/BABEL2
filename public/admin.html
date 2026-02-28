@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - BABEL</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0c10; --surface: #111318; --border: #1e2330;
+            --muted: #3a4055; --text: #e8eaf0; --sub: #6b7280;
+            --green: #10b981; --green-dim: #064e35;
+            --blue: #3b82f6; --blue-dim: #1e3a5f;
+            --orange: #f97316; --red: #ef4444;
+            --purple: #a855f7; --purple-dim: #2e1065;
+            --yellow: #f59e0b;
+            --mono: 'JetBrains Mono', monospace;
+            --sans: 'DM Sans', sans-serif;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100vh; }
+
+        /* ── NAV ── */
+        nav {
+            background: var(--surface); border-bottom: 1px solid var(--border);
+            padding: 14px 24px; display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 50;
+        }
+        .nav-brand { font-family: var(--mono); font-size: 0.9rem; color: var(--green); letter-spacing: 0.1em; }
+        .nav-back  { font-size: 0.75rem; color: var(--sub); text-decoration: none; transition: color 0.15s; }
+        .nav-back:hover { color: var(--text); }
+
+        /* ── TABS ── */
+        .tabs {
+            display: flex; background: var(--surface);
+            border-bottom: 1px solid var(--border); padding: 0 24px;
+        }
+        .tab {
+            padding: 13px 20px; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.06em;
+            text-transform: uppercase; cursor: pointer; border-bottom: 2px solid transparent;
+            color: var(--sub); transition: all 0.15s; user-select: none;
+        }
+        .tab:hover { color: var(--text); }
+        .tab.active { color: var(--green); border-bottom-color: var(--green); }
+        .tab-panel  { display: none; }
+        .tab-panel.active { display: block; }
+
+        .container { max-width: 960px; margin: 0 auto; padding: 28px 24px; display: flex; flex-direction: column; gap: 28px; }
+
+        /* ── SECTION ── */
+        .section { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+        .section-header {
+            padding: 15px 20px; border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .section-header h2 { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+        .section-header p  { font-size: 0.7rem; color: var(--sub); margin-top: 2px; }
+        .section-body { padding: 20px; }
+
+        .fecha-badge {
+            font-family: var(--mono); font-size: 0.72rem; color: var(--sub);
+            background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 4px 11px;
+        }
+
+        /* ── INPUTS ── */
+        .form-group label { display: block; font-size: 0.68rem; color: var(--sub); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; }
+        .form-input, .form-select {
+            width: 100%; background: var(--bg); border: 1px solid var(--border);
+            border-radius: 8px; padding: 9px 12px; color: var(--text);
+            font-family: var(--sans); font-size: 0.84rem; outline: none; transition: border-color 0.15s;
+        }
+        .form-input:focus, .form-select:focus { border-color: var(--blue); }
+        .form-input::placeholder { color: var(--muted); }
+        .hint { font-size: 0.65rem; color: var(--muted); margin-top: 4px; font-family: var(--mono); }
+
+        /* ── STOCK ROW ── */
+        .stock-row {
+            display: grid; grid-template-columns: 2fr 90px 90px 60px auto;
+            gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border);
+        }
+        .stock-row:last-child { border-bottom: none; padding-bottom: 0; }
+        .stock-nombre { font-weight: 700; font-size: 0.84rem; }
+        .stock-meta   { font-size: 0.68rem; color: var(--sub); margin-top: 2px; font-family: var(--mono); }
+        .stock-inp {
+            background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+            padding: 7px 6px; color: var(--text); font-family: var(--mono); font-size: 0.88rem;
+            font-weight: 700; text-align: center; outline: none; transition: border-color 0.15s; width: 100%;
+        }
+        .stock-inp:focus { border-color: var(--blue); }
+        .stock-ml { font-size: 0.7rem; color: var(--sub); font-family: var(--mono); text-align: right; white-space: nowrap; }
+
+        /* ── NOCHE CONFIG: tarjetas de trago ── */
+        .tragos-noche-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px;
+        }
+        .trago-card {
+            background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
+            padding: 14px; transition: border-color 0.15s;
+        }
+        .trago-card.activo { border-color: var(--green); }
+        .trago-card-top {
+            display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;
+        }
+        .trago-card-nombre { font-weight: 700; font-size: 0.85rem; }
+        .trago-card-licor  { font-size: 0.7rem; color: var(--sub); margin-top: 2px; font-family: var(--mono); }
+
+        /* Toggle activo/inactivo */
+        .toggle-wrap { display: flex; align-items: center; gap: 6px; }
+        .toggle { position: relative; display: inline-block; width: 36px; height: 20px; flex-shrink: 0; }
+        .toggle input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider {
+            position: absolute; cursor: pointer; inset: 0;
+            background: var(--muted); border-radius: 20px; transition: 0.2s;
+        }
+        .toggle-slider:before {
+            content: ''; position: absolute; width: 14px; height: 14px; left: 3px; bottom: 3px;
+            background: white; border-radius: 50%; transition: 0.2s;
+        }
+        .toggle input:checked + .toggle-slider { background: var(--green); }
+        .toggle input:checked + .toggle-slider:before { transform: translateX(16px); }
+
+        /* ── MODO PROMO SWITCH ── */
+        .promo-banner {
+            background: linear-gradient(135deg, #1a0533 0%, #2e1065 100%);
+            border: 1px solid var(--purple); border-radius: 10px;
+            padding: 14px 20px; display: flex; align-items: center;
+            justify-content: space-between; margin-bottom: 4px;
+        }
+        .promo-banner-left { display: flex; align-items: center; gap: 12px; }
+        .promo-banner-label { font-size: 0.82rem; font-weight: 700; color: var(--purple); letter-spacing: .04em; }
+        .promo-banner-sub   { font-size: 0.68rem; color: #c084fc; margin-top: 2px; }
+        .toggle-promo { position: relative; display: inline-block; width: 48px; height: 26px; }
+        .toggle-promo input { opacity: 0; width: 0; height: 0; }
+        .toggle-promo-slider {
+            position: absolute; cursor: pointer; inset: 0;
+            background: var(--muted); border-radius: 26px; transition: 0.25s;
+        }
+        .toggle-promo-slider:before {
+            content: ''; position: absolute; width: 20px; height: 20px;
+            left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.25s;
+        }
+        .toggle-promo input:checked + .toggle-promo-slider { background: var(--purple); box-shadow: 0 0 12px rgba(168,85,247,.5); }
+        .toggle-promo input:checked + .toggle-promo-slider:before { transform: translateX(22px); }
+        .promo-badge {
+            font-size: 0.65rem; font-weight: 700; padding: 3px 8px;
+            border-radius: 20px; letter-spacing: .06em;
+            background: var(--purple-dim); color: var(--purple); transition: all .2s;
+        }
+        .promo-badge.on { background: var(--purple); color: #fff; animation: pulse-promo .8s ease infinite alternate; }
+        @keyframes pulse-promo { from { box-shadow: 0 0 0 rgba(168,85,247,.4); } to { box-shadow: 0 0 10px rgba(168,85,247,.7); } }
+        /* Tarjetas con borde promo cuando modo está activo */
+        body.modo-promo .trago-card.activo { border-color: var(--purple); }
+        body.modo-promo .trago-card.activo .trago-card-nombre::after {
+            content: ' 🎉'; font-size: 0.7rem;
+        }
+
+        /* Campos inline de la tarjeta */
+        .trago-card-fields {
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px;
+        }
+        .trago-card-fields.oculto { display: none; }
+        .trago-field label { font-size: 0.6rem; color: var(--sub); letter-spacing: 0.06em; text-transform: uppercase; display: block; margin-bottom: 4px; }
+        .trago-field-inp {
+            width: 100%; background: var(--surface); border: 1px solid var(--border);
+            border-radius: 6px; padding: 6px 8px; color: var(--text); font-family: var(--mono);
+            font-size: 0.82rem; text-align: center; outline: none; transition: border-color 0.15s;
+        }
+        .trago-field-inp:focus { border-color: var(--green); }
+        .tipo-sel {
+            width: 100%; background: var(--surface); border: 1px solid var(--border);
+            border-radius: 6px; padding: 6px 4px; color: var(--text); font-family: var(--sans);
+            font-size: 0.75rem; outline: none; transition: border-color 0.15s;
+        }
+        .tipo-sel:focus { border-color: var(--green); }
+
+        /* ── TIPO BADGES ── */
+        .tipo-badge { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.06em; padding: 2px 7px; border-radius: 4px; text-transform: uppercase; }
+        .tipo-PROMO   { background: var(--purple-dim); color: var(--purple); }
+        .tipo-ENTRADA { background: var(--blue-dim);   color: var(--blue); }
+        .tipo-NORMAL  { background: #431407; color: var(--orange); }
+        .tipo-BOTELLA { background: var(--green-dim);  color: var(--green); }
+
+        /* ── BOTONES ── */
+        .btn-save {
+            padding: 9px 20px; background: var(--green); border: none; border-radius: 8px;
+            color: #000; font-family: var(--mono); font-size: 0.75rem; font-weight: 700;
+            cursor: pointer; transition: all 0.15s; white-space: nowrap;
+        }
+        .btn-save:hover { background: #34d399; }
+        .btn-save:disabled { opacity: 0.4; cursor: not-allowed; }
+        .btn-cancel {
+            padding: 8px 16px; background: transparent; border: 1px solid var(--border);
+            border-radius: 7px; color: var(--sub); font-family: var(--sans);
+            font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.15s;
+        }
+        .btn-cancel:hover { border-color: var(--muted); color: var(--text); }
+        .btn-danger {
+            padding: 8px 18px; background: var(--red); border: none; border-radius: 7px;
+            color: #fff; font-family: var(--mono); font-size: 0.75rem; font-weight: 700;
+            cursor: pointer; transition: all 0.15s;
+        }
+        .btn-danger:hover { background: #f87171; }
+        .btn-ghost {
+            padding: 7px 14px; background: transparent; border: 1px solid var(--border);
+            border-radius: 7px; color: var(--sub); font-family: var(--mono);
+            font-size: 0.72rem; cursor: pointer; transition: all 0.15s;
+        }
+        .btn-ghost:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-dim); }
+        .btn-icn {
+            background: none; border: 1px solid transparent; border-radius: 5px;
+            font-size: 0.75rem; cursor: pointer; padding: 4px 8px; transition: all 0.15s;
+        }
+        .btn-icn-edit { color: var(--blue); }
+        .btn-icn-edit:hover { border-color: var(--blue); background: var(--blue-dim); }
+        .btn-icn-del  { color: var(--muted); }
+        .btn-icn-del:hover  { border-color: var(--red); background: rgba(239,68,68,.08); color: var(--red); }
+
+        /* ── TABLA BASE ── */
+        .base-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+        .base-table th {
+            padding: 7px 12px; text-align: left; font-size: 0.65rem; font-weight: 700;
+            letter-spacing: 0.08em; text-transform: uppercase; color: var(--sub); border-bottom: 1px solid var(--border);
+        }
+        .base-table td { padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        .base-table tr:last-child td { border-bottom: none; }
+        .base-table tr:hover td { background: rgba(255,255,255,0.016); }
+        .precio-cell { font-family: var(--mono); font-weight: 700; color: var(--green); }
+        .td-actions  { display: flex; gap: 5px; }
+
+        /* Form nuevo trago base */
+        .new-trago-form {
+            background: var(--bg); border: 1px solid var(--border);
+            border-radius: 10px; padding: 16px; margin-top: 14px;
+            display: none; animation: fade-in 0.18s ease;
+        }
+        .new-trago-form.visible { display: block; }
+        @keyframes fade-in { from { opacity:0; transform:translateY(-5px); } to { opacity:1; transform:translateY(0); } }
+        .form-grid5 { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 10px; align-items: end; margin-bottom: 12px; }
+        @media (max-width: 700px) { .form-grid5 { grid-template-columns: 1fr 1fr; } }
+        .form-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+        /* ── MODALES ── */
+        .modal-backdrop {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.72);
+            backdrop-filter: blur(5px); z-index: 200;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.2s;
+        }
+        .modal-backdrop.open { opacity: 1; pointer-events: all; }
+        .modal {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 14px; padding: 24px; width: 100%; max-width: 480px;
+            margin: 20px; transform: translateY(12px); transition: transform 0.2s;
+        }
+        .modal-backdrop.open .modal { transform: translateY(0); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-title  { font-size: 0.88rem; font-weight: 700; }
+        .modal-close  { background: none; border: none; color: var(--sub); font-size: 1rem; cursor: pointer; padding: 3px 7px; border-radius: 4px; transition: all 0.15s; }
+        .modal-close:hover { background: var(--border); color: var(--text); }
+        .modal-grid  { display: grid; gap: 13px; }
+        .modal-cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .modal-footer { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
+        .modal-warn  { font-size: 0.82rem; color: var(--sub); line-height: 1.55; padding: 2px 0 12px; }
+        .modal-warn strong { color: var(--text); }
+        .modal-warn .danger { color: var(--red); font-size: 0.74rem; display: block; margin-top: 6px; }
+
+        /* ── GUARDADO STATUS ── */
+        .save-bar {
+            position: sticky; bottom: 0; background: var(--surface);
+            border-top: 1px solid var(--border); padding: 14px 24px;
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 40;
+        }
+        .save-bar p { font-size: 0.78rem; color: var(--sub); }
+        .save-bar strong { color: var(--text); }
+
+        /* Toast */
+        #toast {
+            position: fixed; bottom: 80px; left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            padding: 10px 20px; border-radius: 8px;
+            font-size: 0.82rem; font-weight: 600; z-index: 999;
+            transition: transform 0.3s; white-space: nowrap;
+        }
+        #toast.show { transform: translateX(-50%) translateY(0); }
+        #toast.ok  { background: var(--green-dim); border: 1px solid var(--green); color: var(--green); }
+        #toast.err { background: #3b0a0a; border: 1px solid var(--red); color: var(--red); }
+
+        .empty-state { text-align: center; padding: 36px; color: var(--muted); font-size: 0.82rem; }
+        .divider { height: 1px; background: var(--border); margin: 6px 0; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="nav-brand">BABEL / ADMIN</div>
+    <a href="/" class="nav-back">← Menú principal</a>
+</nav>
+
+<!-- TABS -->
+<div class="tabs">
+    <div class="tab active" onclick="cambiarTab('noche')">🌙 Apertura de Noche</div>
+    <div class="tab" onclick="cambiarTab('base')">⚙ Configuración Base</div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     TAB 1 — APERTURA DE NOCHE
+     Todo lo que el admin configura antes de abrir
+════════════════════════════════════════════ -->
+<div id="tab-noche" class="tab-panel active">
+<div class="container">
+
+    <!-- 1. STOCK FÍSICO -->
+    <div class="section">
+        <div class="section-header">
+            <div>
+                <h2 style="color:var(--blue)">1 · Stock Físico</h2>
+                <p>Cantidad de botellas cerradas en bodega. El % abierto se calcula de las ventas.</p>
+            </div>
+            <div class="fecha-badge" id="fecha-hoy">—</div>
+        </div>
+        <div class="section-body">
+            <div id="lista-stock"><div class="empty-state">Cargando...</div></div>
+        </div>
+    </div>
+
+    <!-- 2. TRAGOS DE LA NOCHE -->
+    <div class="section">
+        <div class="section-header">
+            <div>
+                <h2 style="color:var(--green)">2 · Tragos de Esta Noche</h2>
+                <p>Activá los que se venden hoy. Los apartados están separados por categoría: promos, normales, vasos y combos.</p>
+            </div>
+        </div>
+        <div class="section-body">
+            <div id="tragos-noche" style="display: grid; gap: 0;">
+                <div class="empty-state" style="grid-column:1/-1">Cargando tragos base...</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Save bar sticky -->
+<div class="save-bar">
+    <p>Guardá el stock y los tragos activos antes de <strong>abrir la caja</strong></p>
+    <button class="btn-save" onclick="guardarNoche()">✓ Guardar y Abrir</button>
+</div>
+</div><!-- fin tab noche -->
+
+
+<!-- ════════════════════════════════════════════
+     TAB 2 — CONFIGURACIÓN BASE
+     Licores + Tragos permanentes
+════════════════════════════════════════════ -->
+<div id="tab-base" class="tab-panel">
+<div class="container">
+
+    <!-- TRAGOS BASE -->
+    <!-- TRAGOS BASE -->
+    <div class="section">
+        <div class="section-header">
+            <div>
+                <h2 style="color:var(--green)">Tragos Base</h2>
+                <p>El catálogo completo. El admin elige cada noche cuáles activar.</p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-save" onclick="toggleFormTrago()">+ Nuevo Trago</button>
+                <button class="btn-save" onclick="abrirModalComboAdmin()" style="background: var(--purple);">🎁 Crear Combo</button>
+            </div>
+        </div>
+        <div class="section-body" style="padding-top:0">
+            <!-- Formulario crear -->
+            <div class="new-trago-form" id="form-trago">
+                <div class="form-grid5">
+                    <div class="form-group">
+                        <label>Nombre del Botón</label>
+                        <input type="text" id="t-nombre" class="form-input" placeholder="Ej: Fernet Promo">
+                    </div>
+                    <div class="form-group">
+                        <label>Licor Base</label>
+                        <select id="t-botella" class="form-select"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo de Venta</label>
+                        <select id="t-tipo" class="form-select">
+                            <option value="PROMO">🎉 Promo</option>
+                            <option value="NORMAL">🥃 Normal</option>
+                            <option value="VASO">🍺 Vaso</option>
+                        
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Precio Bs.</label>
+                        <input type="number" id="t-precio" class="form-input" step="0.50" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Precio Promo (opcional)</label>
+                        <input type="number" id="t-precio-promo" class="form-input" step="0.50" min="0" placeholder="Si aplica">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn-cancel" onclick="toggleFormTrago()">Cancelar</button>
+                    <button class="btn-save"   onclick="guardarTrago()">Guardar Trago</button>
+                </div>
+            </div>
+
+            <table class="base-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th><th>Tipo default</th><th>Licor</th>
+                        <th>Vasos/Btl</th><th>Precio base</th><th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="menu-body">
+                    <tr><td colspan="6" class="empty-state">Cargando...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- LICORES -->
+    <div class="section">
+        <div class="section-header">
+            <div>
+                <h2 style="color:var(--orange)">Licores / Productos</h2>
+                <p>Solo cuando comprás un tipo nuevo que no existe</p>
+            </div>
+        </div>
+        <div class="section-body">
+            <div style="display:grid;grid-template-columns:2fr 1fr auto;gap:10px;align-items:end">
+                <div class="form-group">
+                    <label>Nombre</label>
+                    <input type="text" id="b-nombre" class="form-input" placeholder="Ej: Fernet Branca">
+                </div>
+                <div class="form-group">
+                    <label>Volumen (ml)</label>
+                    <input type="number" id="b-ml" class="form-input" value="750">
+                </div>
+                <button class="btn-save" onclick="agregarLicor()">+ Agregar</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+</div><!-- fin tab base -->
+
+
+<!-- ══ MODAL EDITAR TRAGO BASE ══ -->
+<div class="modal-backdrop" id="modal-trago">
+    <div class="modal">
+        <div class="modal-header">
+            <span class="modal-title" style="color:var(--blue)">✎ Editar Trago</span>
+            <button class="modal-close" onclick="cerrarModal('modal-trago')">✕</button>
+        </div>
+        <input type="hidden" id="edit-trago-id">
+        <div class="modal-grid">
+            <div class="form-group">
+                <label>Nombre</label>
+                <input type="text" id="edit-t-nombre" class="form-input">
+            </div>
+            <div class="modal-cols2">
+                <div class="form-group">
+                    <label>Licor base</label>
+                    <select id="edit-t-botella" class="form-select"></select>
+                </div>
+                <div class="form-group">
+                    <label>Tipo default</label>
+                    <select id="edit-t-tipo" class="form-select">
+                        <option value="PROMO">🎉 Promo</option>
+                        <option value="NORMAL">🥃 Normal</option>
+                        <option value="VASO">🍺 Vaso</option>
+                    
+                    </select>
+                </div>
+            </div>
+            <div class="modal-cols2">
+                <div class="form-group">
+                    <label>Precio base ($)</label>
+                    <input type="number" id="edit-t-precio" class="form-input" step="0.50" min="0">
+                </div>
+                <div class="form-group">
+                    <label>Precio Promo (opcional)</label>
+                    <input type="number" id="edit-t-precio-promo" class="form-input" step="0.50" min="0" placeholder="Si aplica">
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="cerrarModal('modal-trago')">Cancelar</button>
+            <button class="btn-save"   onclick="guardarEditTrago()">Guardar Cambios</button>
+        </div>
+    </div>
+</div>
+
+<!-- ══ MODAL EDITAR LICOR ══ -->
+<div class="modal-backdrop" id="modal-licor">
+    <div class="modal" style="max-width:380px">
+        <div class="modal-header">
+            <span class="modal-title" style="color:var(--orange)">✎ Editar Licor</span>
+            <button class="modal-close" onclick="cerrarModal('modal-licor')">✕</button>
+        </div>
+        <input type="hidden" id="edit-licor-id">
+        <div class="modal-grid">
+            <div class="form-group">
+                <label>Nombre</label>
+                <input type="text" id="edit-l-nombre" class="form-input">
+            </div>
+            <div class="form-group">
+                <label>Volumen (ml)</label>
+                <input type="number" id="edit-l-ml" class="form-input" min="1">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="cerrarModal('modal-licor')">Cancelar</button>
+            <button class="btn-save"   onclick="guardarEditLicor()">Guardar Cambios</button>
+        </div>
+    </div>
+</div>
+
+<!-- ══ MODAL CONFIRMAR ELIMINAR ══ -->
+<div class="modal-backdrop" id="modal-confirm">
+    <div class="modal" style="max-width:360px">
+        <div class="modal-header">
+            <span class="modal-title" id="confirm-title" style="color:var(--red)">¿Eliminar?</span>
+            <button class="modal-close" onclick="cerrarModal('modal-confirm')">✕</button>
+        </div>
+        <div class="modal-warn" id="confirm-body"></div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="cerrarModal('modal-confirm')">Cancelar</button>
+            <button class="btn-danger" id="confirm-ok">Eliminar</button>
+        </div>
+    </div>
+</div>
+
+<!-- ══ MODAL CREAR COMBO (ADMIN) ══ -->
+<div class="modal-backdrop" id="modal-combo-admin">
+    <div class="modal" style="max-width:420px">
+        <div class="modal-header">
+            <span class="modal-title" style="color:var(--purple)">🎁 Crear Combo</span>
+            <button class="modal-close" onclick="cerrarModal('modal-combo-admin')">✕</button>
+        </div>
+        <div class="modal-grid">
+            <div class="form-group">
+                <label>Nombre del Combo</label>
+                <input type="text" id="combo-nombre-admin" class="form-input" placeholder="Ej: Fernet + Coca">
+            </div>
+            <div class="form-group">
+                <label>Licor Principal</label>
+                <select id="combo-licor-admin" class="form-select"></select>
+            </div>
+            <div class="form-group">
+                <label>Refresco Acompañante</label>
+                <select id="combo-refresco-admin" class="form-select"></select>
+            </div>
+            <div class="form-group">
+                <label>Precio del Combo</label>
+                <input type="number" id="combo-precio-admin" class="form-input" step="0.50" min="0" placeholder="Descuento incluido">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="cerrarModal('modal-combo-admin')">Cancelar</button>
+            <button class="btn-save" onclick="guardarComboAdmin()" style="background:var(--purple)">Guardar Combo</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const API_URL   = '/api';
+const API_TOKEN = 'token_secreto_bar_123';
+let botellas    = [];  // inventario_botellas
+let tragosBase  = [];  // menu_tragos (catálogo completo)
+
+// ═══════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', async () => {
+    document.getElementById('fecha-hoy').textContent =
+        new Date().toLocaleDateString('es', { weekday:'long', day:'numeric', month:'long' });
+    await cargarBotellas();
+    await cargarMenu();
+    renderStockNoche();
+    renderTragosNoche();
+});
+
+async function api(ep, method = 'GET', body = null) {
+    const opts = { method, headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${API_TOKEN}` } };
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch(API_URL + ep, opts);
+    return res.json();
+}
+
+// ── TABS ─────────────────────────────────────────────
+function cambiarTab(id) {
+    document.querySelectorAll('.tab').forEach((t,i) =>
+        t.classList.toggle('active', (i === 0 && id === 'noche') || (i === 1 && id === 'base'))
+    );
+    document.getElementById('tab-noche').classList.toggle('active', id === 'noche');
+    document.getElementById('tab-base').classList.toggle('active', id === 'base');
+}
+
+// ── MODALES ───────────────────────────────────────────
+function abrirModal(id)  { document.getElementById(id).classList.add('open'); }
+function cerrarModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-backdrop').forEach(el =>
+    el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); })
+);
+
+// ── Mostrar campo combo-desc solo cuando tipo=COMBO ──
+function toggleVasosField(wrapId, tipo) {
+    const wrap = document.getElementById(wrapId);
+    if (wrap) wrap.style.display = tipo === 'COMBO' ? '' : 'none';
+}
+
+// ═══════════════════════════════════════════════════════
+// CARGA DE DATOS
+// ═══════════════════════════════════════════════════════
+async function cargarBotellas() {
+    const data = await api('/admin/bodega');
+    if (!data.success) return;
+    botellas = data.data;
+    // Llenar selects
+    ['t-botella','edit-t-botella','combo-licor-admin','combo-refresco-admin'].forEach(selId => {
+        const sel = document.getElementById(selId); if (!sel) return;
+        const cur = sel.value;
+        sel.innerHTML = '<option value="">— Selecciona —</option>';
+        botellas.forEach(b => sel.innerHTML += `<option value="${b.id}" ${b.id===cur?'selected':''}>${b.nombre} (${b.volumen_ml}ml)</option>`);
+    });
+}
+
+async function cargarMenu() {
+    const data = await api('/admin/menu');
+    if (!data.success) return;
+    tragosBase = data.data;
+    renderTablaBase();
+    renderTragosNoche();
+}
+
+// ═══════════════════════════════════════════════════════
+// TAB 1 — APERTURA DE NOCHE
+// ═══════════════════════════════════════════════════════
+
+// ── SECCIÓN STOCK ──
+function renderStockNoche() {
+    const lista = document.getElementById('lista-stock');
+    if (!botellas.length) {
+        lista.innerHTML = '<div class="empty-state">Sin licores. Ve a Configuración Base para agregar.</div>';
+        return;
+    }
+    lista.innerHTML = `
+        <div style="display:grid;grid-template-columns:2fr 120px 60px;gap:10px;padding:0 0 8px;border-bottom:1px solid var(--border);margin-bottom:4px">
+            <span style="font-size:.65rem;color:var(--sub);text-transform:uppercase;letter-spacing:.06em">Licor</span>
+            <span style="font-size:.65rem;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;text-align:center">Btl. Cerradas</span>
+            <span></span>
+        </div>
+    ` + botellas.map(b => `
+        <div style="display:grid;grid-template-columns:2fr 120px 60px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
+            <div>
+                <div class="stock-nombre">${b.nombre}</div>
+                <div class="stock-meta">${b.volumen_ml}ml</div>
+            </div>
+            <input type="number" class="stock-inp" id="stock-${b.id}" value="${b.stock_cerrado}" min="0" style="text-align:center">
+            <div style="display:flex;gap:4px">
+                <button class="btn-icn btn-icn-edit" onclick="abrirEditLicor('${b.id}')" title="Editar">✎</button>
+                <button class="btn-icn btn-icn-del"  onclick="confirmarEliminar('licor','${b.id}','${b.nombre.replace(/'/g,"\\'")}','¿Eliminar <strong>${b.nombre}</strong>?<span class=\\'danger\\'>⚠ También se eliminarán sus tragos del menú.</span>')" title="Eliminar">✕</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// ── SECCIÓN TRAGOS DE LA NOCHE (separado en 4 categorías) ──
+
+function renderTragosNoche() {
+    const cont = document.getElementById('tragos-noche');
+    if (!tragosBase.length) {
+        cont.innerHTML = '<div class="empty-state" style="grid-column:1/-1">Sin tragos base. Ve a Configuración Base.</div>';
+        return;
+    }
+
+    // Agrupar por tipo_venta
+    const grupos = {
+        'PROMO':  { emoji: '🎉', label: 'PROMOS', color: 'purple', items: [] },
+        'NORMAL': { emoji: '🥃', label: 'NORMALES', color: 'orange', items: [] },
+        'VASO':   { emoji: '🍺', label: 'VASOS', color: 'blue', items: [] },
+        'COMBO':  { emoji: '🎁', label: 'COMBOS', color: 'green', items: [] }
+    };
+
+    tragosBase.forEach(m => {
+        let tipo = m.tipo_venta || 'VASO';
+        if (!grupos[tipo]) tipo = 'VASO';
+        grupos[tipo].items.push(m);
+    });
+
+    // Renderizar cada grupo
+    cont.innerHTML = Object.entries(grupos).map(([key, grupo]) => {
+        const items = grupo.items;
+        const varColor = `var(--${grupo.color === 'purple' ? 'purple' : grupo.color === 'orange' ? 'orange' : grupo.color === 'blue' ? 'blue' : 'green'})`;
+
+        return `
+        <div style="grid-column: 1/-1; border-top: 2px solid ${varColor}; padding-top: 20px; margin-top: 20px;">
+            <h3 style="font-size: 0.85rem; font-weight: 700; color: ${varColor}; margin-bottom: 12px; letter-spacing: 0.06em; text-transform: uppercase;">
+                ${grupo.emoji} ${grupo.label}
+            </h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;">
+                ${items.length === 0 ? 
+                    `<div style="grid-column: 1/-1; padding: 12px; color: var(--muted); font-size: 0.78rem; text-align: center; border: 1px dashed var(--border); border-radius: 8px;">Sin tragos en esta categoría</div>` 
+                    : items.map(m => renderTragoCard(m)).join('') 
+                }
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function renderTragoCard(m) {
+    const estadoGuardado = getNocheTrago(m.id);
+    const activo = estadoGuardado ? estadoGuardado.activo : false;
+    const tipo = estadoGuardado ? estadoGuardado.tipo : m.tipo_venta;
+    const precio = estadoGuardado ? estadoGuardado.precio : parseFloat(m.precio).toFixed(2);
+
+    const tipoEmoji = { PROMO: '🎉', NORMAL: '🥃', VASO: '🍺', COMBO: '🎁' }[tipo] || '🥃';
+    const tipoLabel = { PROMO: 'PROMO', NORMAL: 'NORMAL', VASO: 'VASO', COMBO: 'COMBO' }[tipo] || tipo;
+
+    return `
+    <div style="background: var(--bg); border: 2px solid ${activo ? 'var(--green)' : 'var(--border)'}; border-radius: 10px; padding: 12px; transition: all 0.2s;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+            <div>
+                <div style="font-weight: 700; font-size: 0.85rem; color: var(--text);">${m.nombre_boton}</div>
+                <div style="font-size: 0.7rem; color: var(--sub); margin-top: 2px;">${m.nombre_botella}</div>
+            </div>
+            <label class="toggle" style="margin: 0;">
+                <input type="checkbox" id="act-${m.id}" ${activo ? 'checked' : ''}
+                    onchange="toggleTragoNoche('${m.id}')">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+        <div id="fields-${m.id}" style="display: ${activo ? 'block' : 'none'}; gap: 8px; margin-top: 8px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                <div class="form-group" style="margin: 0;">
+                    <label style="font-size: 0.65rem;">Tipo</label>
+                    <select class="form-select" id="tipo-${m.id}" style="padding: 5px 8px; font-size: 0.75rem;">
+                        <option value="PROMO" ${tipo === 'PROMO' ? 'selected' : ''}>🎉 Promo</option>
+                        <option value="NORMAL" ${tipo === 'NORMAL' ? 'selected' : ''}>🥃 Normal</option>
+                        <option value="VASO" ${tipo === 'VASO' ? 'selected' : ''}>🍺 Vaso</option>
+                       
+                    </select>
+                </div>
+                <div class="form-group" style="margin: 0;">
+                    <label style="font-size: 0.65rem;">Precio $</label>
+                    <input type="number" class="form-input" id="precio-${m.id}"
+                        value="${precio}" step="0.50" min="0" style="padding: 5px 8px; font-size: 0.75rem;">
+                </div>
+            </div>
+        </div>
+    </div>`;
+}
+
+// ── TOGGLE PARA MOSTRAR/OCULTAR CAMPOS ──
+function toggleTragoNoche(id) {
+    const activo = document.getElementById(`act-${id}`).checked;
+    const fields = document.getElementById(`fields-${id}`);
+    fields.style.display = activo ? 'block' : 'none';
+}
+
+// Estado local de la noche (lo que el admin configuró)
+// Se persiste al guardar en la BD
+function getNocheTrago(id) {
+    try {
+        const raw = localStorage.getItem(`noche_trago_${id}`);
+        return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+}
+
+// ── GUARDAR TODA LA NOCHE ──
+async function guardarNoche() {
+    const btn = document.querySelector('.save-bar .btn-save');
+    btn.disabled = true; btn.textContent = 'Guardando...';
+
+    try {
+        // 1. Guardar solo stock cerrado de cada botella
+        for (const b of botellas) {
+            const stock = parseInt(document.getElementById(`stock-${b.id}`)?.value) || 0;
+            await api('/admin/bodega/stock', 'POST', {
+                id: b.id, stock_cerrado: stock
+            });
+        }
+
+        // 2. Para cada trago, si está activo → publicar al menú con override de tipo/precio
+        //    Si está inactivo → enviar como inactivo para que la caja no lo muestre
+        const activos = [];
+        for (const m of tragosBase) {
+            const activo = document.getElementById(`act-${m.id}`)?.checked ?? false;
+            if (!activo) {
+                // Guardar estado local para recordarlo si vuelve a abrir el admin
+                localStorage.setItem(`noche_trago_${m.id}`, JSON.stringify({ activo: false }));
+                continue;
+            }
+            const tipo   = document.getElementById(`tipo-${m.id}`)?.value ?? m.tipo_venta;
+            const precio = parseFloat(document.getElementById(`precio-${m.id}`)?.value) || parseFloat(m.precio);
+
+            localStorage.setItem(`noche_trago_${m.id}`, JSON.stringify({ activo: true, tipo, precio }));
+            activos.push({ trago_id: m.id, tipo_venta: tipo, precio });
+        }
+
+        // 3. Enviar configuración de noche al backend
+        const res = await api('/admin/noche', 'POST', { tragos: activos });
+
+        if (res.success || res.total_activos !== undefined) {
+            toast(`✓ Noche abierta · ${activos.length} tragos activos`, 'ok');
+        } else {
+            toast(res.error || 'Error al guardar', 'err');
+        }
+    } catch (e) {
+        toast('Error de conexión', 'err');
+        console.error(e);
+    }
+
+    btn.disabled = false; btn.textContent = '✓ Guardar y Abrir';
+}
+
+function activarTodos() {
+    tragosBase.forEach(m => {
+        const chk = document.getElementById(`act-${m.id}`);
+        if (chk && !chk.checked) { chk.checked = true; toggleTragoNoche(m.id); }
+    });
+}
+function desactivarTodos() {
+    tragosBase.forEach(m => {
+        const chk = document.getElementById(`act-${m.id}`);
+        if (chk && chk.checked) { chk.checked = false; toggleTragoNoche(m.id); }
+    });
+}
+
+// ═══════════════════════════════════════════════════════
+// TAB 2 — CONFIGURACIÓN BASE
+// ═══════════════════════════════════════════════════════
+
+function renderTablaBase() {
+    const tbody = document.getElementById('menu-body');
+    if (!tragosBase.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Sin tragos. Creá el primero.</td></tr>';
+        return;
+    }
+
+    const tipoEmojis = { PROMO: '🎉 Promo', NORMAL: '🥃 Normal', VASO: '🍺 Vaso', COMBO: '🎁 Combo' };
+    const tipoColors = { 
+        PROMO: '#a855f7', 
+        NORMAL: '#f97316', 
+        VASO: '#3b82f6', 
+        COMBO: '#10b981' 
+    };
+
+    tbody.innerHTML = tragosBase.map(m => {
+        const mJson = encodeURIComponent(JSON.stringify(m));
+        const tipoLabel = tipoEmojis[m.tipo_venta] || m.tipo_venta;
+        const tipoColor = tipoColors[m.tipo_venta] || '#6b7280';
+        const detalle = m.combo_desc || '—';
+
+        return `<tr>
+            <td style="font-weight:700">${m.nombre_boton}</td>
+            <td><span style="background: ${tipoColor}33; color: ${tipoColor}; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600;">${tipoLabel}</span></td>
+            <td style="color:var(--sub);font-size:.78rem">${m.nombre_botella}</td>
+            <td style="font-family:var(--mono);font-size:.75rem;color:var(--sub)">${detalle}</td>
+            <td class="precio-cell">$${parseFloat(m.precio).toFixed(2)}</td>
+            <td><div class="td-actions">
+                <button class="btn-icn btn-icn-edit" onclick="abrirEditTrago(decodeURIComponent('${mJson}'))">✎</button>
+                <button class="btn-icn btn-icn-del"  onclick="confirmarEliminar('trago','${m.id}','${m.nombre_boton.replace(/'/g,"\\'")}','¿Eliminar <strong>${m.nombre_boton}</strong> del catálogo?')">✕</button>
+            </div></td>
+        </tr>`;
+    }).join('');
+}
+
+function toggleFormTrago() {
+    const f = document.getElementById('form-trago');
+    f.classList.toggle('visible');
+    if (f.classList.contains('visible')) document.getElementById('t-nombre').focus();
+}
+
+function toggleComboLogic(tipo) {
+    const wrap = document.getElementById('wrap-complemento');
+    wrap.style.display = (tipo === 'COMBO') ? 'block' : 'none';
+    
+    if(tipo === 'COMBO') {
+        // Clonamos las opciones del licor base al selector de refresco
+        const licores = document.getElementById('t-botella').innerHTML;
+        document.getElementById('t-complemento').innerHTML = licores;
+    }
+}
+
+async function guardarTrago() {
+    const payload = {
+        nombre_boton: document.getElementById('t-nombre').value.trim(),
+        botella_id: document.getElementById('t-botella').value,
+        tipo_venta: document.getElementById('t-tipo').value,
+        precio: parseFloat(document.getElementById('t-precio').value),
+        precio_promo: document.getElementById('t-precio-promo').value ? parseFloat(document.getElementById('t-precio-promo').value) : null,
+        combo_desc: ''
+    };
+    
+    if (!payload.nombre_boton || !payload.botella_id || isNaN(payload.precio)) {
+        toast('Completa nombre, licor y precio', 'err');
+        return;
+    }
+    
+    const data = await api('/admin/menu', 'POST', payload);
+    if (data.success) {
+        toast('✓ Trago agregado', 'ok');
+        toggleFormTrago();
+        document.getElementById('t-nombre').value = '';
+        document.getElementById('t-precio').value = '';
+        document.getElementById('t-precio-promo').value = '';
+        document.getElementById('t-tipo').value = 'VASO';
+        await cargarMenu();
+    } else {
+        toast(data.error || 'Error', 'err');
+    }
+}
+
+// ── EDITAR TRAGO ──
+function abrirEditTrago(mJson) {
+    const m = JSON.parse(mJson);
+    document.getElementById('edit-trago-id').value  = m.id;
+    document.getElementById('edit-t-nombre').value  = m.nombre_boton;
+    document.getElementById('edit-t-tipo').value    = m.tipo_venta;
+    document.getElementById('edit-t-precio').value  = parseFloat(m.precio).toFixed(2);
+    document.getElementById('edit-t-precio-promo').value = m.precio_promo ? parseFloat(m.precio_promo).toFixed(2) : '';
+
+    const sel = document.getElementById('edit-t-botella');
+    sel.innerHTML = '<option value="">— Selecciona —</option>';
+    botellas.forEach(b => sel.innerHTML += `<option value="${b.id}" ${b.id===m.botella_id?'selected':''}>${b.nombre} (${b.volumen_ml}ml)</option>`);
+
+    abrirModal('modal-trago');
+    setTimeout(() => document.getElementById('edit-t-nombre').focus(), 100);
+}
+
+async function guardarEditTrago() {
+    const id = document.getElementById('edit-trago-id').value;
+    const p = {
+        nombre_boton: document.getElementById('edit-t-nombre').value.trim(),
+        tipo_venta: document.getElementById('edit-t-tipo').value,
+        botella_id: document.getElementById('edit-t-botella').value,
+        precio: parseFloat(document.getElementById('edit-t-precio').value),
+        precio_promo: document.getElementById('edit-t-precio-promo').value ? parseFloat(document.getElementById('edit-t-precio-promo').value) : null,
+        combo_desc: ''
+    };
+    if (!p.nombre_boton || !p.botella_id || isNaN(p.precio)) { toast('Completa todos los campos', 'err'); return; }
+    const data = await api(`/admin/menu/${id}`, 'PUT', p);
+    if (data.success) {
+        toast('✓ Trago actualizado', 'ok');
+        cerrarModal('modal-trago');
+        await cargarMenu();
+    } else { toast(data.error || 'Error', 'err'); }
+}
+
+// ── EDITAR LICOR ──
+function abrirEditLicor(id) {
+    const b = botellas.find(x => x.id === id); if (!b) return;
+    document.getElementById('edit-licor-id').value = b.id;
+    document.getElementById('edit-l-nombre').value = b.nombre;
+    document.getElementById('edit-l-ml').value     = b.volumen_ml;
+    abrirModal('modal-licor');
+    setTimeout(() => document.getElementById('edit-l-nombre').focus(), 100);
+}
+
+async function guardarEditLicor() {
+    const id = document.getElementById('edit-licor-id').value;
+    const nombre = document.getElementById('edit-l-nombre').value.trim();
+    const ml     = parseInt(document.getElementById('edit-l-ml').value);
+    if (!nombre || !ml) { toast('Completa todos los campos', 'err'); return; }
+    const data = await api(`/admin/bodega/${id}`, 'PUT', { nombre, volumen_ml: ml });
+    if (data.success) {
+        toast('✓ Licor actualizado', 'ok');
+        cerrarModal('modal-licor');
+        await cargarBotellas();
+        renderStockNoche();
+        await cargarMenu();
+    } else { toast(data.error || 'Error', 'err'); }
+}
+
+// ── AGREGAR LICOR ──
+async function agregarLicor() {
+    const nombre = document.getElementById('b-nombre').value.trim();
+    const ml     = parseInt(document.getElementById('b-ml').value);
+    if (!nombre) { toast('Ingresá el nombre del licor', 'err'); return; }
+    const data = await api('/admin/bodega', 'POST', { nombre, volumen_ml: ml, stock_cerrado: 0 });
+    if (data.success) {
+        toast('✓ Licor registrado', 'ok');
+        document.getElementById('b-nombre').value = '';
+        await cargarBotellas();
+        renderStockNoche();
+    } else { toast(data.error || 'Error', 'err'); }
+}
+
+// ── ELIMINAR (genérico) ──
+function confirmarEliminar(tipo, id, nombre, htmlMsg) {
+    document.getElementById('confirm-title').textContent = tipo === 'licor' ? '¿Eliminar licor?' : '¿Eliminar trago?';
+    document.getElementById('confirm-body').innerHTML = htmlMsg;
+    document.getElementById('confirm-ok').onclick = async () => {
+        const ep   = tipo === 'licor' ? `/admin/bodega/${id}` : `/admin/menu/${id}`;
+        const data = await api(ep, 'DELETE');
+        if (data.success) {
+            toast(`${tipo === 'licor' ? 'Licor' : 'Trago'} eliminado`, 'ok');
+            cerrarModal('modal-confirm');
+            if (tipo === 'licor') { await cargarBotellas(); renderStockNoche(); }
+            await cargarMenu();
+        } else { toast(data.error || 'Error', 'err'); }
+    };
+    abrirModal('modal-confirm');
+}
+
+// ── TOAST ──
+let _tt;
+function toast(msg, tipo = 'ok') {
+    const el = document.getElementById('toast');
+    el.textContent = msg; el.className = `show ${tipo}`;
+    clearTimeout(_tt);
+    _tt = setTimeout(() => el.className = tipo, 3500);
+}
+
+// ── MODAL CREAR COMBO (ADMIN) ──
+function abrirModalComboAdmin() {
+    document.getElementById('combo-nombre-admin').value = '';
+    document.getElementById('combo-licor-admin').value = '';
+    document.getElementById('combo-refresco-admin').value = '';
+    document.getElementById('combo-precio-admin').value = '';
+    abrirModal('modal-combo-admin');
+    setTimeout(() => document.getElementById('combo-nombre-admin').focus(), 80);
+}
+
+async function guardarComboAdmin() {
+    const nombre = document.getElementById('combo-nombre-admin').value.trim();
+    const licor_id = document.getElementById('combo-licor-admin').value;
+    const refresco_id = document.getElementById('combo-refresco-admin').value;
+    const precio = parseFloat(document.getElementById('combo-precio-admin').value);
+    
+    if (!nombre || !licor_id || !refresco_id) {
+        toast('Completa todos los campos', 'err');
+        return;
+    }
+    if (isNaN(precio) || precio <= 0) {
+        toast('Ingresa un precio válido', 'err');
+        return;
+    }
+    
+    const payload = {
+        nombre_boton: nombre,
+        tipo_venta: 'COMBO',
+        botella_id: licor_id,
+        precio: precio,
+        licor_id: licor_id,
+        refresco_id: refresco_id
+    };
+    
+    try {
+        const res = await fetch(`${API_URL}/admin/menu`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_TOKEN}` },
+            body: JSON.stringify(payload)
+        });
+        
+        const data = await res.json();
+        if (data.success) {
+            toast('🎁 Combo creado exitosamente', 'ok');
+            cerrarModal('modal-combo-admin');
+            await cargarMenu();
+        } else {
+            toast(data.error || 'Error al crear combo', 'err');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        toast('Error de conexión', 'err');
+    }
+}
+</script>
+</body>
+</html>

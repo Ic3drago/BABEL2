@@ -1,0 +1,2063 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caja - BABEL</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=DM+Sans:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0c10;
+            --surface: #111318;
+            --border: #1e2330;
+            --muted: #3a4055;
+            --text: #e8eaf0;
+            --sub: #6b7280;
+            --green: #10b981;
+            --green-dim: #064e35;
+            --blue: #3b82f6;
+            --purple: #a855f7;
+            --orange: #f97316;
+            --red: #ef4444;
+            --yellow: #f59e0b;
+            --mono: 'JetBrains Mono', monospace;
+            --sans: 'DM Sans', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--sans);
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* ── PANEL IZQUIERDO ── */
+        #panel-left {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border-right: 1px solid var(--border);
+        }
+
+        /* Header */
+        .pos-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--surface);
+            flex-shrink: 0;
+        }
+
+        .pos-header h1 {
+            font-family: var(--mono);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--green);
+            letter-spacing: 0.05em;
+        }
+
+        .pos-header .turno {
+            font-size: 0.75rem;
+            color: var(--sub);
+            font-family: var(--mono);
+        }
+
+        .pos-header .turno span {
+            color: var(--text);
+        }
+
+        /* Tabs de categoría */
+        .cat-tabs {
+            display: flex;
+            gap: 6px;
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--border);
+            background: var(--surface);
+            flex-shrink: 0;
+            overflow-x: auto;
+        }
+
+        .cat-tab {
+            padding: 6px 14px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--sub);
+            font-family: var(--sans);
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+
+        .cat-tab:hover {
+            border-color: var(--muted);
+            color: var(--text);
+        }
+
+        .cat-tab.active {
+            background: var(--green-dim);
+            border-color: var(--green);
+            color: var(--green);
+        }
+
+        .cat-tab[data-tipo="VASO"].active {
+            background: #431407;
+            border-color: var(--orange);
+            color: var(--orange);
+        }
+
+        .cat-tab[data-tipo="BOTELLA"].active {
+            background: var(--green-dim);
+            border-color: var(--green);
+            color: var(--green);
+        }
+
+        .cat-tab[data-tipo="PROMO"].active {
+            background: #0a2a0a;
+            border-color: #34d399;
+            color: #34d399;
+        }
+
+        /* ── BANNER MODO PROMO ── */
+        #banner-promo {
+            display: none;
+            padding: 8px 20px;
+            background: linear-gradient(90deg, #1a0533, #2e1065, #1a0533);
+            border-bottom: 1px solid var(--purple);
+            align-items: center;
+            justify-content: space-between;
+            animation: promo-slide .3s ease;
+        }
+
+        #banner-promo.visible {
+            display: flex;
+        }
+
+        @keyframes promo-slide {
+            from {
+                opacity: 0;
+                transform: translateY(-8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .banner-promo-txt {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--purple);
+            letter-spacing: .05em;
+        }
+
+        .banner-promo-pulse {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--purple);
+            animation: blink 1s ease infinite;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: .2;
+            }
+        }
+
+        /* Botones PROMO brillan cuando modo promo está ON */
+        body.promo-on .trago-btn[data-tipo="PROMO"] {
+            border-color: var(--purple);
+            box-shadow: 0 0 12px rgba(168, 85, 247, .35);
+            background: rgba(168, 85, 247, .08);
+        }
+
+        body.promo-on .trago-btn[data-tipo="PROMO"] .trago-nombre {
+            color: #e9d5ff;
+        }
+
+        /* Grid de botones */
+        #grid-tragos {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 10px;
+            align-content: start;
+        }
+
+        #grid-tragos::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        #grid-tragos::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #grid-tragos::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 2px;
+        }
+
+        .trago-btn {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 10px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s;
+            position: relative;
+            overflow: hidden;
+            min-height: 110px;
+        }
+
+        .trago-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        .trago-btn:active:not(:disabled) {
+            transform: scale(0.96);
+        }
+
+        .trago-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        /* Colores por tipo */
+        .trago-btn[data-tipo="VASO"] {
+            border-color: #431407;
+        }
+
+        .trago-btn[data-tipo="VASO"]:hover:not(:disabled) {
+            border-color: var(--orange);
+            box-shadow: 0 8px 24px rgba(249, 115, 22, 0.2);
+        }
+
+        .trago-btn[data-tipo="BOTELLA"] {
+            border-color: #064e35;
+        }
+
+        .trago-btn[data-tipo="BOTELLA"]:hover:not(:disabled) {
+            border-color: var(--green);
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.2);
+        }
+
+        .trago-btn[data-tipo="PROMO"] {
+            border-color: #0a2a0a;
+        }
+
+        .trago-btn[data-tipo="PROMO"]:hover:not(:disabled) {
+            border-color: #34d399;
+            box-shadow: 0 8px 24px rgba(52, 211, 153, 0.2);
+        }
+
+        .trago-btn[data-tipo="NORMAL"] {
+            border-color: #431407;
+        }
+
+        .trago-btn[data-tipo="NORMAL"]:hover:not(:disabled) {
+            border-color: var(--orange);
+            box-shadow: 0 8px 24px rgba(249, 115, 22, 0.2);
+        }
+
+        .trago-badge {
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            padding: 2px 7px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .badge-VASO {
+            background: #431407;
+            color: var(--orange);
+        }
+
+        .badge-BOTELLA {
+            background: var(--green-dim);
+            color: var(--green);
+        }
+
+        .badge-PROMO {
+            background: #0a2a0a;
+            color: #34d399;
+        }
+
+        .badge-NORMAL {
+            background: #431407;
+            color: var(--orange);
+        }
+
+        .badge-ENTRADA {
+            background: #1e3a5f;
+            color: var(--blue);
+        }
+
+        .trago-nombre {
+            font-size: 0.82rem;
+            font-weight: 700;
+            text-align: center;
+            line-height: 1.3;
+            color: var(--text);
+        }
+
+        .trago-precio {
+            font-family: var(--mono);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--green);
+        }
+
+        .trago-ml {
+            font-size: 0.65rem;
+            color: var(--sub);
+        }
+
+        /* Ripple en click */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(0);
+            animation: ripple-anim 0.5s linear;
+            pointer-events: none;
+        }
+
+        @keyframes ripple-anim {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /* Badge de cantidad en el botón */
+        .trago-qty-badge {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            background: var(--green);
+            color: #000;
+            font-family: var(--mono);
+            font-size: 0.65rem;
+            font-weight: 700;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.15s;
+        }
+
+        .trago-qty-badge.bump {
+            animation: bump 0.2s ease;
+        }
+
+        @keyframes bump {
+
+            0%,
+            100% {
+                transform: scale(1)
+            }
+
+            50% {
+                transform: scale(1.4)
+            }
+        }
+
+        /* ── PANEL DERECHO (TICKET) ── */
+        #panel-ticket {
+            width: 300px;
+            background: var(--surface);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .ticket-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ticket-header h2 {
+            font-family: var(--mono);
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: 0.05em;
+        }
+
+        .btn-vaciar {
+            background: transparent;
+            border: 1px solid #3a1515;
+            color: #7f1d1d;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-family: var(--sans);
+        }
+
+        .btn-vaciar:hover {
+            border-color: var(--red);
+            color: var(--red);
+        }
+
+        /* Lista del ticket */
+        #lista-ticket {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        #lista-ticket::-webkit-scrollbar {
+            width: 3px;
+        }
+
+        #lista-ticket::-webkit-scrollbar-thumb {
+            background: var(--border);
+        }
+
+        .ticket-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--muted);
+            gap: 8px;
+        }
+
+        .ticket-empty .icon {
+            font-size: 2rem;
+            opacity: 0.4;
+        }
+
+        .ticket-empty p {
+            font-size: 0.75rem;
+        }
+
+        .ticket-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            margin-bottom: 6px;
+            animation: slide-in 0.2s ease;
+        }
+
+        @keyframes slide-in {
+            from {
+                opacity: 0;
+                transform: translateX(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .ticket-item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .ticket-item-nombre {
+            font-size: 0.78rem;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--text);
+        }
+
+        .ticket-item-sub {
+            font-size: 0.65rem;
+            color: var(--sub);
+            font-family: var(--mono);
+        }
+
+        .ticket-item-subtotal {
+            font-family: var(--mono);
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--green);
+            white-space: nowrap;
+        }
+
+        /* Controles de cantidad */
+        .qty-ctrl {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .qty-btn {
+            width: 22px;
+            height: 22px;
+            border-radius: 5px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text);
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.1s;
+            flex-shrink: 0;
+        }
+
+        .qty-btn:hover {
+            border-color: var(--muted);
+            background: var(--muted);
+        }
+
+        .qty-btn.minus:hover {
+            border-color: var(--red);
+            color: var(--red);
+        }
+
+        .qty-num {
+            font-family: var(--mono);
+            font-size: 0.78rem;
+            font-weight: 700;
+            min-width: 16px;
+            text-align: center;
+        }
+
+        /* Footer del ticket */
+        .ticket-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border);
+            background: var(--bg);
+            space-y: 12px;
+        }
+
+        .ticket-resumen {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-bottom: 14px;
+        }
+
+        .resumen-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--sub);
+            font-family: var(--mono);
+        }
+
+        .resumen-row.total {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid var(--border);
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--green);
+        }
+
+        .resumen-row.total span:first-child {
+            font-size: 0.75rem;
+            color: var(--sub);
+            align-self: flex-end;
+            font-weight: 400;
+        }
+
+        .btn-cobrar {
+            width: 100%;
+            padding: 14px;
+            background: var(--green);
+            color: #000;
+            border: none;
+            border-radius: 10px;
+            font-family: var(--mono);
+            font-size: 0.9rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: all 0.15s;
+            margin-bottom: 8px;
+        }
+
+        .btn-cobrar:hover:not(:disabled) {
+            background: #34d399;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-cobrar:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        .btn-cobrar:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-fiado {
+            width: 100%;
+            padding: 10px;
+            background: transparent;
+            color: var(--sub);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: var(--sans);
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            margin-bottom: 6px;
+        }
+
+        .btn-fiado:hover {
+            border-color: var(--yellow);
+            color: var(--yellow);
+        }
+
+        .btn-extra {
+            width: 100%;
+            padding: 10px;
+            background: transparent;
+            color: var(--sub);
+            border: 1px dashed var(--muted);
+            border-radius: 8px;
+            font-family: var(--sans);
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .btn-extra:hover {
+            border-color: var(--purple);
+            color: var(--purple);
+            background: rgba(168, 85, 247, .06);
+        }
+
+        /* Modal Extra */
+        #modal-extra {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .88);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 120;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .2s;
+        }
+
+        #modal-extra.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .mex-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            width: 360px;
+            max-width: 95vw;
+            padding: 24px;
+            transform: scale(.9) translateY(20px);
+            transition: transform .25s cubic-bezier(.34, 1.56, .64, 1);
+        }
+
+        #modal-extra.open .mex-box {
+            transform: scale(1) translateY(0);
+        }
+
+        .mex-label {
+            font-size: .68rem;
+            color: var(--sub);
+            letter-spacing: .07em;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .mex-inp {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 12px;
+            color: var(--text);
+            font-family: var(--sans);
+            font-size: .9rem;
+            outline: none;
+            transition: border-color .15s;
+            margin-bottom: 14px;
+        }
+
+        .mex-inp:focus {
+            border-color: var(--purple);
+        }
+
+        .mex-tipos {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .mex-tipo {
+            padding: 9px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--sub);
+            font-size: .8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .15s;
+            text-align: center;
+        }
+
+        .mex-tipo.sel {
+            border-color: var(--purple);
+            background: rgba(168, 85, 247, .12);
+            color: var(--purple);
+        }
+
+        /* ── MODAL DE COBRO ── */
+        #modal-cobro {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+
+        #modal-cobro.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            width: 420px;
+            max-width: 95vw;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: scale(0.9) translateY(20px);
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+            padding: 28px;
+        }
+
+        #modal-cobro.visible .modal-box {
+            transform: scale(1) translateY(0);
+        }
+
+        .modal-title {
+            font-family: var(--mono);
+            font-size: 0.8rem;
+            color: var(--sub);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        /* Resumen del ticket en el modal */
+        .modal-items {
+            margin-bottom: 20px;
+        }
+
+        .modal-item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.82rem;
+        }
+
+        .modal-item-row:last-child {
+            border-bottom: none;
+        }
+
+        .modal-item-nombre {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .modal-item-qty {
+            color: var(--sub);
+            font-family: var(--mono);
+            font-size: 0.75rem;
+            margin: 0 8px;
+        }
+
+        .modal-item-precio {
+            color: var(--green);
+            font-family: var(--mono);
+            font-weight: 700;
+        }
+
+        .modal-total {
+            background: var(--bg);
+            border-radius: 10px;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-total-label {
+            font-size: 0.75rem;
+            color: var(--sub);
+            font-family: var(--mono);
+        }
+
+        .modal-total-num {
+            font-family: var(--mono);
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--green);
+        }
+
+        /* Selector de método de pago */
+        .pago-label {
+            font-size: 0.72rem;
+            color: var(--sub);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .pago-opciones {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .pago-opt {
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--sub);
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s;
+            text-align: center;
+            font-family: var(--sans);
+        }
+
+        .pago-opt:hover {
+            border-color: var(--muted);
+            color: var(--text);
+        }
+
+        .pago-opt.selected {
+            border-color: var(--green);
+            background: var(--green-dim);
+            color: var(--green);
+        }
+
+        /* Input de efectivo recibido */
+        #efectivo-wrap {
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        #efectivo-wrap.visible {
+            display: block;
+        }
+
+        #efectivo-wrap label {
+            font-size: 0.72rem;
+            color: var(--sub);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .input-efectivo {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 14px;
+            color: var(--text);
+            font-family: var(--mono);
+            font-size: 1.1rem;
+            font-weight: 700;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+
+        .input-efectivo:focus {
+            border-color: var(--green);
+        }
+
+        .vuelto-display {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            padding: 8px 14px;
+            background: var(--bg);
+            border-radius: 6px;
+            font-family: var(--mono);
+            font-size: 0.8rem;
+        }
+
+        .vuelto-display .label {
+            color: var(--sub);
+        }
+
+        .vuelto-display .monto {
+            color: var(--yellow);
+            font-weight: 700;
+        }
+
+        .vuelto-display .monto.negativo {
+            color: var(--red);
+        }
+
+        /* Botones del modal */
+        .modal-acciones {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .btn-cancelar-modal {
+            padding: 12px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--sub);
+            font-family: var(--sans);
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .btn-cancelar-modal:hover {
+            border-color: var(--muted);
+            color: var(--text);
+        }
+
+        .btn-confirmar-cobro {
+            padding: 12px;
+            background: var(--green);
+            border: none;
+            border-radius: 8px;
+            color: #000;
+            font-family: var(--mono);
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .btn-confirmar-cobro:hover:not(:disabled) {
+            background: #34d399;
+        }
+
+        .btn-confirmar-cobro:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ── PANTALLA DE ÉXITO ── */
+        #modal-exito {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        #modal-exito.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .exito-box {
+            text-align: center;
+            animation: exito-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes exito-pop {
+            from {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .exito-icon {
+            font-size: 5rem;
+            display: block;
+            margin-bottom: 16px;
+            animation: spin-in 0.5s ease;
+        }
+
+        @keyframes spin-in {
+            from {
+                transform: rotate(-180deg) scale(0);
+            }
+
+            to {
+                transform: rotate(0) scale(1);
+            }
+        }
+
+        .exito-total {
+            font-family: var(--mono);
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--green);
+        }
+
+        .exito-vuelto {
+            font-family: var(--mono);
+            font-size: 1.2rem;
+            color: var(--yellow);
+            margin-top: 8px;
+        }
+
+        .exito-ticket {
+            font-family: var(--mono);
+            font-size: 0.7rem;
+            color: var(--muted);
+            margin-top: 8px;
+        }
+
+        /* Skeleton loader */
+        .skeleton {
+            background: linear-gradient(90deg, var(--surface) 25%, var(--border) 50%, var(--surface) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.2s infinite;
+            border-radius: 10px;
+            min-height: 110px;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        /* Toast de error */
+        #toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: #3b0a0a;
+            border: 1px solid var(--red);
+            color: var(--red);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            z-index: 300;
+            transition: transform 0.3s;
+            white-space: nowrap;
+        }
+
+        #toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* ─────── MODAL COMBO ─────── */
+        #modal-combo {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .88);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 125;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .2s;
+        }
+
+        #modal-combo.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .combo-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            width: 380px;
+            max-width: 95vw;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 24px;
+            transform: scale(.9) translateY(20px);
+            transition: transform .25s cubic-bezier(.34, 1.56, .64, 1);
+        }
+
+        #modal-combo.open .combo-box {
+            transform: scale(1) translateY(0);
+        }
+
+        .combo-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: var(--purple);
+        }
+
+        .combo-subtitle {
+            font-size: 0.75rem;
+            color: var(--sub);
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        .combo-section {
+            margin-bottom: 18px;
+        }
+
+        .combo-section-title {
+            font-size: 0.7rem;
+            color: var(--purple);
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .combo-select {
+            width: 100%;
+            padding: 10px 12px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: var(--sans);
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.15s;
+            margin-bottom: 8px;
+        }
+
+        .combo-select:focus {
+            border-color: var(--purple);
+        }
+
+        .combo-select option {
+            background: var(--surface);
+            color: var(--text);
+        }
+
+        .combo-price-box {
+            background: rgba(168, 85, 247, 0.12);
+            border: 1px solid var(--purple);
+            border-radius: 8px;
+            padding: 12px 14px;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .combo-price-label {
+            font-size: 0.7rem;
+            color: var(--purple);
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .combo-price-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--purple);
+            font-family: var(--mono);
+        }
+
+        .combo-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .combo-btn-cancel {
+            padding: 11px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--sub);
+            font-weight: 700;
+            cursor: pointer;
+            font-family: var(--sans);
+            transition: all 0.15s;
+        }
+
+        .combo-btn-cancel:hover {
+            border-color: var(--muted);
+            color: var(--text);
+        }
+
+        .combo-btn-add {
+            padding: 11px;
+            background: var(--purple);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-family: var(--mono);
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .combo-btn-add:hover {
+            background: #9333ea;
+        }
+
+        .combo-btn-add:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="panel-left">
+        <header class="pos-header">
+            <h1>BABEL / CAJA</h1>
+            <div class="turno">Turno: <span id="turno-hora">--:--</span></div>
+        </header>
+
+        <div class="cat-tabs" id="cat-tabs">
+            <button class="cat-tab active" data-tipo="TODOS" onclick="filtrar('TODOS', this)">✦ Todos</button>
+            <button class="cat-tab" data-tipo="PROMO" onclick="filtrar('PROMO', this)">🎉 Promos</button>
+            <button class="cat-tab" data-tipo="NORMAL" onclick="filtrar('NORMAL', this)">🥃 Normales</button>
+            <button class="cat-tab" data-tipo="VASO" onclick="filtrar('VASO', this)">🍺 Vasos</button>
+        </div>
+
+        <div id="grid-tragos"></div>
+    </div>
+
+    <!-- ═══════════════ PANEL TICKET ═══════════════ -->
+    <div id="panel-ticket">
+        <div class="ticket-header">
+            <h2>▸ TICKET</h2>
+            <button class="btn-vaciar" onclick="vaciarTicket()">VACIAR</button>
+        </div>
+
+        <div id="lista-ticket">
+            <div class="ticket-empty">
+                <span class="icon">🍹</span>
+                <p>Toca un trago para añadir</p>
+            </div>
+        </div>
+
+        <div class="ticket-footer">
+            <div class="ticket-resumen">
+                <div class="resumen-row">
+                    <span>Items</span>
+                    <span id="resumen-items">0</span>
+                </div>
+                <div class="resumen-row">
+                    <span>Subtotal</span>
+                    <span id="resumen-subtotal">$0.00</span>
+                </div>
+                <div class="resumen-row total">
+                    <span>Total</span>
+                    <span id="resumen-total">$0.00</span>
+                </div>
+            </div>
+            <button class="btn-cobrar" id="btn-cobrar" onclick="abrirModalCobro()" disabled>
+                COBRAR
+            </button>
+            <button class="btn-fiado" onclick="procesarFiado()">
+                📝 FIADO / CUENTA PENDIENTE
+            </button>
+            <button class="btn-extra" onclick="abrirModalCombo(null)"
+                title="Crear combo personalizado: licor + refresco">
+                🎁 CREAR COMBO
+            </button>
+            <button class="btn-extra" onclick="abrirModalExtra()"
+                title="Registrar algo vendido que no está en el menú (ej: cortesía, botella especial)">
+                ➕ EXTRA / FUERA DEL MENÚ
+            </button>
+        </div>
+    </div>
+
+    <!-- ═══════════════ MODAL DE COBRO ═══════════════ -->
+    <div id="modal-cobro">
+        <div class="modal-box">
+            <div class="modal-title">◈ Confirmar Cobro</div>
+
+            <div class="modal-items" id="modal-items-lista"></div>
+
+            <div class="modal-total">
+                <div>
+                    <div class="modal-total-label">TOTAL A COBRAR</div>
+                </div>
+                <div class="modal-total-num" id="modal-total-num">$0.00</div>
+            </div>
+
+            <div class="pago-label">Método de Pago</div>
+            <div class="pago-opciones">
+                <button class="pago-opt selected" data-metodo="EFECTIVO" onclick="seleccionarPago(this)">💵
+                    Efectivo</button>
+                <button class="pago-opt" data-metodo="TARJETA" onclick="seleccionarPago(this)">💳 Tarjeta</button>
+                <button class="pago-opt" data-metodo="TRANSFER" onclick="seleccionarPago(this)">📲 Transfer</button>
+            </div>
+
+            <div id="efectivo-wrap" class="visible">
+                <label>Dinero Recibido ($)</label>
+                <input type="number" id="input-efectivo" class="input-efectivo" placeholder="0.00" min="0" step="0.50"
+                    oninput="calcularVuelto()">
+                <div class="vuelto-display" id="vuelto-display">
+                    <span class="label">Vuelto:</span>
+                    <span class="monto" id="vuelto-monto">—</span>
+                </div>
+            </div>
+
+            <div class="modal-acciones">
+                <button class="btn-cancelar-modal" onclick="cerrarModalCobro()">← Cancelar</button>
+                <button class="btn-confirmar-cobro" id="btn-confirmar" onclick="confirmarCobro()">
+                    CONFIRMAR COBRO
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════ MODAL ÉXITO ═══════════════ -->
+    <div id="modal-exito">
+        <div class="exito-box">
+            <span class="exito-icon">✓</span>
+            <div class="exito-total" id="exito-total">$0.00</div>
+            <div class="exito-vuelto" id="exito-vuelto"></div>
+            <div class="exito-ticket" id="exito-ticket"></div>
+        </div>
+    </div>
+
+    <!-- ── MODAL EXTRA ── -->
+    <div id="modal-extra">
+        <div class="mex-box">
+            <div style="font-weight:700;font-size:1rem;margin-bottom:6px">➕ Venta Extra</div>
+            <p style="font-size:.75rem;color:var(--sub);margin-bottom:16px;line-height:1.5">
+                Para lo que no está en los botones del menú.<br>
+                Ej: cortesía cumpleaños, combo especial del momento.
+            </p>
+            <label class="mex-label">¿Qué fue?</label>
+            <input type="text" id="ex-desc" class="mex-inp" placeholder="Ej: Botella de vino, Cortesía ron…">
+            <label class="mex-label">Precio</label>
+            <input type="number" id="ex-precio" class="mex-inp" placeholder="0.00" min="0" step="0.5">
+            <label class="mex-label">Tipo (para la planilla)</label>
+            <div class="mex-tipos">
+                <button class="mex-tipo sel" data-t="VASO" onclick="selExTipo(this)">🥃 Vaso suelto</button>
+                <button class="mex-tipo" data-t="BOTELLA" onclick="selExTipo(this)">🍾 Botella</button>
+                <button class="mex-tipo" data-t="COMBO" onclick="selExTipo(this)">🎁 Combo</button>
+                <button class="mex-tipo" data-t="CORTESIA" onclick="selExTipo(this)">🎂 Cortesía</button>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                <button onclick="cerrarModalExtra()"
+                    style="padding:11px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--sub);font-weight:700;cursor:pointer;font-family:var(--sans)">
+                    Cancelar
+                </button>
+                <button onclick="confirmarExtra()"
+                    style="padding:11px;background:var(--purple);border:none;border-radius:8px;color:#fff;font-family:var(--mono);font-weight:700;cursor:pointer">
+                    AGREGAR AL TICKET
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL COMBO -->
+    <div id="modal-combo">
+        <div class="combo-box">
+            <div class="combo-title">🎁 CREAR COMBO</div>
+            <p class="combo-subtitle">
+                Selecciona un licor principal + un refresco acompañante.<br>
+                Se descontarán ambas botellas del inventario.
+            </p>
+
+            <div class="combo-section">
+                <div class="combo-section-title">Licor Principal</div>
+                <select id="combo-licor" class="combo-select" onchange="actualizarPrecioCombo()">
+                    <option value="">-- Selecciona un licor --</option>
+                </select>
+            </div>
+
+            <div class="combo-section">
+                <div class="combo-section-title">Refresco Acompañante</div>
+                <select id="combo-refresco" class="combo-select" onchange="actualizarPrecioCombo()">
+                    <option value="">-- Selecciona un refresco --</option>
+                </select>
+            </div>
+
+            <div class="combo-section">
+                <div class="combo-section-title">Precio del Combo</div>
+                <input type="number" id="combo-precio-input" class="combo-select" placeholder="0.00" min="0" step="0.5"
+                    onchange="actualizarPrecioCombo()">
+            </div>
+
+            <div class="combo-price-box">
+                <span class="combo-price-label">Total a cobrar</span>
+                <span class="combo-price-value" id="combo-precio-mostrado">$0.00</span>
+            </div>
+
+            <div class="combo-actions">
+                <button class="combo-btn-cancel" onclick="cerrarModalCombo()">Cancelar</button>
+                <button class="combo-btn-add" id="combo-btn-add" onclick="confirmarCombo()" disabled>AGREGAR AL
+                    TICKET</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast"></div>
+
+    <script>
+        // ═══════════════════════════════════════════════════════════
+        // ESTADO GLOBAL
+        // ═══════════════════════════════════════════════════════════
+        const API_URL = '/api';
+        const API_TOKEN = 'token_secreto_bar_123';
+
+        let menuItems = [];
+        let ticket = [];   // [{ trago_id, nombre, precio, vasos_por_botella, cantidad }]
+        let metodoPago = 'EFECTIVO';
+        let categoriaActual = 'TODOS';
+
+        // ═══════════════════════════════════════════════════════════
+        // INIT
+        // ═══════════════════════════════════════════════════════════
+        document.addEventListener('DOMContentLoaded', () => {
+            actualizarReloj();
+            setInterval(actualizarReloj, 1000);
+            cargarMenu();
+        });
+
+        function actualizarReloj() {
+            const ahora = new Date();
+            document.getElementById('turno-hora').textContent =
+                ahora.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // 1. CARGAR MENÚ
+        // ═══════════════════════════════════════════════════════════
+        async function cargarMenu() {
+            const grid = document.getElementById('grid-tragos');
+
+            // Skeleton loader
+            grid.innerHTML = Array(8).fill(0).map(() => `<div class="skeleton"></div>`).join('');
+
+            try {
+                const res = await fetch(`${API_URL}/caja/menu`, {
+                    headers: { 'Authorization': `Bearer ${API_TOKEN}` }
+                });
+                const data = await res.json();
+
+                if (data.success && data.data.length > 0) {
+                    menuItems = data.data;
+                    renderizarGrid(menuItems);
+                } else {
+                    grid.innerHTML = `
+                <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--sub)">
+                    <div style="font-size:2rem;margin-bottom:12px">🍾</div>
+                    <div style="font-weight:700;margin-bottom:6px">Sin tragos en el menú</div>
+                    <div style="font-size:0.75rem">El admin debe crear los botones primero</div>
+                    <a href="/admin" style="color:var(--blue);font-size:0.75rem;margin-top:8px;display:inline-block">
+                        → Ir al Panel de Admin
+                    </a>
+                </div>`;
+                }
+            } catch (err) {
+                console.error(err);
+                grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--red)">
+            ❌ Error al conectar con el servidor
+        </div>`;
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // 2. RENDERIZAR GRID
+        // ═══════════════════════════════════════════════════════════
+        function renderizarGrid(items) {
+            const grid = document.getElementById('grid-tragos');
+            grid.innerHTML = '';
+
+            if (items.length === 0) {
+                grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--sub)">
+            Sin tragos en esta categoría
+        </div>`;
+                return;
+            }
+
+            items.forEach(item => {
+                const sinStock = item.unidades_disponibles <= 0;
+                const enTicket = ticket.find(t => t.trago_id === item.id);
+                const qty = enTicket ? enTicket.cantidad : 0;
+
+                const btn = document.createElement('button');
+                btn.className = `trago-btn ${item.tipo_venta === 'COMBO' ? 'border-purple-500' : 'border-gray-700'}`;
+                btn.dataset.tipo = item.tipo_venta;
+                btn.dataset.id = item.id;
+                btn.disabled = sinStock;
+                if (!sinStock) btn.onclick = (e) => { crearRipple(e, btn); agregarAlTicket(item); };
+
+                btn.innerHTML = `
+            ${qty > 0 ? `<div class="trago-qty-badge" id="qty-${item.id}">${qty}</div>` : `<div class="trago-qty-badge" id="qty-${item.id}" style="display:none">${qty}</div>`}
+            <span class="trago-badge badge-${item.tipo_venta}">${{ VASO: '🥃 Vaso', BOTELLA: '🍾 Botella', COMBO: '🎁 Combo', PROMO: '🎉 Promo', NORMAL: '🥃 Normal', ENTRADA: '🎫 Entrada' }[item.tipo_venta] || item.tipo_venta
+                    }</span>
+            <span class="trago-nombre">${item.nombre_boton}</span>
+            <span class="trago-precio">$${item.precio.toFixed(2)}</span>
+            <span class="trago-ml">${item.nombre_botella}</span>
+        `;
+
+                grid.appendChild(btn);
+            });
+        }
+
+        function crearRipple(e, btn) {
+            const rect = btn.getBoundingClientRect();
+            const ripple = document.createElement('div');
+            ripple.className = 'ripple';
+            const size = Math.max(rect.width, rect.height);
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+            ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+            btn.appendChild(ripple);
+            ripple.addEventListener('animationend', () => ripple.remove());
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // 3. FILTROS
+        // ═══════════════════════════════════════════════════════════
+        function filtrar(tipo, tabEl) {
+            categoriaActual = tipo;
+            document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+            tabEl.classList.add('active');
+            const filtrados = tipo === 'TODOS' ? menuItems : menuItems.filter(i => i.tipo_venta === tipo);
+            renderizarGrid(filtrados);
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // 4. TICKET
+        // ═══════════════════════════════════════════════════════════
+        function agregarAlTicket(item) {
+            const existente = ticket.find(t => t.trago_id === item.id);
+            if (existente) {
+                existente.cantidad++;
+            } else {
+                ticket.push({
+                    trago_id: item.id,
+                    nombre: item.nombre_boton,
+                    precio: item.precio,
+                    vasos_por_botella: item.vasos_por_botella,
+                    cantidad: 1,
+                });
+            }
+            actualizarBadgeBoton(item.id, existente ? existente.cantidad : 1);
+            renderTicket();
+        }
+
+        function actualizarBadgeBoton(tragoId, cantidad) {
+            const badge = document.getElementById(`qty-${tragoId}`);
+            if (!badge) return;
+            if (cantidad > 0) {
+                badge.textContent = cantidad;
+                badge.style.display = 'flex';
+                badge.classList.remove('bump');
+                void badge.offsetWidth;
+                badge.classList.add('bump');
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        function cambiarCantidad(tragoId, delta) {
+            const idx = ticket.findIndex(t => t.trago_id === tragoId);
+            if (idx === -1) return;
+            ticket[idx].cantidad += delta;
+            if (ticket[idx].cantidad <= 0) {
+                ticket.splice(idx, 1);
+                actualizarBadgeBoton(tragoId, 0);
+            } else {
+                actualizarBadgeBoton(tragoId, ticket[idx].cantidad);
+            }
+            renderTicket();
+        }
+
+        function vaciarTicket() {
+            if (ticket.length === 0) return;
+            ticket.forEach(t => actualizarBadgeBoton(t.trago_id, 0));
+            ticket = [];
+            renderTicket();
+        }
+
+        function renderTicket() {
+            const contenedor = document.getElementById('lista-ticket');
+            const btnCobrar = document.getElementById('btn-cobrar');
+
+            if (ticket.length === 0) {
+                contenedor.innerHTML = `
+            <div class="ticket-empty">
+                <span class="icon">🍹</span>
+                <p>Toca un trago para añadir</p>
+            </div>`;
+                document.getElementById('resumen-items').textContent = '0';
+                document.getElementById('resumen-subtotal').textContent = '$0.00';
+                document.getElementById('resumen-total').textContent = '$0.00';
+                btnCobrar.disabled = true;
+                return;
+            }
+
+            let total = 0, totalItems = 0;
+            contenedor.innerHTML = '';
+
+            ticket.forEach(item => {
+                const subtotal = item.precio * item.cantidad;
+                total += subtotal;
+                totalItems += item.cantidad;
+
+                const div = document.createElement('div');
+                div.className = 'ticket-item';
+                div.innerHTML = `
+            <div class="ticket-item-info">
+                <div class="ticket-item-nombre">${item.nombre}</div>
+                <div class="ticket-item-sub">
+                    $${item.precio.toFixed(2)} × ${item.cantidad} ${item.tipo_venta === 'COMBO' ? '· 🎁 Combo (2 botellas)' : ''}
+                </div>
+            </div>
+            <div class="qty-ctrl">
+                <button class="qty-btn minus" onclick="cambiarCantidad('${item.trago_id}', -1)">−</button>
+                <span class="qty-num">${item.cantidad}</span>
+                <button class="qty-btn plus" onclick="cambiarCantidad('${item.trago_id}', 1)">+</button>
+            </div>
+            <div class="ticket-item-subtotal">$${subtotal.toFixed(2)}</div>
+        `;
+                contenedor.appendChild(div);
+            });
+
+            document.getElementById('resumen-items').textContent = totalItems;
+            document.getElementById('resumen-subtotal').textContent = `$${total.toFixed(2)}`;
+            document.getElementById('resumen-total').textContent = `$${total.toFixed(2)}`;
+            btnCobrar.disabled = false;
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // 5. MODAL DE COBRO
+        // ═══════════════════════════════════════════════════════════
+        function abrirModalCobro() {
+            if (ticket.length === 0) return;
+
+            const total = ticket.reduce((s, i) => s + i.precio * i.cantidad, 0);
+
+            // Llenar la lista del modal
+            const lista = document.getElementById('modal-items-lista');
+            lista.innerHTML = ticket.map(item => `
+        <div class="modal-item-row">
+            <span class="modal-item-nombre">${item.nombre}</span>
+            <span class="modal-item-qty">×${item.cantidad}</span>
+            <span class="modal-item-precio">$${(item.precio * item.cantidad).toFixed(2)}</span>
+        </div>
+    `).join('');
+
+            document.getElementById('modal-total-num').textContent = `$${total.toFixed(2)}`;
+            document.getElementById('input-efectivo').value = '';
+            document.getElementById('vuelto-monto').textContent = '—';
+
+            // Resetear método de pago
+            metodoPago = 'EFECTIVO';
+            document.querySelectorAll('.pago-opt').forEach(b => b.classList.remove('selected'));
+            document.querySelector('[data-metodo="EFECTIVO"]').classList.add('selected');
+            document.getElementById('efectivo-wrap').classList.add('visible');
+
+            document.getElementById('modal-cobro').classList.add('visible');
+        }
+
+        function cerrarModalCobro() {
+            document.getElementById('modal-cobro').classList.remove('visible');
+        }
+
+        function seleccionarPago(btn) {
+            document.querySelectorAll('.pago-opt').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            metodoPago = btn.dataset.metodo;
+
+            const wrap = document.getElementById('efectivo-wrap');
+            if (metodoPago === 'EFECTIVO') {
+                wrap.classList.add('visible');
+            } else {
+                wrap.classList.remove('visible');
+            }
+        }
+
+        function calcularVuelto() {
+            const total = ticket.reduce((s, i) => s + i.precio * i.cantidad, 0);
+            const recibido = parseFloat(document.getElementById('input-efectivo').value) || 0;
+            const vuelto = recibido - total;
+            const el = document.getElementById('vuelto-monto');
+
+            if (recibido === 0) { el.textContent = '—'; el.className = 'monto'; return; }
+            el.textContent = `$${Math.abs(vuelto).toFixed(2)}`;
+            if (vuelto < 0) {
+                el.textContent = `−$${Math.abs(vuelto).toFixed(2)} (falta)`;
+                el.className = 'monto negativo';
+            } else {
+                el.className = 'monto';
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // 6. CONFIRMAR COBRO → POST a la BD
+        // ═══════════════════════════════════════════════════════════
+        async function confirmarCobro() {
+            const total = ticket.reduce((s, i) => s + i.precio * i.cantidad, 0);
+
+            // Validar efectivo si aplica
+            if (metodoPago === 'EFECTIVO') {
+                const recibido = parseFloat(document.getElementById('input-efectivo').value) || 0;
+                if (recibido < total) {
+                    mostrarToast('El monto recibido es menor al total');
+                    return;
+                }
+            }
+
+            const btn = document.getElementById('btn-confirmar');
+            btn.textContent = '⏳ Procesando...';
+            btn.disabled = true;
+
+            const payload = {
+                items: ticket
+                    .filter(i => !i.es_extra)
+                    .map(i => ({ trago_id: i.trago_id, cantidad: i.cantidad })),
+                items_extra: ticket
+                    .filter(i => i.es_extra)
+                    .map(i => ({ nombre: i.nombre, precio: i.precio, cantidad: i.cantidad, tipo_venta: i.tipo_venta })),
+                tipo_pago: metodoPago,
+                efectivo_recibido: metodoPago === 'EFECTIVO'
+                    ? (parseFloat(document.getElementById('input-efectivo').value) || 0)
+                    : total,
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/caja/cobrar`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_TOKEN}`,
+                    },
+                    body: JSON.stringify(payload),
+                });
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    const vuelto = payload.efectivo_recibido - total;
+
+                    // Cerrar modal de cobro
+                    cerrarModalCobro();
+
+                    // Mostrar pantalla de éxito
+                    mostrarExito(total, vuelto > 0 ? vuelto : 0, data.id_ticket);
+
+                    // Limpiar ticket
+                    ticket.forEach(t => actualizarBadgeBoton(t.trago_id, 0));
+                    ticket = [];
+                    renderTicket();
+                    cargarMenu();
+                } else {
+                    mostrarToast(data.error || 'Error al procesar el cobro');
+                }
+            } catch (err) {
+                console.error(err);
+                mostrarToast('Error de conexión con el servidor');
+            }
+
+            btn.textContent = 'CONFIRMAR COBRO';
+            btn.disabled = false;
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // 7. PANTALLA DE ÉXITO
+        // ═══════════════════════════════════════════════════════════
+        function mostrarExito(total, vuelto, ticketId) {
+            document.getElementById('exito-total').textContent = `$${total.toFixed(2)}`;
+            document.getElementById('exito-vuelto').textContent = vuelto > 0 ? `Vuelto: $${vuelto.toFixed(2)}` : '';
+            document.getElementById('exito-ticket').textContent = ticketId ? `Ticket #${ticketId.substring(0, 8)}` : '';
+
+            const modal = document.getElementById('modal-exito');
+            modal.classList.add('visible');
+
+            setTimeout(() => {
+                modal.classList.remove('visible');
+            }, 2500);
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // 8. FIADO
+        // ═══════════════════════════════════════════════════════════
+        async function procesarFiado() {
+            if (ticket.length === 0) { mostrarToast('El ticket está vacío'); return; }
+            if (!confirm('¿Registrar este ticket como FIADO?')) return;
+
+            const payload = {
+                items: ticket.map(item => ({ trago_id: item.trago_id, cantidad: item.cantidad })),
+                tipo_pago: 'FIADO',
+                efectivo_recibido: 0,
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/caja/cobrar`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_TOKEN}` },
+                    body: JSON.stringify(payload),
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    mostrarExito(ticket.reduce((s, i) => s + i.precio * i.cantidad, 0), 0, data.id_ticket);
+                    ticket.forEach(t => actualizarBadgeBoton(t.trago_id, 0));
+                    ticket = [];
+                    renderTicket();
+                    cargarMenu();
+                } else {
+                    mostrarToast(data.error || 'Error al registrar fiado');
+                }
+            } catch (e) {
+                mostrarToast('Error de conexión');
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // 9. UTILIDADES
+        // ═══════════════════════════════════════════════════════════
+        let toastTimer;
+        function mostrarToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = '⚠ ' + msg;
+            t.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+        }
+
+        // Cerrar modal al hacer click fuera
+        document.getElementById('modal-cobro').addEventListener('click', function (e) {
+            if (e.target === this) cerrarModalCobro();
+        });
+
+        // ── MODO PROMO — sincronización con admin ──────────
+        function verificarModoPromo() {
+            const on = localStorage.getItem('babel_modo_promo') === '1';
+            const banner = document.getElementById('banner-promo');
+            if (on) {
+                banner.classList.add('visible');
+                document.body.classList.add('promo-on');
+            } else {
+                banner.classList.remove('visible');
+                document.body.classList.remove('promo-on');
+            }
+        }
+        // Revisar al cargar y cada 5 segundos (el admin puede cambiarlo)
+        verificarModoPromo();
+        setInterval(verificarModoPromo, 5000);
+        // También escuchar cambios de storage (si admin y caja están en misma PC)
+        window.addEventListener('storage', e => {
+            if (e.key === 'babel_modo_promo' || e.key === 'babel_promo_ts') verificarModoPromo();
+        });
+
+        // ── MODAL EXTRA ─────────────────────────────────────
+        let exTipo = 'VASO';
+
+        function abrirModalExtra() {
+            document.getElementById('ex-desc').value = '';
+            document.getElementById('ex-precio').value = '';
+            exTipo = 'VASO';
+            document.querySelectorAll('.mex-tipo').forEach(b => b.classList.remove('sel'));
+            document.querySelector('[data-t="VASO"]').classList.add('sel');
+            document.getElementById('modal-extra').classList.add('open');
+            setTimeout(() => document.getElementById('ex-desc').focus(), 80);
+        }
+        function cerrarModalExtra() {
+            document.getElementById('modal-extra').classList.remove('open');
+        }
+        function selExTipo(btn) {
+            document.querySelectorAll('.mex-tipo').forEach(b => b.classList.remove('sel'));
+            btn.classList.add('sel');
+            exTipo = btn.dataset.t;
+        }
+        function confirmarExtra() {
+            const desc = document.getElementById('ex-desc').value.trim();
+            const precio = parseFloat(document.getElementById('ex-precio').value) || 0;
+            if (!desc) { mostrarToast('Escribí una descripción'); return; }
+            const fakeId = 'EXTRA_' + Date.now();
+            // Si ya hay uno igual, incrementa cantidad
+            const existe = ticket.find(t => t.nombre === desc && t.es_extra);
+            if (existe) { existe.cantidad++; }
+            else {
+                ticket.push({
+                    trago_id: fakeId, nombre: desc, precio,
+                    cantidad: 1, tipo_venta: exTipo, es_extra: true,
+                });
+            }
+            cerrarModalExtra();
+            renderTicket();
+            mostrarToast('✓ Extra añadido');
+        }
+        document.getElementById('modal-extra').addEventListener('click', e => {
+            if (e.target.id === 'modal-extra') cerrarModalExtra();
+        });
+
+        // ── MODAL COMBO ─────────────────────────────────────
+        let comboLicorSeleccionado = null;
+        let comboRefrescoSeleccionado = null;
+
+        function abrirModalCombo(item) {
+            document.getElementById('combo-licor').value = '';
+            document.getElementById('combo-refresco').value = '';
+            document.getElementById('combo-precio-input').value = '';
+            comboLicorSeleccionado = null;
+            comboRefrescoSeleccionado = null;
+            poblarSelectoresCombo();
+            document.getElementById('modal-combo').classList.add('open');
+            setTimeout(() => document.getElementById('combo-licor').focus(), 80);
+        }
+        function cerrarModalCombo() {
+            document.getElementById('modal-combo').classList.remove('open');
+        }
+        function poblarSelectoresCombo() {
+            const licorSelect = document.getElementById('combo-licor');
+            const refrescoSelect = document.getElementById('combo-refresco');
+            while (licorSelect.length > 1) licorSelect.remove(1);
+            while (refrescoSelect.length > 1) refrescoSelect.remove(1);
+
+            const todosLosItems = menuItems.filter(i => i.tipo_venta !== 'COMBO');
+
+            todosLosItems.forEach(l => {
+                const opt = document.createElement('option');
+                opt.value = JSON.stringify({ id: l.id, nombre: l.nombre_boton, precio: l.precio });
+                opt.textContent = `${l.nombre_boton} · ${l.volumen_ml}ml ($${l.precio.toFixed(2)})`;
+                licorSelect.appendChild(opt);
+                refrescoSelect.appendChild(opt.cloneNode(true));
+            });
+        }
+        function actualizarPrecioCombo() {
+            const licorVal = document.getElementById('combo-licor').value;
+            const refrescVal = document.getElementById('combo-refresco').value;
+            const precioInput = parseFloat(document.getElementById('combo-precio-input').value) || 0;
+            const btnAdd = document.getElementById('combo-btn-add');
+
+            if (!licorVal || !refrescVal) {
+                document.getElementById('combo-precio-mostrado').textContent = '$0.00';
+                btnAdd.disabled = true;
+                return;
+            }
+            try {
+                comboLicorSeleccionado = JSON.parse(licorVal);
+                comboRefrescoSeleccionado = JSON.parse(refrescVal);
+            } catch (e) { return; }
+
+            const precioFinal = precioInput > 0 ? precioInput :
+                Math.round((comboLicorSeleccionado.precio + comboRefrescoSeleccionado.precio) * 0.9 * 100) / 100;
+
+            document.getElementById('combo-precio-mostrado').textContent = `$${precioFinal.toFixed(2)}`;
+            btnAdd.disabled = false;
+        }
+        function confirmarCombo() {
+            if (!comboLicorSeleccionado || !comboRefrescoSeleccionado) {
+                mostrarToast('Selecciona licor y refresco'); return;
+            }
+            const precioCombo = parseFloat(document.getElementById('combo-precio-input').value) ||
+                Math.round((comboLicorSeleccionado.precio + comboRefrescoSeleccionado.precio) * 0.9 * 100) / 100;
+            if (precioCombo <= 0) { mostrarToast('Ingresa un precio válido'); return; }
+
+            ticket.push({
+                trago_id: 'COMBO_' + Date.now(),
+                nombre: `${comboLicorSeleccionado.nombre} + ${comboRefrescoSeleccionado.nombre}`,
+                precio: precioCombo,
+                cantidad: 1,
+                tipo_venta: 'COMBO',
+                es_combo: true,
+                licor_id: comboLicorSeleccionado.id,
+                refresco_id: comboRefrescoSeleccionado.id,
+                vasos_por_botella: 0
+            });
+            cerrarModalCombo();
+            renderTicket();
+            mostrarToast('✓ Combo agregado');
+        }
+        document.getElementById('modal-combo').addEventListener('click', e => {
+            if (e.target.id === 'modal-combo') cerrarModalCombo();
+        });
+    </script>
+</body>
+
+</html>

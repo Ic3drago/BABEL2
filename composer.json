@@ -1,0 +1,12 @@
+{
+    "name": "ic3drago/bar-pos",
+    "description": "Sistema de POS y control fraccionado para Bar",
+    "require": {
+        "bramus/router": "~1.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    }
+}
