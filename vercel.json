@@ -1,13 +1,13 @@
 {
   "functions": {
-    "api/**/*.php": {
+    "api/index.php": {
       "runtime": "vercel-php@0.8.3"
     }
   },
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/api/index.php"
+      "destination": "/api/index.php?__vercel_path=/api/$1"
     },
     {
       "source": "/pos",
@@ -20,14 +20,6 @@
     {
       "source": "/planilla",
       "destination": "/public/planilla.html"
-    },
-    {
-      "source": "/(.*\\.js)",
-      "destination": "/public/$1"
-    },
-    {
-      "source": "/(.*\\.css)",
-      "destination": "/public/$1"
     },
     {
       "source": "/",
