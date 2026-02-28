@@ -1,17 +1,8 @@
 {
-  "functions": {
-    "api/**/*.php": {
-      "runtime": "vercel-php@0.6.1"
-    }
-  },
   "rewrites": [
     {
       "source": "/api/(.*)",
       "destination": "/api/index.php"
-    },
-    {
-      "source": "/",
-      "destination": "/public/index.html"
     },
     {
       "source": "/pos",
@@ -26,16 +17,16 @@
       "destination": "/public/planilla.html"
     },
     {
-      "source": "/pos.js",
-      "destination": "/public/pos.js"
+      "source": "/(.*\\.js)",
+      "destination": "/public/$1"
     },
     {
-      "source": "/admin.js",
-      "destination": "/public/admin.js"
+      "source": "/(.*\\.css)",
+      "destination": "/public/$1"
     },
     {
-      "source": "/app.js",
-      "destination": "/public/app.js"
+      "source": "/",
+      "destination": "/public/index.html"
     }
   ]
 }
