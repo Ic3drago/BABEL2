@@ -142,6 +142,27 @@
         </div>
     </div>
 
+    <!-- ═══════════════ MODAL ANULAR (SANDBOX) ═══════════════ -->
+    <div id="modal-anular" class="modal-backdrop">
+        <div class="modal" style="max-width:350px; text-align:center;">
+            <div style="font-size:3rem; margin-bottom:10px;">⚠️</div>
+            <h2 style="color:var(--red); font-size:1.4rem; margin-bottom:10px;">¿Anular Venta?</h2>
+            <p id="anular-desc" style="color:var(--sub); font-size:0.9rem; margin-bottom:20px; line-height:1.4;">
+                Se borrará el ticket y el stock de las botellas volverá a su lugar. Esto no se puede deshacer.
+            </p>
+            <div style="display:flex; gap:10px;">
+                <button onclick="cerrarModalAnular()"
+                    style="flex:1; padding:12px; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); font-weight:bold; cursor:pointer;">
+                    No, me equivoqué
+                </button>
+                <button onclick="confirmarAnular()" id="btn-confirm-anular"
+                    style="flex:1; padding:12px; background:var(--red); border:none; border-radius:8px; color:white; font-weight:bold; cursor:pointer;">
+                    Sí, ANULAR
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- ═══════════════ MODAL ÉXITO ═══════════════ -->
     <div id="modal-exito">
         <div class="exito-box">

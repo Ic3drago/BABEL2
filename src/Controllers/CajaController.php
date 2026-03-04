@@ -253,6 +253,79 @@ class CajaController {
                  ->execute([$sc, round(max(0, $nuevoPct), 4), $bid]);
     }
 
+    private function aumentarInventario($bid, $tipo, $qty, $vxb) {
+        $st = $this->db->prepare("SELECT stock_cerrado, porcentaje_abierto FROM inventario_botellas WHERE id = ? FOR UPDATE");
+        $st->execute([$bid]);
+        $res = $st->fetch(\PDO::FETCH_ASSOC);
+        if (!$res) return; // Si por alguna razón no existe, no hacemos nada
+
+        $sc  = (int)   $res['stock_cerrado'];
+        $pct = (float) $res['porcentaje_abierto'];
+
+        if ($tipo === 'BOTELLA' || $tipo === 'COMBO') {
+            $consumo = 100.0 * $qty;
+        } else {
+            $vxb = max(1, $vxb);
+            $consumo = (100.0 / $vxb) * $qty;
+        }
+
+        $nuevoPct = $pct + $consumo;
+        
+        while ($nuevoPct > 100.0) { 
+            $sc++; 
+            $nuevoPct -= 100.0; 
+        }
+
+        $this->db->prepare("UPDATE inventario_botellas SET stock_cerrado=?, porcentaje_abierto=?, updated_at=NOW() WHERE id=?")
+                 ->execute([$sc, round(min(100, $nuevoPct), 4), $bid]);
+    }
+
+    public function anularVenta(string $ticketId): void {
+        $this->db->beginTransaction();
+        try {
+            // Obtener los detalles de la venta para devolver el stock
+            $stmt = $this->db->prepare("SELECT vd.*, mt.botella_id, ib.vasos_por_botella 
+                                        FROM ventas_detalles vd 
+                                        LEFT JOIN menu_tragos mt ON vd.trago_id = mt.id
+                                        LEFT JOIN inventario_botellas ib ON mt.botella_id = ib.id
+                                        WHERE vd.ticket_id = ?");
+            $stmt->execute([$ticketId]);
+            $detalles = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            if (empty($detalles)) {
+                // Si no hay detalles, tal vez es solo un registro vacío o ya fue borrado
+                $this->db->prepare("DELETE FROM ventas_tickets WHERE id = ?")->execute([$ticketId]);
+                $this->db->commit();
+                echo json_encode(['success' => true, 'mensaje' => 'Venta anulada (sin detalles).']);
+                return;
+            }
+
+            foreach ($detalles as $d) {
+                if ($d['botella_id']) {
+                    // Descifrar tipo de venta de la nota extra
+                    // Si la nota dice 'PROMO', 'VASO', 'BOTELLA', etc.
+                    $tipo = str_replace('EXTRA: ', '', $d['nota_extra']); 
+                    // Si no es un texto válido, asumimos consumo proporcional
+                    if (!in_array($tipo, ['BOTELLA', 'COMBO', 'PROMO', 'VASO', 'NORMAL', 'ENTRADA'])) {
+                        $tipo = 'VASO'; 
+                    }
+                    $this->aumentarInventario($d['botella_id'], $tipo, (int)$d['cantidad'], (int)$d['vasos_por_botella']);
+                }
+            }
+
+            // Borrar detalles y ticket (usualmente hay ON DELETE CASCADE, pero lo hacemos manual por si acaso)
+            $this->db->prepare("DELETE FROM ventas_detalles WHERE ticket_id = ?")->execute([$ticketId]);
+            $this->db->prepare("DELETE FROM ventas_tickets WHERE id = ?")->execute([$ticketId]);
+
+            $this->db->commit();
+            echo json_encode(['success' => true, 'mensaje' => 'Venta anulada y stock devuelto exitosamente.']);
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
     private function uuid(): string {
         return sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x', mt_rand(0,0xffff),mt_rand(0,0xffff),mt_rand(0,0xffff), mt_rand(0,0x0fff)|0x4000,mt_rand(0,0x3fff)|0x8000, mt_rand(0,0xffff),mt_rand(0,0xffff),mt_rand(0,0xffff));
     }

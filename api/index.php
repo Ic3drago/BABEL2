@@ -89,6 +89,7 @@ if ($method==='DELETE' && $uri==='/api/admin/reset_ventas')    { requireRole('ad
 // CAJA (Both 'admin' and 'bartender')
 if ($method==='GET'  && $uri==='/api/caja/menu')               { requireRole(['admin', 'bartender']); $cajaCtrl->getMenu(); exit; }
 if ($method==='POST' && $uri==='/api/caja/cobrar')             { requireRole(['admin', 'bartender']); $cajaCtrl->cobrar(); exit; }
+if ($method==='DELETE' && preg_match('#^/api/caja/ventas/([^/]+)$#', $uri, $m)) { requireRole(['admin', 'bartender']); $cajaCtrl->anularVenta($m[1]); exit; }
 
 // PLANILLA (Admin only usually, or both?) Let's restrict to admin for now, or allow both to view.
 if ($method==='GET'  && preg_match('#^/api/planilla/(\d{4}-\d{2}-\d{2})$#', $uri, $m)) { requireRole(['admin', 'bartender']); $planillaCtrl->getPlanilla($m[1]); exit; }

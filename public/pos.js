@@ -238,15 +238,70 @@ function renderizarVentasRecientes() {
         return;
     }
     contenedor.innerHTML = ventasRecientes.map(v => `
-        <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:4px;box-shadow:0 2px 4px rgba(0,0,0,0.1);">
-            <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:4px;box-shadow:0 2px 4px rgba(0,0,0,0.1); position:relative;">
+            <button onclick="abrirModalAnular('${v.ticket}', '${v.nombre}')" style="position:absolute; top:8px; right:8px; background:var(--bg); border:1px solid var(--border); border-radius:4px; color:var(--red); font-size:1rem; cursor:pointer; padding:2px 8px; font-weight:bold; z-index:10; opacity:0.8;">✕</button>
+            <div style="display:flex;justify-content:space-between;align-items:center; padding-right:32px;">
                 <span style="font-weight:bold;font-size:0.95rem;">${v.nombre}</span>
-                <span style="color:var(--green);font-weight:bold;font-family:var(--mono);font-size:0.9rem;">Bs. ${parseFloat(v.total).toFixed(2)}</span>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;color:var(--sub);font-size:0.75rem;font-family:var(--mono);">
-                <span>#${v.ticket}</span><span>${v.hora}</span>
+                <span>#${v.ticket} &middot; <span style="color:var(--green);font-weight:bold;">Bs. ${parseFloat(v.total).toFixed(2)}</span></span>
+                <span>${v.hora}</span>
             </div>
         </div>`).join('');
+}
+
+// ── ANULAR VENTA (SANDBOX) ──
+let ticketAnularSelect = null;
+
+function abrirModalAnular(ticketId, nombre) {
+    ticketAnularSelect = ticketId;
+    document.getElementById('anular-desc').innerHTML = `Se eliminará el ticket <b>#${ticketId}</b> (${nombre}) y se reabastecerá la botella.`;
+    document.getElementById('modal-anular').classList.add('open');
+}
+
+function cerrarModalAnular() {
+    ticketAnularSelect = null;
+    document.getElementById('modal-anular').classList.remove('open');
+}
+
+async function confirmarAnular() {
+    if (!ticketAnularSelect) return;
+
+    const btn = document.getElementById('btn-confirm-anular');
+    btn.disabled = true;
+    btn.textContent = 'Borrando...';
+
+    try {
+        const res = await fetch(`${API_URL}/caja/ventas/${ticketAnularSelect}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${API_TOKEN}` }
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            mostrarToast('🗑️ ' + data.mensaje);
+            // Quitar de los recientes
+            ventasRecientes = ventasRecientes.filter(v => v.ticket !== ticketAnularSelect);
+            renderizarVentasRecientes();
+
+            // Guardar en storage
+            const wrap = {
+                fecha_turno: obtenerFechaTurnoLocal(),
+                ventas: ventasRecientes
+            };
+            localStorage.setItem('babel_ventas_recientes', JSON.stringify(wrap));
+
+            cargarMenu(); // Refrescar los botones para ver el stock restaurado
+        } else {
+            mostrarToast(data.error || 'Error al anular venta');
+        }
+    } catch (e) {
+        mostrarToast('Error de red al anular');
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Sí, ANULAR';
+    cerrarModalAnular();
 }
 
 function abrirModalCobro() {
