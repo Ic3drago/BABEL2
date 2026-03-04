@@ -121,13 +121,13 @@ async function cargarPlanilla() {
     tbody.innerHTML = `<tr><td colspan="12" class="estado-tabla"><div class="icon">⏳</div></td></tr>`;
 
     try {
-        const res = await fetch(`Bs. {API_URL}/planilla/Bs. {fecha}`, {
-            headers: { 'Authorization': `Bearer Bs. {API_TOKEN}` }
+        const res = await fetch(`${API_URL}/planilla/${fecha}`, {
+            headers: { 'Authorization': `Bearer ${API_TOKEN}` }
         });
         const data = await res.json();
 
         if (!res.ok || !data.success) {
-            tbody.innerHTML = `<tr><td colspan="12" class="estado-tabla">⚠️ Bs. {data.error || 'Sin datos'}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="12" class="estado-tabla">⚠️ ${data.error || 'Sin datos'}</td></tr>`;
             return;
         }
 
@@ -153,32 +153,32 @@ function renderizarTabla(filas, totales) {
 
     tbody.innerHTML = filas.map((f, i) => `
         <tr>
-            <td><strong>Bs. {f.nombre}</strong></td>
-            <td class="num-inicial">Bs. {parseInt(f.stock_inicial)}</td>
+            <td><strong>${f.nombre}</strong></td>
+            <td class="num-inicial">${parseInt(f.stock_inicial)}</td>
 
             <!-- PROMO -->
-            <td class="num num-cant" style="color: var(--purple);">Bs. {f.promo_unidades || 0}</td>
-            <td class="num num-dinero">Bs. Bs. {parseFloat(f.promo_recaudado || 0).toFixed(2)}</td>
+            <td class="num num-cant" style="color: var(--purple);">${f.promo_unidades || 0}</td>
+            <td class="num num-dinero">Bs. ${parseFloat(f.promo_recaudado || 0).toFixed(2)}</td>
 
             <!-- NORMAL -->
-            <td class="num num-cant" style="color: var(--orange);">Bs. {f.normal_unidades || 0}</td>
-            <td class="num num-dinero">Bs. Bs. {parseFloat(f.normal_recaudado || 0).toFixed(2)}</td>
+            <td class="num num-cant" style="color: var(--orange);">${f.normal_unidades || 0}</td>
+            <td class="num num-dinero">Bs. ${parseFloat(f.normal_recaudado || 0).toFixed(2)}</td>
 
             <!-- VASO -->
-            <td class="num num-cant" style="color: var(--blue);">Bs. {f.vaso_unidades || 0}</td>
-            <td class="num num-dinero">Bs. Bs. {parseFloat(f.vaso_recaudado || 0).toFixed(2)}</td>
+            <td class="num num-cant" style="color: var(--blue);">${f.vaso_unidades || 0}</td>
+            <td class="num num-dinero">Bs. ${parseFloat(f.vaso_recaudado || 0).toFixed(2)}</td>
 
             <!-- ENTRADA -->
-            <td class="num num-cant" style="color: #06b6d4;">Bs. {f.entrada_unidades || 0}</td>
-            <td class="num num-dinero" style="color: #06b6d4;">Bs. Bs. {parseFloat(f.entrada_recaudado || 0).toFixed(2)}</td>
+            <td class="num num-cant" style="color: #06b6d4;">${f.entrada_unidades || 0}</td>
+            <td class="num num-dinero" style="color: #06b6d4;">Bs. ${parseFloat(f.entrada_recaudado || 0).toFixed(2)}</td>
 
             <!-- RESTANTE (calculado: stock_inicial - promo - normal) -->
             <td style="text-align: center; font-family: var(--mono); font-weight: 700; color: var(--yellow);">
-                Bs. {f.restante ?? (parseInt(f.stock_inicial) - (f.promo_unidades||0) - (f.normal_unidades||0))}
+                ${f.restante ?? (parseInt(f.stock_inicial) - (f.promo_unidades||0) - (f.normal_unidades||0))}
             </td>
 
             <!-- TOTAL RECAUDADO -->
-            <td class="num num-dinero">Bs. Bs. {parseFloat(f.total_recaudado || 0).toFixed(2)}</td>
+            <td class="num num-dinero">Bs. ${parseFloat(f.total_recaudado || 0).toFixed(2)}</td>
         </tr>
     `).join('');
 
@@ -188,25 +188,25 @@ function renderizarTabla(filas, totales) {
         <tr class="fila-total">
             <td><strong>TOTAL</strong></td>
             <td class="num"></td>
-            <td class="num" style="color: var(--purple);">Bs. {totales.promo_unidades || 0}</td>
-            <td class="num" style="color: var(--green);">Bs. Bs. {parseFloat(totales.promo_recaudado || 0).toFixed(2)}</td>
-            <td class="num" style="color: var(--orange);">Bs. {totales.normal_unidades || 0}</td>
-            <td class="num" style="color: var(--green);">Bs. Bs. {parseFloat(totales.normal_recaudado || 0).toFixed(2)}</td>
-            <td class="num" style="color: var(--blue);">Bs. {totales.vaso_unidades || 0}</td>
-            <td class="num" style="color: var(--green);">Bs. Bs. {parseFloat(totales.vaso_recaudado || 0).toFixed(2)}</td>
-            <td class="num" style="color: #06b6d4;">Bs. {totales.entrada_unidades || 0}</td>
-            <td class="num" style="color: #06b6d4;">Bs. Bs. {parseFloat(totales.entrada_recaudado || 0).toFixed(2)}</td>
+            <td class="num" style="color: var(--purple);">${totales.promo_unidades || 0}</td>
+            <td class="num" style="color: var(--green);">Bs. ${parseFloat(totales.promo_recaudado || 0).toFixed(2)}</td>
+            <td class="num" style="color: var(--orange);">${totales.normal_unidades || 0}</td>
+            <td class="num" style="color: var(--green);">Bs. ${parseFloat(totales.normal_recaudado || 0).toFixed(2)}</td>
+            <td class="num" style="color: var(--blue);">${totales.vaso_unidades || 0}</td>
+            <td class="num" style="color: var(--green);">Bs. ${parseFloat(totales.vaso_recaudado || 0).toFixed(2)}</td>
+            <td class="num" style="color: #06b6d4;">${totales.entrada_unidades || 0}</td>
+            <td class="num" style="color: #06b6d4;">Bs. ${parseFloat(totales.entrada_recaudado || 0).toFixed(2)}</td>
             <td></td>
-            <td class="num" style="color: var(--yellow);font-size:0.9rem;">Bs. Bs. {parseFloat(totales.total_recaudado || 0).toFixed(2)}</td>
+            <td class="num" style="color: var(--yellow);font-size:0.9rem;">Bs. ${parseFloat(totales.total_recaudado || 0).toFixed(2)}</td>
         </tr>
     `;
 
     // ACTUALIZAR CARDS
-    document.getElementById('card-total').textContent = `Bs. Bs. {parseFloat(totales.total_recaudado || 0).toFixed(2)}`;
-    document.getElementById('card-promo').textContent = `Bs. {totales.promo_unidades || 0} / Bs. Bs. {parseFloat(totales.promo_recaudado || 0).toFixed(2)}`;
-    document.getElementById('card-normal').textContent = `Bs. {totales.normal_unidades || 0} / Bs. Bs. {parseFloat(totales.normal_recaudado || 0).toFixed(2)}`;
-    document.getElementById('card-vaso').textContent = `Bs. {totales.vaso_unidades || 0} / Bs. Bs. {parseFloat(totales.vaso_recaudado || 0).toFixed(2)}`;
-    document.getElementById('card-entrada').textContent = `Bs. {totales.entrada_unidades || 0} / Bs. Bs. {parseFloat(totales.entrada_recaudado || 0).toFixed(2)}`;
+    document.getElementById('card-total').textContent = `Bs. ${parseFloat(totales.total_recaudado || 0).toFixed(2)}`;
+    document.getElementById('card-promo').textContent = `${totales.promo_unidades || 0} / Bs. ${parseFloat(totales.promo_recaudado || 0).toFixed(2)}`;
+    document.getElementById('card-normal').textContent = `${totales.normal_unidades || 0} / Bs. ${parseFloat(totales.normal_recaudado || 0).toFixed(2)}`;
+    document.getElementById('card-vaso').textContent = `${totales.vaso_unidades || 0} / Bs. ${parseFloat(totales.vaso_recaudado || 0).toFixed(2)}`;
+    document.getElementById('card-entrada').textContent = `${totales.entrada_unidades || 0} / Bs. ${parseFloat(totales.entrada_recaudado || 0).toFixed(2)}`;
 }
 
 function renderizarDetalle(detalle) {
@@ -264,14 +264,14 @@ function renderizarDetalle(detalle) {
     const ws = XLSX.utils.aoa_to_sheet(ws_data);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Planilla');
-    XLSX.writeFile(wb, `Planilla_Bs. {document.getElementById('fecha-planilla').value}.xlsx`);
+    XLSX.writeFile(wb, `Planilla_${document.getElementById('fecha-planilla').value}.xlsx`);
     toast('✓ Exportado', 'ok');
 }
 
 function toast(msg, tipo = 'ok') {
     const el = document.getElementById('toast');
     el.textContent = msg;
-    el.className = `show Bs. {tipo}`;
+    el.className = `show ${tipo}`;
     setTimeout(() => el.className = tipo, 3500);
 }
 </script>
