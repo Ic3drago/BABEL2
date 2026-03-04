@@ -1310,9 +1310,30 @@ body.promo-on .trago-btn[data-tipo="PROMO"] .trago-nombre {
         overflow: hidden !important;
     }
 
-    /* Ocultar panel de recientes en celulares para no robar pantalla */
+    /* Ajustar panel de recientes para que sea flotante/desplegable en móvil */
     #panel-recientes {
-        display: none !important;
+        position: fixed !important;
+        top: auto !important;
+        bottom: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        height: 60vh !important;
+        z-index: 80 !important;
+        border-radius: 20px 20px 0 0 !important;
+        box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5) !important;
+        transform: translateY(110%);
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        display: flex !important;
+    }
+
+    #panel-recientes.open {
+        transform: translateY(0);
+    }
+
+    #btn-mobile-recientes {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
     }
 
     #panel-left {

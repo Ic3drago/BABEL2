@@ -12,6 +12,8 @@
     <script>
         if (!localStorage.getItem('babel_token')) {
             window.location.href = '/login';
+        } else if (localStorage.getItem('babel_role') === 'bartender') {
+            window.location.href = '/pos';
         }
     </script>
 </head>

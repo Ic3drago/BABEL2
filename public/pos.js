@@ -527,9 +527,10 @@ function poblarSelectoresCombo() {
     const todosLosItems = menuItems.filter(i => i.tipo_venta !== 'COMBO');
 
     todosLosItems.forEach(l => {
+        const precioFloat = parseFloat(l.precio) || 0;
         const opt = document.createElement('option');
-        opt.value = JSON.stringify({ id: l.id, nombre: l.nombre_boton, precio: l.precio });
-        opt.textContent = `${l.nombre_boton} · ${l.volumen_ml}ml (Bs. ${l.precio.toFixed(2)})`;
+        opt.value = JSON.stringify({ id: l.id, nombre: l.nombre_boton, precio: precioFloat });
+        opt.textContent = `${l.nombre_boton} · ${l.volumen_ml}ml (Bs. ${precioFloat.toFixed(2)})`;
         licorSelect.appendChild(opt);
         refrescoSelect.appendChild(opt.cloneNode(true));
     });
@@ -587,3 +588,9 @@ function confirmarCombo() {
 document.getElementById('modal-combo').addEventListener('click', e => {
     if (e.target.id === 'modal-combo') cerrarModalCombo();
 });
+
+// ── MÓVIL: Toggle Panel Recientes ──
+function toggleRecientesMobile() {
+    const panel = document.getElementById('panel-recientes');
+    if (panel) panel.classList.toggle('open');
+}

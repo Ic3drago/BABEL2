@@ -10,6 +10,13 @@
         rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="css/planilla.css">
+    <script>
+        if (!localStorage.getItem('babel_token')) {
+            window.location.href = '/login';
+        } else if (localStorage.getItem('babel_role') === 'bartender') {
+            window.location.href = '/pos';
+        }
+    </script>
 </head>
 
 <body>

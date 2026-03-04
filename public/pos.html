@@ -178,7 +178,7 @@
                 </button>
                 <button onclick="confirmarExtra()"
                     style="padding:11px;background:var(--purple);border:none;border-radius:8px;color:#fff;font-family:var(--mono);font-weight:700;cursor:pointer">
-                    AGREGAR AL TICKET
+                    VENDER AL CONTADO
                 </button>
             </div>
         </div>
@@ -220,14 +220,21 @@
 
             <div class="combo-actions">
                 <button class="combo-btn-cancel" onclick="cerrarModalCombo()">Cancelar</button>
-                <button class="combo-btn-add" id="combo-btn-add" onclick="confirmarCombo()" disabled>AGREGAR AL
-                    TICKET</button>
+                <button class="combo-btn-add" id="combo-btn-add" onclick="confirmarCombo()" disabled>
+                    VENDER AL CONTADO
+                </button>
             </div>
         </div>
     </div>
 
     <!-- Toast -->
     <div id="toast"></div>
+
+    <!-- BOTON FLOTANTE MÓVIL (Ventas Recientes) -->
+    <button id="btn-mobile-recientes" onclick="toggleRecientesMobile()"
+        style="display:none; position:fixed; bottom:20px; right:20px; width:56px; height:56px; border-radius:50%; background:var(--purple); border:none; color:white; font-size:1.5rem; box-shadow:0 8px 24px rgba(168,85,247,0.4); z-index:90; cursor:pointer;">
+        🕒
+    </button>
 
     <script src="pos.js"></script>
 
