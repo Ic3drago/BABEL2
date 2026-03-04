@@ -130,7 +130,12 @@
         style="width: 320px; background: var(--bg2); border-left: 1px solid var(--border); display: flex; flex-direction: column;">
         <div
             style="padding: 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between;">
-            <h2 style="font-size: 1.1rem; color: var(--green);">🕒 Vendido Recién</h2>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <h2 style="font-size: 1.1rem; color: var(--green); margin:0;">🕒 Vendido Recién</h2>
+                <button onclick="vaciarVentasRecientes()" title="Limpiar lista"
+                    style="background:transparent; border:none; color:var(--sub); font-size:1.1rem; cursor:pointer;"
+                    onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--sub)'">🗑️</button>
+            </div>
             <button onclick="toggleRecientesMobile()" class="btn-cerrar-mobile"
                 style="background:transparent; border:none; color:var(--text); font-size:1.5rem; cursor:pointer; display:none;">✕</button>
         </div>

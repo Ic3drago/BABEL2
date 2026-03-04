@@ -250,6 +250,16 @@ function renderizarVentasRecientes() {
         </div>`).join('');
 }
 
+function vaciarVentasRecientes() {
+    if (ventasRecientes.length === 0) return;
+    if (!confirm('¿Seguro quieres limpiar la lista de "Vendido Recién"?\n\n(Esto solo limpia tu pantalla, no afecta a la Planilla ni al Inventario)')) {
+        return;
+    }
+    ventasRecientes = [];
+    localStorage.removeItem('babel_ventas_recientes');
+    renderizarVentasRecientes();
+}
+
 // ── ANULAR VENTA (SANDBOX) ──
 let ticketAnularSelect = null;
 
