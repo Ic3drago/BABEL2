@@ -407,24 +407,30 @@
                 return;
             }
             lista.innerHTML = `
-        <div style="display:grid;grid-template-columns:2fr 120px 60px;gap:10px;padding:0 0 8px;border-bottom:1px solid var(--border);margin-bottom:4px">
+        <div style="display:grid;grid-template-columns:2fr 150px 60px;gap:10px;padding:0 0 8px;border-bottom:1px solid var(--border);margin-bottom:4px">
             <span style="font-size:.65rem;color:var(--sub);text-transform:uppercase;letter-spacing:.06em">Licor</span>
-            <span style="font-size:.65rem;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;text-align:center">Btl. Cerradas</span>
+            <span style="font-size:.65rem;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;text-align:center">Stock Cerrado</span>
             <span></span>
         </div>
-    ` + botellas.map(b => `
-        <div style="display:grid;grid-template-columns:2fr 120px 60px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
+    ` + botellas.map(b => {
+                let pct = (b.porcentaje_abierto && parseFloat(b.porcentaje_abierto) > 0) ? ` <span style="background:var(--blue); color:white; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 0.65rem; margin-left: 6px;">${Math.round(b.porcentaje_abierto)}% Abierta</span>` : '';
+                return `
+        <div style="display:grid;grid-template-columns:2fr 150px 60px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
             <div>
-                <div class="stock-nombre">${b.nombre}</div>
+                <div class="stock-nombre">${b.nombre} ${pct}</div>
                 <div class="stock-meta">${b.volumen_ml}ml • Rinde ${b.vasos_por_botella} Vasos</div>
             </div>
-            <input type="number" class="stock-inp" id="stock-${b.id}" value="${b.stock_cerrado}" min="0" style="text-align:center">
-            <div style="display:flex;gap:4px">
+            <div style="display:flex; gap: 4px; align-items:center;">
+                <input type="number" class="stock-inp" id="stock-${b.id}" value="${b.stock_cerrado}" min="0" style="text-align:center; flex: 1;">
+                <button class="btn-save" style="padding: 6px 10px; font-size: 0.75rem; background: var(--green);" onclick="sumarStock('${b.id}')">+1 Btl</button>
+            </div>
+            <div style="display:flex;gap:4px; justify-content: flex-end;">
                 <button class="btn-icn btn-icn-edit" onclick="abrirEditLicor('${b.id}')" title="Editar">✎</button>
                 <button class="btn-icn btn-icn-del"  onclick="confirmarEliminar('licor','${b.id}','${b.nombre.replace(/'/g, "\\'")}','¿Eliminar <strong>${b.nombre}</strong>?<span class=\\'danger\\'>⚠ También se eliminarán sus tragos del menú.</span>')" title="Eliminar">✕</button>
             </div>
         </div>
-    `).join('');
+    `;
+            }).join('');
         }
 
         // ── SECCIÓN TRAGOS DE LA NOCHE (separado en 4 categorías) ──
@@ -750,6 +756,21 @@
                 await cargarBotellas();
                 renderStockNoche();
             } else { toast(data.error || 'Error', 'err'); }
+        }
+
+        // ── SUMAR STOCK MID-SHIFT ──
+        async function sumarStock(id) {
+            const btn = event.currentTarget;
+            btn.disabled = true;
+            const data = await api('/admin/bodega/agregar_stock', 'POST', { id, cantidad: 1 });
+            if (data.success) {
+                toast('✓ Stock incrementado', 'ok');
+                await cargarBotellas();
+                renderStockNoche();
+            } else {
+                toast(data.error || 'Error', 'err');
+            }
+            btn.disabled = false;
         }
 
         // ── ELIMINAR (genérico) ──

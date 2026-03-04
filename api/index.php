@@ -76,6 +76,7 @@ $barCtrl      = new \App\Controllers\BarController($barRepo);
 if ($method==='POST' && $uri==='/api/admin/noche')             { requireRole('admin'); $adminCtrl->guardarConfigNoche(); exit; }
 if ($method==='GET'  && $uri==='/api/admin/bodega')            { requireRole('admin'); $adminCtrl->getBodega(); exit; }
 if ($method==='POST' && $uri==='/api/admin/bodega')            { requireRole('admin'); $adminCtrl->agregarBotella(); exit; }
+if ($method==='POST' && $uri==='/api/admin/bodega/agregar_stock') { requireRole('admin'); $adminCtrl->sumarStockMidShift(); exit; }
 if ($method==='POST' && $uri==='/api/admin/bodega/stock')      { requireRole('admin'); $adminCtrl->guardarStockNoche(); exit; }
 if ($method==='PUT'    && preg_match('#^/api/admin/bodega/([^/]+)$#', $uri, $m)) { requireRole('admin'); $adminCtrl->editarBotella($m[1]); exit; }
 if ($method==='DELETE' && preg_match('#^/api/admin/bodega/([^/]+)$#', $uri, $m)) { requireRole('admin'); $adminCtrl->eliminarBotella($m[1]); exit; }
