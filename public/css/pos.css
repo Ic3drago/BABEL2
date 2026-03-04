@@ -1318,11 +1318,16 @@ body.promo-on .trago-btn[data-tipo="PROMO"] .trago-nombre {
         right: 0 !important;
         width: 100% !important;
         height: 60vh !important;
-        z-index: 80 !important;
-        border-radius: 20px 20px 0 0 !important;
-        box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5) !important;
+        z-index: 150 !important;
+        background: var(--surface) !important;
+        border-top: 2px solid var(--purple) !important;
+        border-left: none !important;
+        border-right: none !important;
+        border-bottom: none !important;
+        border-radius: 24px 24px 0 0 !important;
+        box-shadow: 0 -15px 40px rgba(0, 0, 0, 0.8) !important;
         transform: translateY(110%);
-        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
         display: flex !important;
     }
 
