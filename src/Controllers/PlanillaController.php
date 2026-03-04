@@ -10,7 +10,7 @@ class PlanillaController {
         try {
             // 1. Stock inicial registrado al inicio de la noche
             $stmtB = $this->db->prepare("
-                SELECT ib.id, ib.nombre, ib.volumen_ml,
+                SELECT ib.id, ib.nombre, ib.volumen_ml, ib.vasos_por_botella,
                        COALESCE(sn.stock_cerrado, ib.stock_cerrado) AS stock_inicial
                 FROM inventario_botellas ib
                 LEFT JOIN stock_noche sn ON sn.botella_id = ib.id AND sn.fecha = :fecha
@@ -20,7 +20,7 @@ class PlanillaController {
             $botellas = $stmtB->fetchAll(\PDO::FETCH_ASSOC);
 
             // ─────────────────────────────────────────────────────────
-            // 2. Ventas por botella agrupadas por tipo (nota_extra = fuente de verdad)
+            // 2. Ventas por botella agrupadas por tipo (nota_wstra = fuente de verdad)
             //
             // Tipos en nota_extra:
             //   PROMO   → botella entera en promo O componente de un combo
@@ -101,12 +101,22 @@ class PlanillaController {
                 $entrada_u = (int)   ($data['ENTRADA']['unidades'] ?? 0);
                 $entrada_r = (float) ($data['ENTRADA']['recaudado']?? 0);
 
-                // RESTANTE: botellas enteras que deberían quedar físicamente
-                // Solo se descuentan PROMO y NORMAL (botellas cerradas que se abrieron y vaciaron)
-                // VASO y ENTRADA no se cuentan — son de botella abierta (fracción manual)
-                $btl_consumidas = $promo_u + $normal_u;
-                $stock_ini      = (int) $b['stock_inicial'];
-                $restante       = max(0, $stock_ini - $btl_consumidas);
+                // RESTANTE: botellas que deberían quedar físicamente
+                // Se descuentan PROMO y NORMAL como botellas enteras (1.0)
+                // Se descuentan VASO y ENTRADA como fracción (1 / vasos_por_botella)
+                $vxb = max(1, (int) ($b['vasos_por_botella'] ?? 18));
+                
+                // Botellas enteras consumidas
+                $btl_enteras = $promo_u + $normal_u;
+                // Botellas fraccionales consumidas
+                $btl_fraccionales = ($vaso_u + $entrada_u) / $vxb;
+
+                $total_consumido = $btl_enteras + $btl_fraccionales;
+                
+                $stock_ini = (float) $b['stock_inicial'];
+                // Formateamos a 2 decimales para que sea amigable ("1.5 botellas", "2.0", etc.)
+                $restante = max(0, $stock_ini - $total_consumido);
+                $restante_fmt = round($restante, 2);
 
                 $total_r = $promo_r + $normal_r + $vaso_r + $entrada_r;
 
@@ -115,7 +125,7 @@ class PlanillaController {
                     'nombre'           => $b['nombre'],
                     'volumen_ml'       => (int) $b['volumen_ml'],
                     'stock_inicial'    => $stock_ini,
-                    'restante'         => $restante,
+                    'restante'         => $restante_fmt,
 
                     'promo_unidades'   => $promo_u,
                     'promo_recaudado'  => round($promo_r, 2),
@@ -146,8 +156,40 @@ class PlanillaController {
             foreach ($totales as $k => $v) {
                 if (str_contains($k, 'recaudado')) $totales[$k] = round((float)$v, 2);
             }
+            // 3. Detalle exacto de productos vendidos (Agrupado)
+            // Se hace un reemplazo en SQL para que '(Oculto) Complemento' se lea mejor y se asocie a Combos
+            $stmtDetalle = $this->db->prepare("
+                SELECT 
+                    CASE 
+                        WHEN vdt.nota_extra = '(Oculto) Complemento' THEN CONCAT('🥤 (Acompañante de Combo) ', mt.nombre_boton)
+                        WHEN vdt.nota_extra = 'PROMO' THEN CONCAT('🎁 (Promo/Combo) ', mt.nombre_boton)
+                        WHEN vdt.nota_extra LIKE 'EXTRA:%' THEN REPLACE(vdt.nota_extra, 'EXTRA: ', '➕ (Extra) ')
+                        ELSE COALESCE(mt.nombre_boton, vdt.nota_extra)
+                    END AS nombre,
+                    SUM(vdt.cantidad) as cantidad_vendida,
+                    SUM(vdt.subtotal) as subtotal
+                FROM ventas_tickets vt
+                JOIN ventas_detalles vdt ON vt.id = vdt.ticket_id
+                LEFT JOIN menu_tragos mt ON vdt.trago_id = mt.id
+                WHERE DATE(vt.created_at) = :fecha
+                GROUP BY 
+                    CASE 
+                        WHEN vdt.nota_extra = '(Oculto) Complemento' THEN CONCAT('🥤 (Acompañante de Combo) ', mt.nombre_boton)
+                        WHEN vdt.nota_extra = 'PROMO' THEN CONCAT('🎁 (Promo/Combo) ', mt.nombre_boton)
+                        WHEN vdt.nota_extra LIKE 'EXTRA:%' THEN REPLACE(vdt.nota_extra, 'EXTRA: ', '➕ (Extra) ')
+                        ELSE COALESCE(mt.nombre_boton, vdt.nota_extra)
+                    END
+                ORDER BY subtotal DESC, cantidad_vendida DESC
+            ");
+            $stmtDetalle->execute(['fecha' => $fecha]);
+            $detalle_ventas = $stmtDetalle->fetchAll(\PDO::FETCH_ASSOC);
 
-            echo json_encode(['success' => true, 'filas' => $filas, 'totales' => $totales]);
+            echo json_encode([
+                'success' => true, 
+                'filas' => $filas, 
+                'totales' => $totales,
+                'detalle_ventas' => $detalle_ventas
+            ]);
 
         } catch (\Exception $e) {
             http_response_code(500);

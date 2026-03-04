@@ -1,7 +1,14 @@
 const API_URL = '/api';
-const API_TOKEN = 'token_secreto_bar_123';
+
+function getToken() {
+    return localStorage.getItem('babel_token');
+}
 
 document.addEventListener('DOMContentLoaded', () => {
+    if (!getToken()) {
+        window.location.href = '/login';
+        return;
+    }
     cargarBodega();
     cargarMenu();
 });
@@ -9,9 +16,10 @@ document.addEventListener('DOMContentLoaded', () => {
 // --- 1. SECCIÓN BODEGA ---
 async function cargarBodega() {
     try {
-        const res = await fetch(`${API_URL}/admin/bodega`, { headers: { 'Authorization': `Bearer ${API_TOKEN}` } });
+        const res = await fetch(`${API_URL}/admin/bodega`, { headers: { 'Authorization': `Bearer ${getToken()}` } });
+        if (res.status === 401 || res.status === 403) { localStorage.removeItem('babel_token'); window.location.href = '/login'; return; }
         const data = await res.json();
-        
+
         if (data.success) {
             // Llenar los selectores de botellas
             [
@@ -48,7 +56,7 @@ async function guardarComboAdmin() {
     const licor_id = document.getElementById('combo-licor-admin').value;
     const refresco_id = document.getElementById('combo-refresco-admin').value;
     const precio = parseFloat(document.getElementById('combo-precio-admin').value);
-    
+
     if (!nombre || !licor_id || !refresco_id) {
         toast('Completa todos los campos', 'err');
         return;
@@ -57,7 +65,7 @@ async function guardarComboAdmin() {
         toast('Ingresa un precio válido', 'err');
         return;
     }
-    
+
     const payload = {
         nombre_boton: nombre,
         tipo_venta: 'COMBO',
@@ -67,14 +75,15 @@ async function guardarComboAdmin() {
         licor_id: licor_id,
         refresco_id: refresco_id
     };
-    
+
     try {
         const res = await fetch(`${API_URL}/admin/menu`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_TOKEN}` },
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` },
             body: JSON.stringify(payload)
         });
-        
+        if (res.status === 401 || res.status === 403) { localStorage.removeItem('babel_token'); window.location.href = '/login'; return; }
+
         const data = await res.json();
         if (data.success) {
             toast('🎁 Combo creado exitosamente', 'ok');
@@ -98,10 +107,11 @@ async function guardarBotella() {
 
     const res = await fetch(`${API_URL}/admin/bodega`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_TOKEN}` },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` },
         body: JSON.stringify(payload)
     });
-    
+    if (res.status === 401 || res.status === 403) { localStorage.removeItem('babel_token'); window.location.href = '/login'; return; }
+
     const data = await res.json();
     if (data.success) {
         alert("¡Botella guardada con éxito!");
@@ -115,17 +125,18 @@ async function guardarBotella() {
 // --- 2. SECCIÓN MENÚ ---
 async function cargarMenu() {
     try {
-        const res = await fetch(`${API_URL}/admin/menu`, { headers: { 'Authorization': `Bearer ${API_TOKEN}` } });
+        const res = await fetch(`${API_URL}/admin/menu`, { headers: { 'Authorization': `Bearer ${getToken()}` } });
+        if (res.status === 401 || res.status === 403) { localStorage.removeItem('babel_token'); window.location.href = '/login'; return; }
         const data = await res.json();
-        
+
         if (data.success) {
             const tbody = document.getElementById('tabla-menu-body');
             tbody.innerHTML = '';
-            
+
             data.data.forEach(m => {
-                let colorCategoria = m.tipo_venta === 'PROMO' ? 'bg-purple-900 text-purple-300' : 
-                                     m.tipo_venta === 'ENTRADA' ? 'bg-blue-900 text-blue-300' : 'bg-orange-900 text-orange-300';
-                                     
+                let colorCategoria = m.tipo_venta === 'PROMO' ? 'bg-purple-900 text-purple-300' :
+                    m.tipo_venta === 'ENTRADA' ? 'bg-blue-900 text-blue-300' : 'bg-orange-900 text-orange-300';
+
                 tbody.innerHTML += `
                     <tr class="hover:bg-gray-750">
                         <td class="p-3 font-medium">${m.nombre_boton}</td>
@@ -156,10 +167,11 @@ async function guardarItemMenu() {
 
     const res = await fetch(`${API_URL}/admin/menu`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_TOKEN}` },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` },
         body: JSON.stringify(payload)
     });
-    
+    if (res.status === 401 || res.status === 403) { localStorage.removeItem('babel_token'); window.location.href = '/login'; return; }
+
     const data = await res.json();
     if (data.success) {
         alert("¡Botón añadido al menú!");

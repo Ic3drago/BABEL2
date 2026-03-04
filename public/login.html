@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SISTEMA BABEL - Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body
+    class="bg-gray-900 text-white min-h-screen flex items-center justify-center p-6 font-sans relative overflow-hidden">
+
+    <!-- Decorative background elements -->
+    <div
+        class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-emerald-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20">
+    </div>
+    <div
+        class="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20">
+    </div>
+
+    <div
+        class="max-w-md w-full bg-gray-800/80 backdrop-blur-md p-8 rounded-2xl shadow-2xl border border-gray-700/50 z-10">
+        <div class="text-center mb-10">
+            <h1
+                class="text-5xl font-bold tracking-wider mb-2 bg-gradient-to-r from-emerald-400 to-blue-500 bg-clip-text text-transparent">
+                BABEL</h1>
+            <p class="text-gray-400 text-sm tracking-widest uppercase">Acceso Restringido</p>
+        </div>
+
+        <form id="login-form" class="space-y-6">
+            <div>
+                <label class="block text-gray-400 text-sm mb-2" for="username">Usuario</label>
+                <input type="text" id="username"
+                    class="w-full bg-gray-900/50 border border-gray-700 px-4 py-3 rounded-lg text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition"
+                    placeholder="admin o bartender" required>
+            </div>
+
+            <div>
+                <label class="block text-gray-400 text-sm mb-2" for="password">Contraseña</label>
+                <input type="password" id="password"
+                    class="w-full bg-gray-900/50 border border-gray-700 px-4 py-3 rounded-lg text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
+                    placeholder="••••••••" required>
+            </div>
+
+            <div id="error-message"
+                class="text-red-400 text-sm text-center hidden bg-red-900/20 p-3 rounded-lg border border-red-500/20">
+            </div>
+
+            <button type="submit" id="login-btn"
+                class="w-full bg-gradient-to-r from-emerald-500 to-blue-600 hover:from-emerald-400 hover:to-blue-500 text-white font-bold py-3 px-4 rounded-lg transform transition hover:-translate-y-0.5 shadow-lg hover:shadow-emerald-500/25">
+                Ingresar al Sistema
+            </button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('babel_token');
+            const role = localStorage.getItem('babel_role');
+
+            if (token) {
+                if (role === 'admin') window.location.href = '/admin';
+                else if (role === 'bartender') window.location.href = '/pos';
+                else window.location.href = '/';
+            }
+        });
+    </script>
+    <script src="/login.js"></script>
+</body>
+
+</html>

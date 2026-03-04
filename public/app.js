@@ -1,9 +1,12 @@
 const API_URL = '/api';
-const API_TOKEN = 'token_secreto_bar_123'; // Esto protege tu API para que nadie más meta datos
+
+function getToken() {
+    return localStorage.getItem('babel_token');
+}
 
 // Establecer la fecha de hoy por defecto en el input
 const dateInput = document.getElementById('session-date');
-dateInput.valueAsDate = new Date();
+if (dateInput) dateInput.valueAsDate = new Date();
 
 // Función dinámica para saber qué sesión estamos editando (usa la fecha seleccionada)
 function getSessionId() {
@@ -12,16 +15,30 @@ function getSessionId() {
 
 // Función base para comunicarse con Supabase a través de tu API PHP
 async function apiCall(endpoint, method = 'GET', body = null) {
-    const options = { 
-        method, 
-        headers: { 
-            'Content-Type': 'application/json', 
-            'Authorization': `Bearer ${API_TOKEN}` 
-        } 
+    const token = getToken();
+    if (!token) {
+        window.location.href = '/login';
+        throw new Error('No estás autenticado.');
+    }
+
+    const options = {
+        method,
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        }
     };
     if (body) options.body = JSON.stringify(body);
     const res = await fetch(`${API_URL}${endpoint}`, options);
     const data = await res.json();
+
+    // Redirect if unauthorized or forbidden
+    if (res.status === 401 || res.status === 403) {
+        localStorage.removeItem('babel_token');
+        window.location.href = '/login';
+        throw new Error('Sesión expirada o acceso denegado.');
+    }
+
     if (!res.ok) throw new Error(data.error || 'Error en el servidor');
     return data;
 }
@@ -33,9 +50,9 @@ async function loadProducts() {
     try {
         const products = await apiCall('/products');
         const tbody = document.getElementById('sheet-body');
-        tbody.innerHTML = ''; 
+        tbody.innerHTML = '';
 
-        if(products.length === 0) {
+        if (products.length === 0) {
             tbody.innerHTML = '<tr><td colspan="13" class="p-8 text-gray-500 text-center">No hay licores registrados. Agrega uno en el panel de arriba.</td></tr>';
             return;
         }
@@ -77,7 +94,7 @@ async function loadProducts() {
 document.getElementById('btn-add-product').addEventListener('click', async () => {
     const nameInput = document.getElementById('new-product-name');
     const glassesInput = document.getElementById('new-product-glasses');
-    
+
     if (!nameInput.value) {
         alert('Por favor, ingresa el nombre del trago');
         return;
@@ -94,8 +111,8 @@ document.getElementById('btn-add-product').addEventListener('click', async () =>
 
     try {
         await apiCall('/products', 'POST', payload);
-        nameInput.value = ''; 
-        await loadProducts(); 
+        nameInput.value = '';
+        await loadProducts();
     } catch (error) {
         alert("Error al guardar el trago en la base de datos.");
     }
@@ -150,14 +167,14 @@ function renderReport(report) {
     report.forEach(item => {
         let diffColor = 'text-emerald-400';
         let diffText = 'INVENTARIO PERFECTO';
-        
-        if (item.diferencia_botellas < 0) { 
-            diffColor = 'text-red-500'; 
-            diffText = `⚠️ FALTAN ${Math.abs(item.diferencia_botellas)} BOTELLAS (Posible merma/robo)`; 
+
+        if (item.diferencia_botellas < 0) {
+            diffColor = 'text-red-500';
+            diffText = `⚠️ FALTAN ${Math.abs(item.diferencia_botellas)} BOTELLAS (Posible merma/robo)`;
         }
-        if (item.diferencia_botellas > 0) { 
-            diffColor = 'text-yellow-400'; 
-            diffText = `SOBRAN ${item.diferencia_botellas} BOTELLAS (Revisar conteo)`; 
+        if (item.diferencia_botellas > 0) {
+            diffColor = 'text-yellow-400';
+            diffText = `SOBRAN ${item.diferencia_botellas} BOTELLAS (Revisar conteo)`;
         }
 
         const card = `

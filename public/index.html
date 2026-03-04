@@ -1,34 +1,56 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SISTEMA BABEL - Menú Principal</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        if (!localStorage.getItem('babel_token')) {
+            window.location.href = '/login';
+        }
+    </script>
 </head>
-<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center p-6 font-sans">
 
-    <div class="max-w-4xl w-full space-y-8">
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center p-6 font-sans relative">
+
+    <div id="auth-status" class="absolute top-4 right-6 flex items-center gap-4">
+        <span id="user-role-badge" class="px-3 py-1 rounded bg-gray-800 text-xs font-mono text-gray-400 hidden"></span>
+        <button onclick="abrirModalPwd()" id="change-pwd-btn"
+            class="text-sm font-semibold text-blue-400 hover:text-blue-300 hidden">Cambiar Clave</button>
+        <button onclick="logout()" id="logout-btn"
+            class="text-sm font-semibold text-red-500 hover:text-red-400 hidden">Cerrar Sesión</button>
+        <button onclick="window.location.href='/login'" id="login-btn"
+            class="text-sm font-semibold text-emerald-500 hover:text-emerald-400 hidden">Iniciar Sesión</button>
+    </div>
+
+    <div class="max-w-4xl w-full space-y-8 mt-8">
         <div class="text-center space-y-2">
             <h1 class="text-5xl font-bold text-emerald-400 tracking-wider">BABEL</h1>
             <p class="text-gray-400 text-xl">Sistema Integrado de Control y Punto de Venta</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
-            
-            <a href="/pos" class="group bg-gray-800 border-2 border-gray-700 hover:border-emerald-500 rounded-xl p-6 transition-all shadow-lg hover:shadow-emerald-500/20 flex flex-col items-center text-center">
+
+            <a href="/pos"
+                class="group bg-gray-800 border-2 border-gray-700 hover:border-emerald-500 rounded-xl p-6 transition-all shadow-lg hover:shadow-emerald-500/20 flex flex-col items-center text-center">
                 <div class="text-6xl mb-4 group-hover:scale-110 transition-transform">🍹</div>
                 <h2 class="text-2xl font-bold text-white mb-2">Caja (POS)</h2>
-                <p class="text-sm text-gray-400">Interfaz táctil para el cantinero. Venta de tragos, promos y cortesías.</p>
+                <p class="text-sm text-gray-400">Interfaz táctil para el cantinero. Venta de tragos, promos y cortesías.
+                </p>
             </a>
 
-            <a href="/admin" class="group bg-gray-800 border-2 border-gray-700 hover:border-blue-500 rounded-xl p-6 transition-all shadow-lg hover:shadow-blue-500/20 flex flex-col items-center text-center">
+            <a href="/admin"
+                class="group bg-gray-800 border-2 border-gray-700 hover:border-blue-500 rounded-xl p-6 transition-all shadow-lg hover:shadow-blue-500/20 flex flex-col items-center text-center">
                 <div class="text-6xl mb-4 group-hover:scale-110 transition-transform">⚙️</div>
                 <h2 class="text-2xl font-bold text-white mb-2">Administrador</h2>
-                <p class="text-sm text-gray-400">Gestión de bodega (botellas cerradas/sobrantes) y creación de menú y precios.</p>
+                <p class="text-sm text-gray-400">Gestión de bodega (botellas cerradas/sobrantes) y creación de menú y
+                    precios.</p>
             </a>
 
-            <a href="/planilla" class="group bg-gray-800 border-2 border-gray-700 hover:border-orange-500 rounded-xl p-6 transition-all shadow-lg hover:shadow-orange-500/20 flex flex-col items-center text-center">
+            <a href="/planilla"
+                class="group bg-gray-800 border-2 border-gray-700 hover:border-orange-500 rounded-xl p-6 transition-all shadow-lg hover:shadow-orange-500/20 flex flex-col items-center text-center">
                 <div class="text-6xl mb-4 group-hover:scale-110 transition-transform">📋</div>
                 <h2 class="text-2xl font-bold text-white mb-2">Planilla Clásica</h2>
                 <p class="text-sm text-gray-400">La vista tipo "Excel" para ver el cuadre manual detallado.</p>
@@ -37,5 +59,116 @@
         </div>
     </div>
 
+    <div id="modal-pwd" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50">
+        <div class="bg-gray-800 p-8 rounded-xl shadow-2xl max-w-sm w-full border border-gray-700">
+            <h2 class="text-2xl font-bold text-white mb-6">Cambiar Contraseña</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-gray-400 text-sm mb-1">Contraseña Actual</label>
+                    <input type="password" id="old-pwd"
+                        class="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-gray-400 text-sm mb-1">Nueva Contraseña</label>
+                    <input type="password" id="new-pwd"
+                        class="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500">
+                </div>
+            </div>
+            <div id="pwd-msg" class="mt-4 text-sm hidden"></div>
+            <div class="mt-8 flex justify-end gap-3">
+                <button onclick="cerrarModalPwd()"
+                    class="px-4 py-2 text-gray-400 hover:text-white transition">Cancelar</button>
+                <button onclick="cambiarPwd()" id="btn-cambiar-pwd"
+                    class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded font-semibold transition">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('babel_token');
+            const role = localStorage.getItem('babel_role');
+
+            if (token) {
+                // User is authenticated
+                document.getElementById('login-btn').classList.add('hidden');
+                document.getElementById('logout-btn').classList.remove('hidden');
+                document.getElementById('change-pwd-btn').classList.remove('hidden');
+
+                if (role) {
+                    const badge = document.getElementById('user-role-badge');
+                    badge.textContent = `ROL: ${role.toUpperCase()}`;
+                    badge.classList.remove('hidden');
+                }
+            }
+        });
+
+        function logout() {
+            localStorage.removeItem('babel_token');
+            localStorage.removeItem('babel_role');
+            window.location.reload();
+        }
+
+        function abrirModalPwd() {
+            document.getElementById('old-pwd').value = '';
+            document.getElementById('new-pwd').value = '';
+            document.getElementById('pwd-msg').className = 'mt-4 text-sm hidden';
+            document.getElementById('modal-pwd').style.display = 'flex';
+        }
+
+        function cerrarModalPwd() {
+            document.getElementById('modal-pwd').style.display = 'none';
+        }
+
+        async function cambiarPwd() {
+            const oldp = document.getElementById('old-pwd').value;
+            const newp = document.getElementById('new-pwd').value;
+            const msg = document.getElementById('pwd-msg');
+            const btn = document.getElementById('btn-cambiar-pwd');
+
+            if (!oldp || !newp) {
+                msg.textContent = 'Llena todos los campos';
+                msg.className = 'mt-4 text-sm text-red-500 block';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Guardando...';
+            msg.className = 'mt-4 text-sm hidden';
+
+            try {
+                const res = await fetch('/api/auth/password', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('babel_token')
+                    },
+                    body: JSON.stringify({ old_password: oldp, new_password: newp })
+                });
+
+                if (res.status === 401 || res.status === 403) {
+                    logout(); return;
+                }
+
+                const data = await res.json();
+                if (data.success) {
+                    msg.textContent = '✓ Contraseña actualizada. Inicia sesión de nuevo.';
+                    msg.className = 'mt-4 text-sm text-emerald-500 block';
+                    setTimeout(logout, 2000);
+                } else {
+                    msg.textContent = data.error || 'Error al cambiar clave';
+                    msg.className = 'mt-4 text-sm text-red-500 block';
+                    btn.disabled = false;
+                    btn.textContent = 'Guardar';
+                }
+            } catch (e) {
+                msg.textContent = 'Error de conexión';
+                msg.className = 'mt-4 text-sm text-red-500 block';
+                btn.disabled = false;
+                btn.textContent = 'Guardar';
+            }
+        }
+    </script>
 </body>
+
 </html>

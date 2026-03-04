@@ -177,9 +177,9 @@ class CajaController {
                                  ->execute([$this->uuid(), $ticketId, $refresco['id'], $p['qty'], 0, 'PROMO']);
                     }
                 } elseif ($p['tipo'] === 'EXTRA') {
-                    // Extras no se vinculan a un trago_id específico
-                    $this->db->prepare("INSERT INTO ventas_detalles (id, ticket_id, trago_id, cantidad, subtotal) VALUES (?,?,?,?,?)")
-                             ->execute([$this->uuid(), $ticketId, null, $p['qty'], $p['sub']]);
+                    // Extras no se vinculan a un trago_id específico. Guardamos su nombre en nota_extra.
+                    $this->db->prepare("INSERT INTO ventas_detalles (id, ticket_id, trago_id, cantidad, subtotal, nota_extra) VALUES (?,?,?,?,?,?)")
+                             ->execute([$this->uuid(), $ticketId, null, $p['qty'], $p['sub'], 'EXTRA: ' . $p['nombre']]);
                 }
             }
 
@@ -226,26 +226,29 @@ class CajaController {
         $sc  = (int)   $res['stock_cerrado'];
         $pct = (float) $res['porcentaje_abierto'];
 
-        // VASO y ENTRADA: solo marcar como "abierta" si no lo está ya.
-        // No sabemos exactamente cuánto queda → lo registra el admin manualmente al cerrar.
-        if ($tipo === 'VASO' || $tipo === 'ENTRADA') {
-            if ($pct <= 0 && $sc > 0) {
-                // Abrir una botella del stock cerrado
-                $sc--;
-                $pct = 100.0;
-                $this->db->prepare("UPDATE inventario_botellas SET stock_cerrado=?, porcentaje_abierto=?, updated_at=NOW() WHERE id=?")
-                         ->execute([$sc, $pct, $bid]);
-            }
-            // Si ya hay una botella abierta (pct > 0), no hacemos nada más.
-            // El campo manual de la planilla registrará cuánto sobró al cierre.
-            return;
+        // Determinar consumo en porcentaje (%) según el tipo de venta
+        if ($tipo === 'BOTELLA' || $tipo === 'COMBO') {
+            // Venta de botella entera
+            $consumo = 100.0 * $qty;
+        } else {
+            // VASO, ENTRADA, NORMAL, PROMO (Fracción proporcional equivalente)
+            $vxb = max(1, $vxb);
+            $consumo = (100.0 / $vxb) * $qty;
         }
 
-        // PROMO, NORMAL, BOTELLA, COMBO: descuenta 1 botella entera por unidad vendida
-        $consumo  = 100.0 * $qty;
         $nuevoPct = $pct - $consumo;
-        while ($nuevoPct < -0.001 && $sc > 0) { $sc--; $nuevoPct += 100.0; }
-        if ($nuevoPct < -0.001) throw new Exception("Stock insuficiente para esta venta.");
+        
+        // Si el porcentaje baja de 0 y hay stock cerrado disponible, lo sumamos.
+        while ($nuevoPct <= -0.001 && $sc > 0) { 
+            $sc--; 
+            $nuevoPct += 100.0; 
+        }
+
+        // Si después de consumir el stock cerrado sigue siendo negativo, error.
+        if ($nuevoPct <= -0.001) {
+            throw new Exception("Stock insuficiente para esta venta.");
+        }
+
         $this->db->prepare("UPDATE inventario_botellas SET stock_cerrado=?, porcentaje_abierto=?, updated_at=NOW() WHERE id=?")
                  ->execute([$sc, round(max(0, $nuevoPct), 4), $bid]);
     }
