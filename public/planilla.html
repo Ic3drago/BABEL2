@@ -207,7 +207,7 @@
 
             <!-- RESTANTE (calculado: stock_inicial - promo - normal) -->
             <td style="text-align: center; font-family: var(--mono); font-weight: 700; color: var(--yellow);">
-                ${f.restante ?? (parseInt(f.stock_inicial) - (f.promo_unidades || 0) - (f.normal_unidades || 0))}
+                ${parseFloat(f.restante ?? (parseInt(f.stock_inicial) - (f.promo_unidades || 0) - (f.normal_unidades || 0))).toFixed(2).replace(/\.00$/, '')}
             </td>
 
             <!-- TOTAL RECAUDADO -->
@@ -289,7 +289,7 @@
                     f.vaso_recaudado || 0,
                     f.entrada_unidades || 0,
                     f.entrada_recaudado || 0,
-                    f.restante ?? (parseInt(f.stock_inicial) - (f.promo_unidades || 0) - (f.normal_unidades || 0)),
+                    parseFloat(f.restante ?? (parseInt(f.stock_inicial) - (f.promo_unidades || 0) - (f.normal_unidades || 0))).toFixed(2),
                     f.total_recaudado || 0
                 ]);
             });
