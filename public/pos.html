@@ -18,7 +18,7 @@
         <header class="pos-header">
             <h1>BABEL / CAJA</h1>
             <div class="turno">Turno: <span id="turno-hora">--:--</span></div>
-<div style="display: flex; gap: 10px;">
+            <div style="display: flex; gap: 10px;">
                 <button class="btn-extra"
                     style="padding: 8px 16px; background: var(--green); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;"
                     onclick="abrirModalCombo(null)">🎉 CREAR COMBO</button>
@@ -125,7 +125,7 @@
         </div>
     </div>
 
-        <!-- PANEL RECIENTES -->
+    <!-- PANEL RECIENTES -->
     <div id="panel-recientes"
         style="width: 320px; background: var(--bg2); border-left: 1px solid var(--border); display: flex; flex-direction: column;">
         <div
@@ -159,9 +159,11 @@
                 Ej: cortesía cumpleaños, combo especial del momento.
             </p>
             <label class="mex-label">¿Qué fue?</label>
-            <input type="text" id="ex-desc" class="mex-inp" placeholder="Ej: Botella de vino, Cortesía ron…">
+            <input type="text" id="ex-desc" class="mex-inp" placeholder="Ej: Botella de vino, Cortesía ron…"
+                autocomplete="off">
             <label class="mex-label">Precio</label>
-            <input type="number" id="ex-precio" class="mex-inp" placeholder="0.00" min="0" step="0.5">
+            <input type="number" id="ex-precio" class="mex-inp" placeholder="0.00" min="0" step="0.5"
+                autocomplete="off">
             <label class="mex-label">Tipo (para la planilla)</label>
             <div class="mex-tipos">
                 <button class="mex-tipo sel" data-t="VASO" onclick="selExTipo(this)">🥃 Vaso suelto</button>

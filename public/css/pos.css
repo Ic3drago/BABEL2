@@ -32,6 +32,25 @@ body {
     overflow: hidden;
 }
 
+/* ── SCROLLBAR DARK THEME ── */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--muted);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--sub);
+}
+
 /* ── PANEL IZQUIERDO ── */
 #panel-left {
     flex: 1;
@@ -562,7 +581,9 @@ body.promo-on .trago-btn[data-tipo="PROMO"] .trago-nombre {
     padding: 16px 20px;
     border-top: 1px solid var(--border);
     background: var(--bg);
-    space-y: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 .ticket-resumen {
