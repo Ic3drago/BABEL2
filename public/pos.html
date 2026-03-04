@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -10,85 +10,164 @@
         href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=DM+Sans:wght@400;500;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="css/pos.css">
-    <script>
-        if (!localStorage.getItem('babel_token')) {
-            window.location.href = '/login';
-        }
-    </script>
 </head>
 
 <body>
 
     <div id="panel-left">
         <header class="pos-header">
-            <div style="display: flex; align-items: center; gap: 20px;">
-                <h1>BABEL / CAJA</h1>
-                <div class="turno">Turno: <span id="turno-hora">--:--</span></div>
-            </div>
-            <div style="display: flex; gap: 10px;">
+            <h1>BABEL / CAJA</h1>
+            <div class="turno">Turno: <span id="turno-hora">--:--</span></div>
+<div style="display: flex; gap: 10px;">
                 <button class="btn-extra"
-                    style="padding: 8px 16px; background: var(--green); color: black; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;"
-                    onclick="abrirModalCombo(null)">ðŸŽ CREAR COMBO</button>
+                    style="padding: 8px 16px; background: var(--green); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;"
+                    onclick="abrirModalCombo(null)">🎉 CREAR COMBO</button>
                 <button class="btn-extra"
                     style="padding: 8px 16px; background: var(--purple); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;"
-                    onclick="abrirModalExtra()">âž• EXTRA</button>
+                    onclick="abrirModalExtra()">➕ EXTRA</button>
             </div>
         </header>
 
         <div class="cat-tabs" id="cat-tabs">
-            <button class="cat-tab active" data-tipo="TODOS" onclick="filtrar('TODOS', this)">âœ¦ Todos</button>
-            <button class="cat-tab" data-tipo="PROMO" onclick="filtrar('PROMO', this)">ðŸŽ‰ Promos</button>
-            <button class="cat-tab" data-tipo="NORMAL" onclick="filtrar('NORMAL', this)">ðŸ¥ƒ Normales</button>
-            <button class="cat-tab" data-tipo="VASO" onclick="filtrar('VASO', this)">ðŸº Vasos</button>
+            <button class="cat-tab active" data-tipo="TODOS" onclick="filtrar('TODOS', this)">✦ Todos</button>
+            <button class="cat-tab" data-tipo="PROMO" onclick="filtrar('PROMO', this)">🎉 Promos</button>
+            <button class="cat-tab" data-tipo="NORMAL" onclick="filtrar('NORMAL', this)">🥃 Normales</button>
+            <button class="cat-tab" data-tipo="VASO" onclick="filtrar('VASO', this)">🍺 Vasos</button>
         </div>
 
         <div id="grid-tragos"></div>
     </div>
 
-    <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• PANEL RECIENTES â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
-    <div id="panel-recientes"
-        style="width: 320px; background: var(--bg2); border-left: 1px solid var(--border); display: flex; flex-direction: column;">
-        <div
-            style="padding: 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between;">
-            <h2 style="font-size: 1.1rem; color: var(--green);">ðŸ•’ Vendido ReciÃ©n</h2>
+    <!-- ═══════════════ PANEL TICKET ═══════════════ -->
+    <div id="panel-ticket" style="display:none;">
+        <div class="ticket-header">
+            <h2>▸ TICKET</h2>
+            <button class="btn-vaciar" onclick="vaciarTicket()">VACIAR</button>
         </div>
-        <div id="lista-recientes"
-            style="flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px;">
-            <div style="text-align: center; color: var(--sub); font-size: 0.9rem; margin-top: 40px;">
-                AÃºn no hay ventas en este turno
+
+        <div id="lista-ticket">
+            <div class="ticket-empty">
+                <span class="icon">🍹</span>
+                <p>Toca un trago para añadir</p>
+            </div>
+        </div>
+
+        <div class="ticket-footer">
+            <div class="ticket-resumen">
+                <div class="resumen-row">
+                    <span>Items</span>
+                    <span id="resumen-items">0</span>
+                </div>
+                <div class="resumen-row">
+                    <span>Subtotal</span>
+                    <span id="resumen-subtotal">Bs. 0.00</span>
+                </div>
+                <div class="resumen-row total">
+                    <span>Total</span>
+                    <span id="resumen-total">Bs. 0.00</span>
+                </div>
+            </div>
+            <button class="btn-cobrar" id="btn-cobrar" onclick="abrirModalCobro()" disabled>
+                COBRAR
+            </button>
+            <button class="btn-fiado" onclick="procesarFiado()">
+                📝 FIADO / CUENTA PENDIENTE
+            </button>
+            <button class="btn-extra" onclick="abrirModalCombo(null)"
+                title="Crear combo personalizado: licor + refresco">
+                🎁 CREAR COMBO
+            </button>
+            <button class="btn-extra" onclick="abrirModalExtra()"
+                title="Registrar algo vendido que no está en el menú (ej: cortesía, botella especial)">
+                ➕ EXTRA / FUERA DEL MENÚ
+            </button>
+        </div>
+    </div>
+
+    <!-- ═══════════════ MODAL DE COBRO ═══════════════ -->
+    <div id="modal-cobro">
+        <div class="modal-box">
+            <div class="modal-title">◈ Confirmar Cobro</div>
+
+            <div class="modal-items" id="modal-items-lista"></div>
+
+            <div class="modal-total">
+                <div>
+                    <div class="modal-total-label">TOTAL A COBRAR</div>
+                </div>
+                <div class="modal-total-num" id="modal-total-num">Bs. 0.00</div>
+            </div>
+
+            <div class="pago-label">Método de Pago</div>
+            <div class="pago-opciones">
+                <button class="pago-opt selected" data-metodo="EFECTIVO" onclick="seleccionarPago(this)">💵
+                    Efectivo</button>
+                <button class="pago-opt" data-metodo="TARJETA" onclick="seleccionarPago(this)">💳 Tarjeta</button>
+                <button class="pago-opt" data-metodo="TRANSFER" onclick="seleccionarPago(this)">📲 Transfer</button>
+            </div>
+
+            <div id="efectivo-wrap" class="visible">
+                <label>Dinero Recibido (Bs. )</label>
+                <input type="number" id="input-efectivo" class="input-efectivo" placeholder="0.00" min="0" step="0.50"
+                    oninput="calcularVuelto()">
+                <div class="vuelto-display" id="vuelto-display">
+                    <span class="label">Vuelto:</span>
+                    <span class="monto" id="vuelto-monto">—</span>
+                </div>
+            </div>
+
+            <div class="modal-acciones">
+                <button class="btn-cancelar-modal" onclick="cerrarModalCobro()">← Cancelar</button>
+                <button class="btn-confirmar-cobro" id="btn-confirmar" onclick="confirmarCobro()">
+                    CONFIRMAR COBRO
+                </button>
             </div>
         </div>
     </div>
 
+        <!-- PANEL RECIENTES -->
+    <div id="panel-recientes"
+        style="width: 320px; background: var(--bg2); border-left: 1px solid var(--border); display: flex; flex-direction: column;">
+        <div
+            style="padding: 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between;">
+            <h2 style="font-size: 1.1rem; color: var(--green);">🕒 Vendido Recién</h2>
+        </div>
+        <div id="lista-recientes"
+            style="flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px;">
+            <div style="text-align: center; color: var(--sub); font-size: 0.9rem; margin-top: 40px;">
+                Aún no hay ventas en este turno
+            </div>
+        </div>
+    </div>
 
-    <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• MODAL Ã‰XITO â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+    <!-- ═══════════════ MODAL ÉXITO ═══════════════ -->
     <div id="modal-exito">
         <div class="exito-box">
-            <span class="exito-icon">âœ“</span>
+            <span class="exito-icon">✓</span>
             <div class="exito-total" id="exito-total">Bs. 0.00</div>
             <div class="exito-vuelto" id="exito-vuelto"></div>
             <div class="exito-ticket" id="exito-ticket"></div>
         </div>
     </div>
 
-    <!-- â”€â”€ MODAL EXTRA â”€â”€ -->
+    <!-- ── MODAL EXTRA ── -->
     <div id="modal-extra">
         <div class="mex-box">
-            <div style="font-weight:700;font-size:1rem;margin-bottom:6px">âž• Venta Extra</div>
+            <div style="font-weight:700;font-size:1rem;margin-bottom:6px">➕ Venta Extra</div>
             <p style="font-size:.75rem;color:var(--sub);margin-bottom:16px;line-height:1.5">
-                Para lo que no estÃ¡ en los botones del menÃº.<br>
-                Ej: cortesÃ­a cumpleaÃ±os, combo especial del momento.
+                Para lo que no está en los botones del menú.<br>
+                Ej: cortesía cumpleaños, combo especial del momento.
             </p>
-            <label class="mex-label">Â¿QuÃ© fue?</label>
-            <input type="text" id="ex-desc" class="mex-inp" placeholder="Ej: Botella de vino, CortesÃ­a ronâ€¦">
+            <label class="mex-label">¿Qué fue?</label>
+            <input type="text" id="ex-desc" class="mex-inp" placeholder="Ej: Botella de vino, Cortesía ron…">
             <label class="mex-label">Precio</label>
             <input type="number" id="ex-precio" class="mex-inp" placeholder="0.00" min="0" step="0.5">
             <label class="mex-label">Tipo (para la planilla)</label>
             <div class="mex-tipos">
-                <button class="mex-tipo sel" data-t="VASO" onclick="selExTipo(this)">ðŸ¥ƒ Vaso suelto</button>
-                <button class="mex-tipo" data-t="BOTELLA" onclick="selExTipo(this)">ðŸ¾ Botella</button>
-                <button class="mex-tipo" data-t="COMBO" onclick="selExTipo(this)">ðŸŽ Combo</button>
-                <button class="mex-tipo" data-t="CORTESIA" onclick="selExTipo(this)">ðŸŽ‚ CortesÃ­a</button>
+                <button class="mex-tipo sel" data-t="VASO" onclick="selExTipo(this)">🥃 Vaso suelto</button>
+                <button class="mex-tipo" data-t="BOTELLA" onclick="selExTipo(this)">🍾 Botella</button>
+                <button class="mex-tipo" data-t="COMBO" onclick="selExTipo(this)">🎁 Combo</button>
+                <button class="mex-tipo" data-t="CORTESIA" onclick="selExTipo(this)">🎂 Cortesía</button>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
                 <button onclick="cerrarModalExtra()"
@@ -106,10 +185,10 @@
     <!-- MODAL COMBO -->
     <div id="modal-combo">
         <div class="combo-box">
-            <div class="combo-title">ðŸŽ CREAR COMBO</div>
+            <div class="combo-title">🎁 CREAR COMBO</div>
             <p class="combo-subtitle">
-                Selecciona un licor principal + un refresco acompaÃ±ante.<br>
-                Se descontarÃ¡n ambas botellas del inventario.
+                Selecciona un licor principal + un refresco acompañante.<br>
+                Se descontarán ambas botellas del inventario.
             </p>
 
             <div class="combo-section">
@@ -120,7 +199,7 @@
             </div>
 
             <div class="combo-section">
-                <div class="combo-section-title">Refresco AcompaÃ±ante</div>
+                <div class="combo-section-title">Refresco Acompañante</div>
                 <select id="combo-refresco" class="combo-select" onchange="actualizarPrecioCombo()">
                     <option value="">-- Selecciona un refresco --</option>
                 </select>
@@ -148,7 +227,580 @@
     <!-- Toast -->
     <div id="toast"></div>
 
-    <script src="/pos.js"></script>
+    <script>
+        // ═══════════════════════════════════════════════════════════
+        // ESTADO GLOBAL
+        // ═══════════════════════════════════════════════════════════
+        const API_URL = '/api';
+        const API_TOKEN = 'token_secreto_bar_123';
+
+        let menuItems = [];
+        let ticket = [];   // [{ trago_id, nombre, precio, vasos_por_botella, cantidad }]
+        let metodoPago = 'EFECTIVO';
+        let categoriaActual = 'TODOS';
+
+        // ═══════════════════════════════════════════════════════════
+        // INIT
+        // ═══════════════════════════════════════════════════════════
+        document.addEventListener('DOMContentLoaded', () => {
+            actualizarReloj();
+            setInterval(actualizarReloj, 1000);
+            cargarMenu();
+        });
+
+        function actualizarReloj() {
+            const ahora = new Date();
+            document.getElementById('turno-hora').textContent =
+                ahora.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // 1. CARGAR MENÚ
+        // ═══════════════════════════════════════════════════════════
+        async function cargarMenu() {
+            const grid = document.getElementById('grid-tragos');
+
+            // Skeleton loader
+            grid.innerHTML = Array(8).fill(0).map(() => `<div class="skeleton"></div>`).join('');
+
+            try {
+                const res = await fetch(`Bs. {API_URL}/caja/menu`, {
+                    headers: { 'Authorization': `Bearer Bs. {API_TOKEN}` }
+                });
+                const data = await res.json();
+
+                if (data.success && data.data.length > 0) {
+                    menuItems = data.data;
+                    renderizarGrid(menuItems);
+                } else {
+                    grid.innerHTML = `
+                <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--sub)">
+                    <div style="font-size:2rem;margin-bottom:12px">🍾</div>
+                    <div style="font-weight:700;margin-bottom:6px">Sin tragos en el menú</div>
+                    <div style="font-size:0.75rem">El admin debe crear los botones primero</div>
+                    <a href="/admin" style="color:var(--blue);font-size:0.75rem;margin-top:8px;display:inline-block">
+                        → Ir al Panel de Admin
+                    </a>
+                </div>`;
+                }
+            } catch (err) {
+                console.error(err);
+                grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--red)">
+            ❌ Error al conectar con el servidor
+        </div>`;
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // 2. RENDERIZAR GRID
+        // ═══════════════════════════════════════════════════════════
+        function renderizarGrid(items) {
+            const grid = document.getElementById('grid-tragos');
+            grid.innerHTML = '';
+
+            if (items.length === 0) {
+                grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--sub)">
+            Sin tragos en esta categoría
+        </div>`;
+                return;
+            }
+
+            items.forEach(item => {
+                const sinStock = item.unidades_disponibles <= 0;
+                const enTicket = ticket.find(t => t.trago_id === item.id);
+                const qty = enTicket ? enTicket.cantidad : 0;
+
+                const btn = document.createElement('button');
+                btn.className = `trago-btn Bs. {item.tipo_venta === 'COMBO' ? 'border-purple-500' : 'border-gray-700'}`;
+                btn.dataset.tipo = item.tipo_venta;
+                btn.dataset.id = item.id;
+                btn.disabled = sinStock;
+                if (!sinStock) btn.onclick = (e) => { crearRipple(e, btn); agregarAlTicket(item); };
+
+                btn.innerHTML = `
+            Bs. {qty > 0 ? `<div class="trago-qty-badge" id="qty-Bs. {item.id}">Bs. {qty}</div>` : `<div class="trago-qty-badge" id="qty-Bs. {item.id}" style="display:none">Bs. {qty}</div>`}
+            <span class="trago-badge badge-Bs. {item.tipo_venta}">Bs. {{ VASO: '🥃 Vaso', BOTELLA: '🍾 Botella', COMBO: '🎁 Combo', PROMO: '🎉 Promo', NORMAL: '🥃 Normal', ENTRADA: '🎫 Entrada' }[item.tipo_venta] || item.tipo_venta
+                    }</span>
+            <span class="trago-nombre">Bs. {item.nombre_boton}</span>
+            <span class="trago-precio">Bs. Bs. {item.precio.toFixed(2)}</span>
+            <span class="trago-ml">Bs. {item.nombre_botella}</span>
+        `;
+
+                grid.appendChild(btn);
+            });
+        }
+
+        function crearRipple(e, btn) {
+            const rect = btn.getBoundingClientRect();
+            const ripple = document.createElement('div');
+            ripple.className = 'ripple';
+            const size = Math.max(rect.width, rect.height);
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+            ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+            btn.appendChild(ripple);
+            ripple.addEventListener('animationend', () => ripple.remove());
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // 3. FILTROS
+        // ═══════════════════════════════════════════════════════════
+        function filtrar(tipo, tabEl) {
+            categoriaActual = tipo;
+            document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+            tabEl.classList.add('active');
+            const filtrados = tipo === 'TODOS' ? menuItems : menuItems.filter(i => i.tipo_venta === tipo);
+            renderizarGrid(filtrados);
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // 4. TICKET
+        // ═══════════════════════════════════════════════════════════
+        function agregarAlTicket(item) {
+            const existente = ticket.find(t => t.trago_id === item.id);
+            if (existente) {
+                existente.cantidad++;
+            } else {
+                ticket.push({
+                    trago_id: item.id,
+                    nombre: item.nombre_boton,
+                    precio: item.precio,
+                    vasos_por_botella: item.vasos_por_botella,
+                    cantidad: 1,
+                });
+            }
+            actualizarBadgeBoton(item.id, existente ? existente.cantidad : 1);
+            renderTicket();
+        }
+
+        function actualizarBadgeBoton(tragoId, cantidad) {
+            const badge = document.getElementById(`qty-Bs. {tragoId}`);
+            if (!badge) return;
+            if (cantidad > 0) {
+                badge.textContent = cantidad;
+                badge.style.display = 'flex';
+                badge.classList.remove('bump');
+                void badge.offsetWidth;
+                badge.classList.add('bump');
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        function cambiarCantidad(tragoId, delta) {
+            const idx = ticket.findIndex(t => t.trago_id === tragoId);
+            if (idx === -1) return;
+            ticket[idx].cantidad += delta;
+            if (ticket[idx].cantidad <= 0) {
+                ticket.splice(idx, 1);
+                actualizarBadgeBoton(tragoId, 0);
+            } else {
+                actualizarBadgeBoton(tragoId, ticket[idx].cantidad);
+            }
+            renderTicket();
+        }
+
+        function vaciarTicket() {
+            if (ticket.length === 0) return;
+            ticket.forEach(t => actualizarBadgeBoton(t.trago_id, 0));
+            ticket = [];
+            renderTicket();
+        }
+
+        function renderTicket() {
+            const contenedor = document.getElementById('lista-ticket');
+            const btnCobrar = document.getElementById('btn-cobrar');
+
+            if (ticket.length === 0) {
+                contenedor.innerHTML = `
+            <div class="ticket-empty">
+                <span class="icon">🍹</span>
+                <p>Toca un trago para añadir</p>
+            </div>`;
+                document.getElementById('resumen-items').textContent = '0';
+                document.getElementById('resumen-subtotal').textContent = 'Bs. 0.00';
+                document.getElementById('resumen-total').textContent = 'Bs. 0.00';
+                btnCobrar.disabled = true;
+                return;
+            }
+
+            let total = 0, totalItems = 0;
+            contenedor.innerHTML = '';
+
+            ticket.forEach(item => {
+                const subtotal = item.precio * item.cantidad;
+                total += subtotal;
+                totalItems += item.cantidad;
+
+                const div = document.createElement('div');
+                div.className = 'ticket-item';
+                div.innerHTML = `
+            <div class="ticket-item-info">
+                <div class="ticket-item-nombre">Bs. {item.nombre}</div>
+                <div class="ticket-item-sub">
+                    Bs. Bs. {item.precio.toFixed(2)} × Bs. {item.cantidad} Bs. {item.tipo_venta === 'COMBO' ? '· 🎁 Combo (2 botellas)' : ''}
+                </div>
+            </div>
+            <div class="qty-ctrl">
+                <button class="qty-btn minus" onclick="cambiarCantidad('Bs. {item.trago_id}', -1)">−</button>
+                <span class="qty-num">Bs. {item.cantidad}</span>
+                <button class="qty-btn plus" onclick="cambiarCantidad('Bs. {item.trago_id}', 1)">+</button>
+            </div>
+            <div class="ticket-item-subtotal">Bs. Bs. {subtotal.toFixed(2)}</div>
+        `;
+                contenedor.appendChild(div);
+            });
+
+            document.getElementById('resumen-items').textContent = totalItems;
+            document.getElementById('resumen-subtotal').textContent = `Bs. Bs. {total.toFixed(2)}`;
+            document.getElementById('resumen-total').textContent = `Bs. Bs. {total.toFixed(2)}`;
+            btnCobrar.disabled = false;
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // 5. MODAL DE COBRO
+        // ═══════════════════════════════════════════════════════════
+        function abrirModalCobro() {
+            if (ticket.length === 0) return;
+
+            const total = ticket.reduce((s, i) => s + i.precio * i.cantidad, 0);
+
+            // Llenar la lista del modal
+            const lista = document.getElementById('modal-items-lista');
+            lista.innerHTML = ticket.map(item => `
+        <div class="modal-item-row">
+            <span class="modal-item-nombre">Bs. {item.nombre}</span>
+            <span class="modal-item-qty">×Bs. {item.cantidad}</span>
+            <span class="modal-item-precio">Bs. Bs. {(item.precio * item.cantidad).toFixed(2)}</span>
+        </div>
+    `).join('');
+
+            document.getElementById('modal-total-num').textContent = `Bs. Bs. {total.toFixed(2)}`;
+            document.getElementById('input-efectivo').value = '';
+            document.getElementById('vuelto-monto').textContent = '—';
+
+            // Resetear método de pago
+            metodoPago = 'EFECTIVO';
+            document.querySelectorAll('.pago-opt').forEach(b => b.classList.remove('selected'));
+            document.querySelector('[data-metodo="EFECTIVO"]').classList.add('selected');
+            document.getElementById('efectivo-wrap').classList.add('visible');
+
+            document.getElementById('modal-cobro').classList.add('visible');
+        }
+
+        function cerrarModalCobro() {
+            document.getElementById('modal-cobro').classList.remove('visible');
+        }
+
+        function seleccionarPago(btn) {
+            document.querySelectorAll('.pago-opt').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            metodoPago = btn.dataset.metodo;
+
+            const wrap = document.getElementById('efectivo-wrap');
+            if (metodoPago === 'EFECTIVO') {
+                wrap.classList.add('visible');
+            } else {
+                wrap.classList.remove('visible');
+            }
+        }
+
+        function calcularVuelto() {
+            const total = ticket.reduce((s, i) => s + i.precio * i.cantidad, 0);
+            const recibido = parseFloat(document.getElementById('input-efectivo').value) || 0;
+            const vuelto = recibido - total;
+            const el = document.getElementById('vuelto-monto');
+
+            if (recibido === 0) { el.textContent = '—'; el.className = 'monto'; return; }
+            el.textContent = `Bs. Bs. {Math.abs(vuelto).toFixed(2)}`;
+            if (vuelto < 0) {
+                el.textContent = `−Bs. Bs. {Math.abs(vuelto).toFixed(2)} (falta)`;
+                el.className = 'monto negativo';
+            } else {
+                el.className = 'monto';
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // 6. CONFIRMAR COBRO → POST a la BD
+        // ═══════════════════════════════════════════════════════════
+        async function confirmarCobro() {
+            const total = ticket.reduce((s, i) => s + i.precio * i.cantidad, 0);
+
+            // Validar efectivo si aplica
+            if (metodoPago === 'EFECTIVO') {
+                const recibido = parseFloat(document.getElementById('input-efectivo').value) || 0;
+                if (recibido < total) {
+                    mostrarToast('El monto recibido es menor al total');
+                    return;
+                }
+            }
+
+            const btn = document.getElementById('btn-confirmar');
+            btn.textContent = '⏳ Procesando...';
+            btn.disabled = true;
+
+            const payload = {
+                items: ticket
+                    .filter(i => !i.es_extra)
+                    .map(i => ({ trago_id: i.trago_id, cantidad: i.cantidad })),
+                items_extra: ticket
+                    .filter(i => i.es_extra)
+                    .map(i => ({ nombre: i.nombre, precio: i.precio, cantidad: i.cantidad, tipo_venta: i.tipo_venta })),
+                tipo_pago: metodoPago,
+                efectivo_recibido: metodoPago === 'EFECTIVO'
+                    ? (parseFloat(document.getElementById('input-efectivo').value) || 0)
+                    : total,
+            };
+
+            try {
+                const res = await fetch(`Bs. {API_URL}/caja/cobrar`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer Bs. {API_TOKEN}`,
+                    },
+                    body: JSON.stringify(payload),
+                });
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    const vuelto = payload.efectivo_recibido - total;
+
+                    // Cerrar modal de cobro
+                    cerrarModalCobro();
+
+                    // Mostrar pantalla de éxito
+                    mostrarExito(total, vuelto > 0 ? vuelto : 0, data.id_ticket);
+
+                    // Limpiar ticket
+                    ticket.forEach(t => actualizarBadgeBoton(t.trago_id, 0));
+                    ticket = [];
+                    renderTicket();
+                    cargarMenu();
+                } else {
+                    mostrarToast(data.error || 'Error al procesar el cobro');
+                }
+            } catch (err) {
+                console.error(err);
+                mostrarToast('Error de conexión con el servidor');
+            }
+
+            btn.textContent = 'CONFIRMAR COBRO';
+            btn.disabled = false;
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // 7. PANTALLA DE ÉXITO
+        // ═══════════════════════════════════════════════════════════
+        function mostrarExito(total, vuelto, ticketId) {
+            document.getElementById('exito-total').textContent = `Bs. Bs. {total.toFixed(2)}`;
+            document.getElementById('exito-vuelto').textContent = vuelto > 0 ? `Vuelto: Bs. Bs. {vuelto.toFixed(2)}` : '';
+            document.getElementById('exito-ticket').textContent = ticketId ? `Ticket #Bs. {ticketId.substring(0, 8)}` : '';
+
+            const modal = document.getElementById('modal-exito');
+            modal.classList.add('visible');
+
+            setTimeout(() => {
+                modal.classList.remove('visible');
+            }, 2500);
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // 8. FIADO
+        // ═══════════════════════════════════════════════════════════
+        async function procesarFiado() {
+            if (ticket.length === 0) { mostrarToast('El ticket está vacío'); return; }
+            if (!confirm('¿Registrar este ticket como FIADO?')) return;
+
+            const payload = {
+                items: ticket.map(item => ({ trago_id: item.trago_id, cantidad: item.cantidad })),
+                tipo_pago: 'FIADO',
+                efectivo_recibido: 0,
+            };
+
+            try {
+                const res = await fetch(`Bs. {API_URL}/caja/cobrar`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer Bs. {API_TOKEN}` },
+                    body: JSON.stringify(payload),
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    mostrarExito(ticket.reduce((s, i) => s + i.precio * i.cantidad, 0), 0, data.id_ticket);
+                    ticket.forEach(t => actualizarBadgeBoton(t.trago_id, 0));
+                    ticket = [];
+                    renderTicket();
+                    cargarMenu();
+                } else {
+                    mostrarToast(data.error || 'Error al registrar fiado');
+                }
+            } catch (e) {
+                mostrarToast('Error de conexión');
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // 9. UTILIDADES
+        // ═══════════════════════════════════════════════════════════
+        let toastTimer;
+        function mostrarToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = '⚠ ' + msg;
+            t.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+        }
+
+        // Cerrar modal al hacer click fuera
+        document.getElementById('modal-cobro').addEventListener('click', function (e) {
+            if (e.target === this) cerrarModalCobro();
+        });
+
+        // ── MODO PROMO — sincronización con admin ──────────
+        function verificarModoPromo() {
+            const on = localStorage.getItem('babel_modo_promo') === '1';
+            const banner = document.getElementById('banner-promo');
+            if (on) {
+                banner.classList.add('visible');
+                document.body.classList.add('promo-on');
+            } else {
+                banner.classList.remove('visible');
+                document.body.classList.remove('promo-on');
+            }
+        }
+        // Revisar al cargar y cada 5 segundos (el admin puede cambiarlo)
+        verificarModoPromo();
+        setInterval(verificarModoPromo, 5000);
+        // También escuchar cambios de storage (si admin y caja están en misma PC)
+        window.addEventListener('storage', e => {
+            if (e.key === 'babel_modo_promo' || e.key === 'babel_promo_ts') verificarModoPromo();
+        });
+
+        // ── MODAL EXTRA ─────────────────────────────────────
+        let exTipo = 'VASO';
+
+        function abrirModalExtra() {
+            document.getElementById('ex-desc').value = '';
+            document.getElementById('ex-precio').value = '';
+            exTipo = 'VASO';
+            document.querySelectorAll('.mex-tipo').forEach(b => b.classList.remove('sel'));
+            document.querySelector('[data-t="VASO"]').classList.add('sel');
+            document.getElementById('modal-extra').classList.add('open');
+            setTimeout(() => document.getElementById('ex-desc').focus(), 80);
+        }
+        function cerrarModalExtra() {
+            document.getElementById('modal-extra').classList.remove('open');
+        }
+        function selExTipo(btn) {
+            document.querySelectorAll('.mex-tipo').forEach(b => b.classList.remove('sel'));
+            btn.classList.add('sel');
+            exTipo = btn.dataset.t;
+        }
+        function confirmarExtra() {
+            const desc = document.getElementById('ex-desc').value.trim();
+            const precio = parseFloat(document.getElementById('ex-precio').value) || 0;
+            if (!desc) { mostrarToast('Escribí una descripción'); return; }
+            const fakeId = 'EXTRA_' + Date.now();
+            // Si ya hay uno igual, incrementa cantidad
+            const existe = ticket.find(t => t.nombre === desc && t.es_extra);
+            if (existe) { existe.cantidad++; }
+            else {
+                ticket.push({
+                    trago_id: fakeId, nombre: desc, precio,
+                    cantidad: 1, tipo_venta: exTipo, es_extra: true,
+                });
+            }
+            cerrarModalExtra();
+            renderTicket();
+            mostrarToast('✓ Extra añadido');
+        }
+        document.getElementById('modal-extra').addEventListener('click', e => {
+            if (e.target.id === 'modal-extra') cerrarModalExtra();
+        });
+
+        // ── MODAL COMBO ─────────────────────────────────────
+        let comboLicorSeleccionado = null;
+        let comboRefrescoSeleccionado = null;
+
+        function abrirModalCombo(item) {
+            document.getElementById('combo-licor').value = '';
+            document.getElementById('combo-refresco').value = '';
+            document.getElementById('combo-precio-input').value = '';
+            comboLicorSeleccionado = null;
+            comboRefrescoSeleccionado = null;
+            poblarSelectoresCombo();
+            document.getElementById('modal-combo').classList.add('open');
+            setTimeout(() => document.getElementById('combo-licor').focus(), 80);
+        }
+        function cerrarModalCombo() {
+            document.getElementById('modal-combo').classList.remove('open');
+        }
+        function poblarSelectoresCombo() {
+            const licorSelect = document.getElementById('combo-licor');
+            const refrescoSelect = document.getElementById('combo-refresco');
+            while (licorSelect.length > 1) licorSelect.remove(1);
+            while (refrescoSelect.length > 1) refrescoSelect.remove(1);
+
+            const todosLosItems = menuItems.filter(i => i.tipo_venta !== 'COMBO');
+
+            todosLosItems.forEach(l => {
+                const opt = document.createElement('option');
+                opt.value = JSON.stringify({ id: l.id, nombre: l.nombre_boton, precio: l.precio });
+                opt.textContent = `Bs. {l.nombre_boton} · Bs. {l.volumen_ml}ml (Bs. Bs. {l.precio.toFixed(2)})`;
+                licorSelect.appendChild(opt);
+                refrescoSelect.appendChild(opt.cloneNode(true));
+            });
+        }
+        function actualizarPrecioCombo() {
+            const licorVal = document.getElementById('combo-licor').value;
+            const refrescVal = document.getElementById('combo-refresco').value;
+            const precioInput = parseFloat(document.getElementById('combo-precio-input').value) || 0;
+            const btnAdd = document.getElementById('combo-btn-add');
+
+            if (!licorVal || !refrescVal) {
+                document.getElementById('combo-precio-mostrado').textContent = 'Bs. 0.00';
+                btnAdd.disabled = true;
+                return;
+            }
+            try {
+                comboLicorSeleccionado = JSON.parse(licorVal);
+                comboRefrescoSeleccionado = JSON.parse(refrescVal);
+            } catch (e) { return; }
+
+            const precioFinal = precioInput > 0 ? precioInput :
+                Math.round((comboLicorSeleccionado.precio + comboRefrescoSeleccionado.precio) * 0.9 * 100) / 100;
+
+            document.getElementById('combo-precio-mostrado').textContent = `Bs. Bs. {precioFinal.toFixed(2)}`;
+            btnAdd.disabled = false;
+        }
+        function confirmarCombo() {
+            if (!comboLicorSeleccionado || !comboRefrescoSeleccionado) {
+                mostrarToast('Selecciona licor y refresco'); return;
+            }
+            const precioCombo = parseFloat(document.getElementById('combo-precio-input').value) ||
+                Math.round((comboLicorSeleccionado.precio + comboRefrescoSeleccionado.precio) * 0.9 * 100) / 100;
+            if (precioCombo <= 0) { mostrarToast('Ingresa un precio válido'); return; }
+
+            ticket.push({
+                trago_id: 'COMBO_' + Date.now(),
+                nombre: `Bs. {comboLicorSeleccionado.nombre} + Bs. {comboRefrescoSeleccionado.nombre}`,
+                precio: precioCombo,
+                cantidad: 1,
+                tipo_venta: 'COMBO',
+                es_combo: true,
+                licor_id: comboLicorSeleccionado.id,
+                refresco_id: comboRefrescoSeleccionado.id,
+                vasos_por_botella: 0
+            });
+            cerrarModalCombo();
+            renderTicket();
+            mostrarToast('✓ Combo agregado');
+        }
+        document.getElementById('modal-combo').addEventListener('click', e => {
+            if (e.target.id === 'modal-combo') cerrarModalCombo();
+        });
+    </script>
 </body>
 
 </html>
