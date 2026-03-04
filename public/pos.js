@@ -182,7 +182,7 @@ async function enviarCobroRapido(payload, totalEsperado, nombreItemResumen) {
             // NOTE: We do NOT call mostrarExito here to keep checkout instant.
 
             agregarVentaReciente({
-                ticket: data.id_ticket.substring(0, 8),
+                ticket: data.id_ticket, // Guardamos el UUID completo para la anulación
                 nombre: nombreItemResumen,
                 total: totalEsperado,
                 hora: new Date().toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' })
@@ -244,7 +244,7 @@ function renderizarVentasRecientes() {
                 <span style="font-weight:bold;font-size:0.95rem;">${v.nombre}</span>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;color:var(--sub);font-size:0.75rem;font-family:var(--mono);">
-                <span>#${v.ticket} &middot; <span style="color:var(--green);font-weight:bold;">Bs. ${parseFloat(v.total).toFixed(2)}</span></span>
+                <span>#${v.ticket.substring(0, 8)} &middot; <span style="color:var(--green);font-weight:bold;">Bs. ${parseFloat(v.total).toFixed(2)}</span></span>
                 <span>${v.hora}</span>
             </div>
         </div>`).join('');
@@ -254,8 +254,12 @@ function renderizarVentasRecientes() {
 let ticketAnularSelect = null;
 
 function abrirModalAnular(ticketId, nombre) {
+    if (ticketId.length < 20) {
+        mostrarToast('Ticket muy antiguo para anular (error de versión)');
+        return;
+    }
     ticketAnularSelect = ticketId;
-    document.getElementById('anular-desc').innerHTML = `Se eliminará el ticket <b>#${ticketId}</b> (${nombre}) y se reabastecerá la botella.`;
+    document.getElementById('anular-desc').innerHTML = `Se eliminará el ticket <b>#${ticketId.substring(0, 8)}</b> (${nombre}) y se reabastecerá la botella al inventario.`;
     document.getElementById('modal-anular').classList.add('open');
 }
 
