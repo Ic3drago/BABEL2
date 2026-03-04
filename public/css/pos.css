@@ -1145,8 +1145,9 @@ body.promo-on .trago-btn[data-tipo="PROMO"] .trago-nombre {
     transform: translateX(-50%) translateY(0);
 }
 
-/* ─────── MODAL ANULAR (SANDBOX) ─────── */
-#modal-anular {
+/* ─────── MODAL ANULAR (SANDBOX) & VACIAR ─────── */
+#modal-anular,
+#modal-vaciar-recientes {
     position: fixed;
     top: 0;
     left: 0;
@@ -1164,7 +1165,8 @@ body.promo-on .trago-btn[data-tipo="PROMO"] .trago-nombre {
     transition: opacity 0.25s;
 }
 
-#modal-anular.open {
+#modal-anular.open,
+#modal-vaciar-recientes.open {
     opacity: 1;
     pointer-events: auto;
 }
@@ -1181,7 +1183,8 @@ body.promo-on .trago-btn[data-tipo="PROMO"] .trago-nombre {
     max-width: 350px;
 }
 
-#modal-anular.open .modal-anular-box {
+#modal-anular.open .modal-anular-box,
+#modal-vaciar-recientes.open .modal-anular-box {
     transform: translateY(0);
 }
 
