@@ -192,4 +192,23 @@ class AdminController {
             $this->json(['success'=>true]);
         } catch (Exception $e) { $this->json(['success'=>false,'error'=>$e->getMessage()],500); }
     }
+
+    public function resetearVentas(): void {
+        try {
+            $db = Database::getConnection();
+            $db->beginTransaction();
+            $db->exec("DELETE FROM ventas_detalles");
+            $db->exec("DELETE FROM ventas_tickets");
+            $db->exec("DELETE FROM stock_noche");
+            $db->exec("DELETE FROM menu_tragos_noche");
+            try { $db->exec("DELETE FROM ventas"); } catch(Exception $e){}
+            try { $db->exec("DELETE FROM venta_detalles"); } catch(Exception $e){}
+            try { $db->exec("DELETE FROM daily_sheets"); } catch(Exception $e){}
+            $db->commit();
+            $this->json(['success'=>true, 'mensaje'=>'Todas las ventas y configuraciones fueron eliminadas. El stock físico se mantiene intacto.']);
+        } catch (Exception $e) {
+            if (isset($db)) $db->rollBack();
+            $this->json(['success'=>false,'error'=>$e->getMessage()],500);
+        }
+    }
 }

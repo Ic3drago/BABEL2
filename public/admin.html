@@ -186,6 +186,22 @@
                 </div>
             </div>
 
+            <!-- RESET DATA -->
+            <div class="section" style="border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.05);">
+                <div class="section-header">
+                    <div>
+                        <h2 style="color:var(--red)">Peligro: Limpiar Sistema</h2>
+                        <p>Elimina todas las ventas, planillas y turnos. Mantiene botellas y menú.</p>
+                    </div>
+                </div>
+                <div class="section-body" style="display:flex; justify-content:flex-end;">
+                    <button class="btn-save" style="background:var(--red); color:white; padding: 10px 20px;"
+                        onclick="resetearSistema()">
+                        ⚠ BARRER TODAS LAS VENTAS
+                    </button>
+                </div>
+            </div>
+
         </div>
     </div><!-- fin tab base -->
 
@@ -347,6 +363,25 @@
             if (body) opts.body = JSON.stringify(body);
             const res = await fetch(API_URL + ep, opts);
             return res.json();
+        }
+
+        // ── RESET DATA ──
+        async function resetearSistema() {
+            if (!confirm('¿ESTAS TOTALMENTE SEGURO? Se borrarán TODAS las Planillas, Tickets y Cierres. Solo sobrevivirá el Stock de Botellas y el Menú.')) return;
+            if (!confirm('ULTIMO AVISO: Esta acción es IRREVERSIBLE. ¿Continuar y borrar todo el historial de ventas?')) return;
+
+            try {
+                const res = await api('/admin/reset_ventas', 'DELETE');
+                if (res.success) {
+                    toast(res.mensaje || 'Sistema reseteado con éxito.', 'ok');
+                    cargarBotellas();
+                    cargarMenu();
+                } else {
+                    toast(res.error || 'Error al resetear', 'err');
+                }
+            } catch (e) {
+                toast('Error de red', 'err');
+            }
         }
 
         // ── TABS ─────────────────────────────────────────────

@@ -84,6 +84,7 @@ if ($method==='GET'  && $uri==='/api/admin/menu')              { requireRole('ad
 if ($method==='POST' && $uri==='/api/admin/menu')              { requireRole('admin'); $adminCtrl->agregarItemMenu(); exit; }
 if ($method==='PUT'    && preg_match('#^/api/admin/menu/([^/]+)$#', $uri, $m)) { requireRole('admin'); $adminCtrl->editarItemMenu($m[1]); exit; }
 if ($method==='DELETE' && preg_match('#^/api/admin/menu/([^/]+)$#', $uri, $m)) { requireRole('admin'); $adminCtrl->eliminarItemMenu($m[1]); exit; }
+if ($method==='DELETE' && $uri==='/api/admin/reset_ventas')    { requireRole('admin'); $adminCtrl->resetearVentas(); exit; }
 
 // CAJA (Both 'admin' and 'bartender')
 if ($method==='GET'  && $uri==='/api/caja/menu')               { requireRole(['admin', 'bartender']); $cajaCtrl->getMenu(); exit; }

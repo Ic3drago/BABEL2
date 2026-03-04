@@ -1304,60 +1304,122 @@ body.promo-on .trago-btn[data-tipo="PROMO"] .trago-nombre {
 /* ── RESPONSIVE MOBILE QUERIES (TABLETS & PHONES) ── */
 @media (max-width: 768px) {
     body {
-        overflow-y: auto !important;
-        height: auto !important;
-        display: block !important;
-    }
-
-    .container {
-        padding: 16px 12px !important;
-    }
-
-    nav {
+        display: flex !important;
         flex-direction: column !important;
-        gap: 12px !important;
-        align-items: center !important;
+        height: 100dvh !important;
+        overflow: hidden !important;
     }
 
-    #panel-ticket {
-        width: 100% !important;
-        height: auto !important;
-        min-height: 50vh !important;
-        border-left: none !important;
-        border-top: 1px solid var(--border) !important;
+    /* Ocultar panel de recientes en celulares para no robar pantalla */
+    #panel-recientes {
+        display: none !important;
     }
 
     #panel-left {
-        max-height: 50vh;
-        overflow-y: auto;
-    }
-
-    .stock-row {
-        grid-template-columns: 1fr 1fr !important;
-        gap: 12px;
-        align-items: flex-start;
-    }
-
-    .stock-row>div:first-child {
-        grid-column: span 2;
-    }
-
-    .form-group {
-        margin-bottom: 15px;
-    }
-
-    .tabs {
-        overflow-x: auto;
-        white-space: nowrap;
-        padding: 0 10px;
+        flex: 1.5 !important;
+        max-height: unset !important;
+        border-right: none !important;
+        border-bottom: 2px solid var(--purple) !important;
         display: flex;
+        flex-direction: column;
     }
 
-    .resumen {
-        grid-template-columns: 1fr !important;
+    #panel-ticket {
+        flex: 1 !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: unset !important;
+        border-left: none !important;
     }
 
-    .tabla-wrap {
-        overflow-x: auto;
+    /* Reducir tamaño de header y tabs para ahorrar espacio vertical */
+    .pos-header {
+        padding: 10px 12px !important;
+    }
+
+    .cat-tabs {
+        padding: 8px 12px !important;
+    }
+
+    .cat-tab {
+        font-size: 0.75rem !important;
+        padding: 6px 12px !important;
+    }
+
+    /* Hacer el grid de botones de la caja mucho más denso */
+    #grid-tragos {
+        grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)) !important;
+        padding: 10px !important;
+        gap: 8px !important;
+    }
+
+    .trago-btn {
+        min-height: 85px !important;
+        padding: 8px 4px !important;
+        border-radius: 8px !important;
+    }
+
+    .trago-nombre {
+        font-size: 0.72rem !important;
+        line-height: 1.1 !important;
+    }
+
+    .trago-precio {
+        font-size: 0.85rem !important;
+    }
+
+    .trago-badge {
+        font-size: 0.55rem !important;
+        padding: 2px 4px !important;
+    }
+
+    /* Hacer el ticket más compacto para que entren más items */
+    .ticket-header {
+        padding: 10px 14px !important;
+    }
+
+    .ticket-header h2 {
+        font-size: 0.8rem !important;
+    }
+
+    #lista-ticket {
+        padding: 6px !important;
+    }
+
+    .ticket-item {
+        padding: 6px 8px !important;
+        margin-bottom: 4px !important;
+    }
+
+    .ticket-item-nombre {
+        font-size: 0.75rem !important;
+    }
+
+    .qty-btn {
+        width: 20px !important;
+        height: 20px !important;
+    }
+
+    /* Footer del ticket apegado abajo */
+    .ticket-footer {
+        padding: 10px 14px !important;
+        gap: 6px !important;
+    }
+
+    .resumen-row.total {
+        margin-top: 4px !important;
+        padding-top: 4px !important;
+        font-size: 1.1rem !important;
+    }
+
+    .btn-cobrar {
+        padding: 10px !important;
+        font-size: 0.9rem !important;
+    }
+
+    .btn-fiado,
+    .btn-extra {
+        padding: 8px !important;
+        font-size: 0.75rem !important;
     }
 }
