@@ -250,14 +250,21 @@ function renderizarVentasRecientes() {
         </div>`).join('');
 }
 
-function vaciarVentasRecientes() {
+// ── VACIAR RECIENTES (SANDBOX) ──
+function abrirModalVaciar() {
     if (ventasRecientes.length === 0) return;
-    if (!confirm('¿Seguro quieres limpiar la lista de "Vendido Recién"?\n\n(Esto solo limpia tu pantalla, no afecta a la Planilla ni al Inventario)')) {
-        return;
-    }
+    document.getElementById('modal-vaciar-recientes').classList.add('open');
+}
+
+function cerrarModalVaciar() {
+    document.getElementById('modal-vaciar-recientes').classList.remove('open');
+}
+
+function confirmarVaciar() {
     ventasRecientes = [];
     localStorage.removeItem('babel_ventas_recientes');
     renderizarVentasRecientes();
+    cerrarModalVaciar();
 }
 
 // ── ANULAR VENTA (SANDBOX) ──
