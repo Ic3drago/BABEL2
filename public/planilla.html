@@ -207,7 +207,7 @@
 
             <!-- RESTANTE (calculado: stock_inicial - promo - normal) -->
             <td style="text-align: center; font-family: var(--mono); font-weight: 700; color: var(--yellow);">
-                ${parseFloat(f.restante ?? (parseInt(f.stock_inicial) - (f.promo_unidades || 0) - (f.normal_unidades || 0))).toFixed(2).replace(/\.00$/, '')}
+                ${formatearRestante(parseFloat(f.restante ?? (parseInt(f.stock_inicial) - (f.promo_unidades || 0) - (f.normal_unidades || 0))))}
             </td>
 
             <!-- TOTAL RECAUDADO -->
@@ -270,6 +270,22 @@
             }).join('');
         }
 
+        function formatearRestante(restante) {
+            if (isNaN(restante)) return '0';
+            const enteras = Math.floor(restante);
+            const fraccion = restante - enteras;
+
+            if (fraccion > 0) {
+                const porcentaje = Math.round(fraccion * 100);
+                if (enteras > 0) {
+                    return `${enteras} Btl + ${porcentaje}%`;
+                }
+                return `${porcentaje}%`;
+            }
+
+            return enteras.toString();
+        }
+
         function exportarExcel() {
             if (!planillaData.length) return;
 
@@ -289,7 +305,7 @@
                     f.vaso_recaudado || 0,
                     f.entrada_unidades || 0,
                     f.entrada_recaudado || 0,
-                    parseFloat(f.restante ?? (parseInt(f.stock_inicial) - (f.promo_unidades || 0) - (f.normal_unidades || 0))).toFixed(2),
+                    formatearRestante(parseFloat(f.restante ?? (parseInt(f.stock_inicial) - (f.promo_unidades || 0) - (f.normal_unidades || 0)))),
                     f.total_recaudado || 0
                 ]);
             });
