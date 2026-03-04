@@ -162,7 +162,9 @@ async function enviarCobroRapido(payload, totalEsperado, nombreItemResumen) {
         const data = await res.json();
         if (res.ok && data.success) {
             mostrarToast(`✓ Vendido ${nombreItemResumen}`);
-            mostrarExito(totalEsperado, 0, data.id_ticket);
+
+            // NOTE: We do NOT call mostrarExito here to keep checkout instant.
+
             agregarVentaReciente({
                 ticket: data.id_ticket.substring(0, 8),
                 nombre: nombreItemResumen,

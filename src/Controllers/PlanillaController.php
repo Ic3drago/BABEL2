@@ -8,6 +8,10 @@ class PlanillaController {
 
     public function getPlanilla(string $fecha): void {
         try {
+            // Un turno de bar cruza la medianoche.
+            // Definimos el turno desde las 06:00 del día consultado hasta las 05:59:59 del día siguiente.
+            $fechaInicio = $fecha . ' 06:00:00';
+            $fechaFin = date('Y-m-d', strtotime($fecha . ' +1 day')) . ' 05:59:59';
             // 1. Stock inicial registrado al inicio de la noche
             $stmtB = $this->db->prepare("
                 SELECT ib.id, ib.nombre, ib.volumen_ml, ib.vasos_por_botella,
@@ -52,7 +56,7 @@ class PlanillaController {
                 JOIN inventario_botellas ib ON mt.botella_id = ib.id
                 LEFT JOIN menu_tragos_noche mtn
                        ON mtn.trago_id = mt.id AND mtn.fecha = :fecha
-                WHERE DATE(vt.created_at) = :fecha2
+                WHERE vt.created_at >= :fechaInicio AND vt.created_at <= :fechaFin
                 GROUP BY
                     ib.id,
                     CASE
@@ -64,7 +68,11 @@ class PlanillaController {
                     END
                 ORDER BY ib.nombre ASC
             ");
-            $stmtV->execute(['fecha' => $fecha, 'fecha2' => $fecha]);
+            $stmtV->execute([
+                'fecha' => $fecha,
+                'fechaInicio' => $fechaInicio,
+                'fechaFin' => $fechaFin
+            ]);
             $ventas = $stmtV->fetchAll(\PDO::FETCH_ASSOC);
 
             // map[botella_id][tipo] = {unidades, recaudado}
@@ -171,7 +179,7 @@ class PlanillaController {
                 JOIN ventas_detalles vdt ON vt.id = vdt.ticket_id
                 LEFT JOIN menu_tragos mt ON vdt.trago_id = mt.id
                 LEFT JOIN inventario_botellas ib ON mt.botella_id = ib.id
-                WHERE DATE(vt.created_at) = :fecha
+                WHERE vt.created_at >= :fechaInicio AND vt.created_at <= :fechaFin
                 GROUP BY 
                     CASE 
                         WHEN mt.nombre_boton = '(Oculto) Complemento' THEN CONCAT('🥤 (Acompañante de Combo) ', ib.nombre)
@@ -181,7 +189,10 @@ class PlanillaController {
                     END
                 ORDER BY subtotal DESC, cantidad_vendida DESC
             ");
-            $stmtDetalle->execute(['fecha' => $fecha]);
+            $stmtDetalle->execute([
+                'fechaInicio' => $fechaInicio,
+                'fechaFin' => $fechaFin
+            ]);
             $detalle_ventas = $stmtDetalle->fetchAll(\PDO::FETCH_ASSOC);
 
             echo json_encode([
