@@ -1145,6 +1145,46 @@ body.promo-on .trago-btn[data-tipo="PROMO"] .trago-nombre {
     transform: translateX(-50%) translateY(0);
 }
 
+/* ─────── MODAL ANULAR (SANDBOX) ─────── */
+#modal-anular {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+}
+
+#modal-anular.open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-anular-box {
+    background: var(--surface);
+    padding: 30px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    transform: translateY(20px);
+    transition: transform 0.25s;
+    width: 90%;
+    max-width: 350px;
+}
+
+#modal-anular.open .modal-anular-box {
+    transform: translateY(0);
+}
+
 /* ─────── MODAL COMBO ─────── */
 #modal-combo {
     position: fixed;
