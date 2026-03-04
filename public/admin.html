@@ -407,23 +407,26 @@
                 return;
             }
             lista.innerHTML = `
-        <div style="display:grid;grid-template-columns:2fr 150px 60px;gap:10px;padding:0 0 8px;border-bottom:1px solid var(--border);margin-bottom:4px">
+        <div style="display:grid;grid-template-columns:2fr 150px 100px 60px;gap:10px;padding:0 0 8px;border-bottom:1px solid var(--border);margin-bottom:4px">
             <span style="font-size:.65rem;color:var(--sub);text-transform:uppercase;letter-spacing:.06em">Licor</span>
             <span style="font-size:.65rem;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;text-align:center">Stock Cerrado</span>
+            <span style="font-size:.65rem;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;text-align:center">% Abierta (0-100)</span>
             <span></span>
         </div>
     ` + botellas.map(b => {
                 let pct = (b.porcentaje_abierto && parseFloat(b.porcentaje_abierto) > 0) ? ` <span style="background:var(--blue); color:white; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 0.65rem; margin-left: 6px;">${Math.round(b.porcentaje_abierto)}% Abierta</span>` : '';
+                let openVal = b.porcentaje_abierto ? Math.round(b.porcentaje_abierto) : 0;
                 return `
-        <div style="display:grid;grid-template-columns:2fr 150px 60px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
+        <div style="display:grid;grid-template-columns:2fr 150px 100px 60px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
             <div>
                 <div class="stock-nombre">${b.nombre} ${pct}</div>
                 <div class="stock-meta">${b.volumen_ml}ml • Rinde ${b.vasos_por_botella} Vasos</div>
             </div>
             <div style="display:flex; gap: 4px; align-items:center;">
-                <input type="number" class="stock-inp" id="stock-${b.id}" value="${b.stock_cerrado}" min="0" style="text-align:center; flex: 1;">
+                <input type="number" class="stock-inp" id="stock-${b.id}" value="${b.stock_cerrado}" min="0" style="text-align:center; flex: 1;" title="Botellas Enteras Cerradas">
                 <button class="btn-save" style="padding: 6px 10px; font-size: 0.75rem; background: var(--green);" onclick="sumarStock('${b.id}')">+1 Btl</button>
             </div>
+            <input type="number" class="pct-inp" id="pct-${b.id}" value="${openVal}" min="0" max="100" style="text-align:center; padding: 12px; background: rgba(255,255,255,0.05); color:white; border: 1px solid var(--border); border-radius:8px;" title="Porcentaje de botella abierta">
             <div style="display:flex;gap:4px; justify-content: flex-end;">
                 <button class="btn-icn btn-icn-edit" onclick="abrirEditLicor('${b.id}')" title="Editar">✎</button>
                 <button class="btn-icn btn-icn-del"  onclick="confirmarEliminar('licor','${b.id}','${b.nombre.replace(/'/g, "\\'")}','¿Eliminar <strong>${b.nombre}</strong>?<span class=\\'danger\\'>⚠ También se eliminarán sus tragos del menú.</span>')" title="Eliminar">✕</button>
@@ -541,11 +544,12 @@
             btn.disabled = true; btn.textContent = 'Guardando...';
 
             try {
-                // 1. Guardar solo stock cerrado de cada botella
+                // 1. Guardar stock cerrado y porcentaje abierto de cada botella
                 for (const b of botellas) {
                     const stock = parseInt(document.getElementById(`stock-${b.id}`)?.value) || 0;
+                    const pct = parseInt(document.getElementById(`pct-${b.id}`)?.value) || 0;
                     await api('/admin/bodega/stock', 'POST', {
-                        id: b.id, stock_cerrado: stock
+                        id: b.id, stock_cerrado: stock, porcentaje_abierto: pct
                     });
                 }
 

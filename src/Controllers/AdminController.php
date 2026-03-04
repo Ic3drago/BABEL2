@@ -45,6 +45,21 @@ class AdminController {
         } catch (Exception $e) { $this->json(['success'=>false,'error'=>$e->getMessage()],500); }
     }
 
+    public function sumarStockMidShift(): void {
+        try {
+            $d = $this->input();
+            if (empty($d['id']) || empty($d['cantidad'])) throw new Exception("ID y cantidad son obligatorios.");
+            
+            $db = Database::getConnection();
+            $db->prepare("UPDATE inventario_botellas SET stock_cerrado = stock_cerrado + ?, updated_at=NOW() WHERE id=?")
+               ->execute([(int)$d['cantidad'], $d['id']]);
+               
+            $this->json(['success'=>true,'mensaje'=>'Stock incrementado']);
+        } catch (Exception $e) {
+            $this->json(['success'=>false,'error'=>$e->getMessage()],500);
+        }
+    }
+
     public function editarBotella(string $id): void {
         try {
             $d = $this->input();
@@ -82,14 +97,19 @@ class AdminController {
             $d = $this->input();
             if (empty($d['id'])) throw new Exception("Falta id.");
             $db = Database::getConnection(); $hoy = date('Y-m-d');
-            // Solo guardar stock_cerrado, porcentaje_abierto se calcula automáticamente
+            
+            // Accept porcentaje_abierto from frontend, default to 0 if not provided
+            $pct = isset($d['porcentaje_abierto']) ? (float)$d['porcentaje_abierto'] : 0.0;
+            
+            // Guardar stock_cerrado y porcentaje_abierto original
             $db->prepare("INSERT INTO stock_noche (botella_id,fecha,stock_cerrado,porcentaje_abierto)
-                VALUES (?,?,?,0) ON CONFLICT (botella_id,fecha) DO UPDATE
-                SET stock_cerrado=EXCLUDED.stock_cerrado")
-               ->execute([$d['id'],$hoy,(int)$d['stock_cerrado']]);
-            // Actualizar solo stock_cerrado en inventario_botellas
-            $db->prepare("UPDATE inventario_botellas SET stock_cerrado=?,updated_at=NOW() WHERE id=?")
-                ->execute([(int)$d['stock_cerrado'],$d['id']]);
+                VALUES (?,?,?,?) ON CONFLICT (botella_id,fecha) DO UPDATE
+                SET stock_cerrado=EXCLUDED.stock_cerrado, porcentaje_abierto=EXCLUDED.porcentaje_abierto")
+               ->execute([$d['id'],$hoy,(int)$d['stock_cerrado'], round($pct, 4)]);
+               
+            // Actualizar stock_cerrado y porcentaje_abierto en inventario_botellas para live system
+            $db->prepare("UPDATE inventario_botellas SET stock_cerrado=?, porcentaje_abierto=?, updated_at=NOW() WHERE id=?")
+                ->execute([(int)$d['stock_cerrado'], round($pct, 4), $d['id']]);
             $this->json(['success'=>true]);
         } catch (Exception $e) { $this->json(['success'=>false,'error'=>$e->getMessage()],500); }
     }
