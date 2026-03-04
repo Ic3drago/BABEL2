@@ -177,6 +177,10 @@
                             <label>Volumen (ml)</label>
                             <input type="number" id="b-ml" class="form-input" value="750">
                         </div>
+                        <div class="form-group">
+                            <label>Rinde (Vasos)</label>
+                            <input type="number" id="b-vasos" class="form-input" value="18" min="1">
+                        </div>
                         <button class="btn-save" onclick="agregarLicor()">+ Agregar</button>
                     </div>
                 </div>
@@ -249,6 +253,10 @@
                 <div class="form-group">
                     <label>Volumen (ml)</label>
                     <input type="number" id="edit-l-ml" class="form-input" min="1">
+                </div>
+                <div class="form-group">
+                    <label>Rinde (Vasos)</label>
+                    <input type="number" id="edit-l-vasos" class="form-input" min="1">
                 </div>
             </div>
             <div class="modal-footer">
@@ -408,7 +416,7 @@
         <div style="display:grid;grid-template-columns:2fr 120px 60px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
             <div>
                 <div class="stock-nombre">${b.nombre}</div>
-                <div class="stock-meta">${b.volumen_ml}ml</div>
+                <div class="stock-meta">${b.volumen_ml}ml • Rinde ${b.vasos_por_botella} Vasos</div>
             </div>
             <input type="number" class="stock-inp" id="stock-${b.id}" value="${b.stock_cerrado}" min="0" style="text-align:center">
             <div style="display:flex;gap:4px">
@@ -708,6 +716,7 @@
             document.getElementById('edit-licor-id').value = b.id;
             document.getElementById('edit-l-nombre').value = b.nombre;
             document.getElementById('edit-l-ml').value = b.volumen_ml;
+            document.getElementById('edit-l-vasos').value = b.vasos_por_botella || 18;
             abrirModal('modal-licor');
             setTimeout(() => document.getElementById('edit-l-nombre').focus(), 100);
         }
@@ -716,8 +725,9 @@
             const id = document.getElementById('edit-licor-id').value;
             const nombre = document.getElementById('edit-l-nombre').value.trim();
             const ml = parseInt(document.getElementById('edit-l-ml').value);
-            if (!nombre || !ml) { toast('Completa todos los campos', 'err'); return; }
-            const data = await api(`/admin/bodega/${id}`, 'PUT', { nombre, volumen_ml: ml });
+            const vasos = parseInt(document.getElementById('edit-l-vasos').value);
+            if (!nombre || !ml || !vasos) { toast('Completa todos los campos', 'err'); return; }
+            const data = await api(`/admin/bodega/${id}`, 'PUT', { nombre, volumen_ml: ml, vasos_por_botella: vasos });
             if (data.success) {
                 toast('✓ Licor actualizado', 'ok');
                 cerrarModal('modal-licor');
@@ -731,8 +741,9 @@
         async function agregarLicor() {
             const nombre = document.getElementById('b-nombre').value.trim();
             const ml = parseInt(document.getElementById('b-ml').value);
+            const vasos = parseInt(document.getElementById('b-vasos').value);
             if (!nombre) { toast('Ingresá el nombre del licor', 'err'); return; }
-            const data = await api('/admin/bodega', 'POST', { nombre, volumen_ml: ml, stock_cerrado: 0 });
+            const data = await api('/admin/bodega', 'POST', { nombre, volumen_ml: ml, vasos_por_botella: vasos, stock_cerrado: 0 });
             if (data.success) {
                 toast('✓ Licor registrado', 'ok');
                 document.getElementById('b-nombre').value = '';
