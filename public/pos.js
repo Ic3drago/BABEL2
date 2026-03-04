@@ -184,6 +184,7 @@ async function enviarCobroRapido(payload, totalEsperado, nombreItemResumen) {
             agregarVentaReciente({
                 ticket: data.id_ticket, // Guardamos el UUID completo para la anulación
                 nombre: nombreItemResumen,
+                tipo: payload.items && payload.items[0] ? (payload.items[0].es_combo ? 'COMBO' : 'NORMAL') : '',
                 total: totalEsperado,
                 hora: new Date().toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' })
             });
@@ -239,7 +240,7 @@ function renderizarVentasRecientes() {
     }
     contenedor.innerHTML = ventasRecientes.map(v => `
         <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:4px;box-shadow:0 2px 4px rgba(0,0,0,0.1); position:relative;">
-            <button onclick="abrirModalAnular('${v.ticket}', '${v.nombre}')" style="position:absolute; top:8px; right:8px; background:var(--bg); border:1px solid var(--border); border-radius:4px; color:var(--red); font-size:1rem; cursor:pointer; padding:2px 8px; font-weight:bold; z-index:10; opacity:0.8;">✕</button>
+            <button onclick="abrirModalAnular('${v.ticket}', '${v.nombre}', '${v.tipo || ''}')" style="position:absolute; top:8px; right:8px; background:var(--bg); border:1px solid var(--border); border-radius:4px; color:var(--red); font-size:1rem; cursor:pointer; padding:2px 8px; font-weight:bold; z-index:10; opacity:0.8;">✕</button>
             <div style="display:flex;justify-content:space-between;align-items:center; padding-right:32px;">
                 <span style="font-weight:bold;font-size:0.95rem;">${v.nombre}</span>
             </div>
@@ -270,13 +271,23 @@ function confirmarVaciar() {
 // ── ANULAR VENTA (SANDBOX) ──
 let ticketAnularSelect = null;
 
-function abrirModalAnular(ticketId, nombre) {
+function abrirModalAnular(ticketId, nombre, tipoItem) {
     if (ticketId.length < 20) {
         mostrarToast('Ticket muy antiguo para anular (error de versión)');
         return;
     }
     ticketAnularSelect = ticketId;
-    document.getElementById('anular-desc').innerHTML = `Se eliminará el ticket <b>#${ticketId.substring(0, 8)}</b> (${nombre}) y se reabastecerá la botella al inventario.`;
+
+    let accionTexto = "se reabastecerá el inventario.";
+    if (tipoItem === 'VASO' || tipoItem === 'ENTRADA' || nombre.toLowerCase().includes('vaso')) {
+        accionTexto = "el vaso (fracción) volverá a la botella abierta.";
+    } else if (tipoItem === 'BOTELLA') {
+        accionTexto = "la botella entera volverá al stock cerrado.";
+    } else if (tipoItem === 'COMBO') {
+        accionTexto = "ambas botellas volverán al stock.";
+    }
+
+    document.getElementById('anular-desc').innerHTML = `Se eliminará el ticket <b>#${ticketId.substring(0, 8)}</b> (${nombre}) y ${accionTexto}`;
     document.getElementById('modal-anular').classList.add('open');
 }
 
