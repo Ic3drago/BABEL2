@@ -20,11 +20,27 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
         const guardadas = localStorage.getItem('babel_ventas_recientes');
         if (guardadas) {
-            ventasRecientes = JSON.parse(guardadas);
-            renderizarVentasRecientes();
+            const wrap = JSON.parse(guardadas);
+            // Comprobar si las ventas son de hoy (turno actual termina a las 6am)
+            if (wrap.fecha_turno === obtenerFechaTurnoLocal()) {
+                ventasRecientes = wrap.ventas || [];
+                renderizarVentasRecientes();
+            } else {
+                localStorage.removeItem('babel_ventas_recientes'); // Es de otra noche, borrar
+            }
         }
     } catch (e) { }
 });
+
+// Función para determinar la fecha lógica del turno actual (corta a las 6:00 AM)
+function obtenerFechaTurnoLocal() {
+    const ahora = new Date();
+    // Si la hora es antes de las 6:00 AM, pertenece al turno del día anterior
+    if (ahora.getHours() < 6) {
+        ahora.setDate(ahora.getDate() - 1);
+    }
+    return ahora.toISOString().split('T')[0]; // devuelve "YYYY-MM-DD"
+}
 
 function actualizarReloj() {
     const ahora = new Date();
@@ -206,7 +222,12 @@ function agregarVentaReciente(venta) {
     ventasRecientes.unshift(venta);
     if (ventasRecientes.length > 30) ventasRecientes.pop();
     renderizarVentasRecientes();
-    localStorage.setItem('babel_ventas_recientes', JSON.stringify(ventasRecientes));
+    // Guardamos las ventas junto con la fecha lógica del turno actual
+    const wrap = {
+        fecha_turno: obtenerFechaTurnoLocal(),
+        ventas: ventasRecientes
+    };
+    localStorage.setItem('babel_ventas_recientes', JSON.stringify(wrap));
 }
 
 function renderizarVentasRecientes() {
