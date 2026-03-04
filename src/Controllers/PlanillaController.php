@@ -157,12 +157,11 @@ class PlanillaController {
                 if (str_contains($k, 'recaudado')) $totales[$k] = round((float)$v, 2);
             }
             // 3. Detalle exacto de productos vendidos (Agrupado)
-            // Se hace un reemplazo en SQL para que '(Oculto) Complemento' se lea mejor y se asocie a Combos
             $stmtDetalle = $this->db->prepare("
                 SELECT 
                     CASE 
-                        WHEN vdt.nota_extra = '(Oculto) Complemento' THEN CONCAT('🥤 (Acompañante de Combo) ', mt.nombre_boton)
-                        WHEN vdt.nota_extra = 'PROMO' THEN CONCAT('🎁 (Promo/Combo) ', mt.nombre_boton)
+                        WHEN mt.nombre_boton = '(Oculto) Complemento' THEN CONCAT('🥤 (Acompañante de Combo) ', ib.nombre)
+                        WHEN vdt.nota_extra = 'PROMO' THEN CONCAT('🎁 (Promo/Combo) ', COALESCE(mt.nombre_boton, ib.nombre))
                         WHEN vdt.nota_extra LIKE 'EXTRA:%' THEN REPLACE(vdt.nota_extra, 'EXTRA: ', '➕ (Extra) ')
                         ELSE COALESCE(mt.nombre_boton, vdt.nota_extra)
                     END AS nombre,
@@ -171,11 +170,12 @@ class PlanillaController {
                 FROM ventas_tickets vt
                 JOIN ventas_detalles vdt ON vt.id = vdt.ticket_id
                 LEFT JOIN menu_tragos mt ON vdt.trago_id = mt.id
+                LEFT JOIN inventario_botellas ib ON mt.botella_id = ib.id
                 WHERE DATE(vt.created_at) = :fecha
                 GROUP BY 
                     CASE 
-                        WHEN vdt.nota_extra = '(Oculto) Complemento' THEN CONCAT('🥤 (Acompañante de Combo) ', mt.nombre_boton)
-                        WHEN vdt.nota_extra = 'PROMO' THEN CONCAT('🎁 (Promo/Combo) ', mt.nombre_boton)
+                        WHEN mt.nombre_boton = '(Oculto) Complemento' THEN CONCAT('🥤 (Acompañante de Combo) ', ib.nombre)
+                        WHEN vdt.nota_extra = 'PROMO' THEN CONCAT('🎁 (Promo/Combo) ', COALESCE(mt.nombre_boton, ib.nombre))
                         WHEN vdt.nota_extra LIKE 'EXTRA:%' THEN REPLACE(vdt.nota_extra, 'EXTRA: ', '➕ (Extra) ')
                         ELSE COALESCE(mt.nombre_boton, vdt.nota_extra)
                     END
