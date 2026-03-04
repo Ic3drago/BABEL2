@@ -117,8 +117,10 @@ function crearRipple(e, btn) {
 // ═══════════════════════════════════════════════════════════
 function filtrar(tipo, tabEl) {
     categoriaActual = tipo;
-    document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
-    tabEl.classList.add('active');
+    if (tabEl) {
+        document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+        tabEl.classList.add('active');
+    }
     const filtrados = tipo === 'TODOS' ? menuItems : menuItems.filter(i => i.tipo_venta === tipo);
     renderizarGrid(filtrados);
 }
