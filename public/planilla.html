@@ -1,157 +1,190 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Planilla - BABEL</title>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=DM+Sans:wght@400;500;700&display=swap"
+        rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="css/planilla.css">
 </head>
+
 <body>
 
-<nav>
-    <div class="nav-brand">BABEL / PLANILLA</div>
-    <a href="/" class="nav-back">← Menú principal</a>
-</nav>
+    <nav>
+        <div class="nav-brand">BABEL / PLANILLA</div>
+        <a href="/" class="nav-back">← Menú principal</a>
+    </nav>
 
-<div class="container">
+    <div class="container">
 
-    <!-- CONTROLES -->
-    <div class="header-controles">
-        <input type="date" id="fecha-planilla" class="fecha-input">
-        <button class="btn" onclick="cargarPlanilla()">Cargar</button>
-        <button class="btn" id="btn-exportar" onclick="exportarExcel()" disabled style="background: var(--green);">
-            ⬇ Exportar Excel
-        </button>
-        <span style="font-size: 0.75rem; color: var(--sub); margin-left: auto;" id="label-fecha"></span>
+        <!-- CONTROLES -->
+        <div class="header-controles">
+            <input type="date" id="fecha-planilla" class="fecha-input">
+            <button class="btn" onclick="cargarPlanilla()">Cargar</button>
+            <button class="btn" id="btn-exportar" onclick="exportarExcel()" disabled style="background: var(--green);">
+                ⬇ Exportar Excel
+            </button>
+            <span style="font-size: 0.75rem; color: var(--sub); margin-left: auto;" id="label-fecha"></span>
+        </div>
+
+        <!-- RESUMEN -->
+        <div class="resumen" id="resumen" style="display: none;">
+            <div class="card">
+                <div class="card-label">Total Recaudado</div>
+                <div class="card-value green" id="card-total">Bs. 0.00</div>
+            </div>
+            <div class="card">
+                <div class="card-label">🎉 Promos</div>
+                <div class="card-value purple" id="card-promo">0 / Bs. 0</div>
+            </div>
+            <div class="card">
+                <div class="card-label">🥃 Normales</div>
+                <div class="card-value" style="color: var(--orange);" id="card-normal">0 / Bs. 0</div>
+            </div>
+            <div class="card">
+                <div class="card-label">🍺 Vasos</div>
+                <div class="card-value" style="color: var(--blue);" id="card-vaso">0 / Bs. 0</div>
+            </div>
+            <div class="card">
+                <div class="card-label">🚪 Entradas</div>
+                <div class="card-value" style="color: #06b6d4;" id="card-entrada">0 / Bs. 0</div>
+            </div>
+
+        </div>
+
+        <!-- TABLA -->
+        <div class="tabla-wrap">
+            <div class="tabla-header">
+                <h2>Contabilización por Apartado</h2>
+            </div>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 150px;">BOTELLA</th>
+                            <th style="width: 70px; text-align: center;">INICIAL</th>
+
+                            <th colspan="2" class="section-header sec-promo">🎉 PROMO</th>
+                            <th colspan="2" class="section-header sec-normal">🥃 NORMAL</th>
+                            <th colspan="2" class="section-header sec-vaso">🍺 VASO</th>
+                            <th colspan="2" class="section-header sec-entrada">🚪 ENTRADA</th>
+
+                            <th style="width: 70px; text-align: center; border-bottom: 2px solid var(--yellow);">
+                                <span style="color: var(--yellow);">RESTANTE</span><br>
+                                <span style="font-size: 0.55rem; color: var(--muted);">botellas llenas</span>
+                            </th>
+                            <th colspan="1" class="section-header sec-total">TOTAL Bs. </th>
+                        </tr>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th class="center" style="color: var(--purple);">Cant</th>
+                            <th class="center" style="color: var(--purple);">Bs. </th>
+                            <th class="center" style="color: var(--orange);">Cant</th>
+                            <th class="center" style="color: var(--orange);">Bs. </th>
+                            <th class="center" style="color: var(--blue);">Cant</th>
+                            <th class="center" style="color: var(--blue);">Bs. </th>
+                            <th class="center" style="color: #06b6d4;">Cant</th>
+                            <th class="center" style="color: #06b6d4;">Bs. </th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-planilla">
+                        <tr>
+                            <td colspan="12" class="estado-tabla">
+                                <div class="icon">📋</div>
+                                <div>Seleccioná fecha y toca "Cargar"</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tfoot id="tfoot-planilla"></tfoot>
+                </table>
+            </div>
+        </div>
+
+        <!-- DETALLE DE VENTAS -->
+        <div class="tabla-wrap" style="margin-top: 30px;">
+            <div class="tabla-header">
+                <h2>Detalle de Ventas (Extra y Combos)</h2>
+            </div>
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; max-width: 600px; margin: 0 auto;">
+                    <thead>
+                        <tr>
+                            <th style="text-align: left; padding-left: 16px;">Ítem Vendido</th>
+                            <th style="text-align: center; width: 80px;">Cant</th>
+                            <th style="text-align: right; padding-right: 16px; width: 120px;">Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-detalle">
+                        <tr>
+                            <td colspan="3" class="estado-tabla">
+                                <div class="icon">📋</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
 
-    <!-- RESUMEN -->
-    <div class="resumen" id="resumen" style="display: none;">
-        <div class="card">
-            <div class="card-label">Total Recaudado</div>
-            <div class="card-value green" id="card-total">Bs. 0.00</div>
-        </div>
-        <div class="card">
-            <div class="card-label">🎉 Promos</div>
-            <div class="card-value purple" id="card-promo">0 / Bs. 0</div>
-        </div>
-        <div class="card">
-            <div class="card-label">🥃 Normales</div>
-            <div class="card-value" style="color: var(--orange);" id="card-normal">0 / Bs. 0</div>
-        </div>
-        <div class="card">
-            <div class="card-label">🍺 Vasos</div>
-            <div class="card-value" style="color: var(--blue);" id="card-vaso">0 / Bs. 0</div>
-        </div>
-        <div class="card">
-            <div class="card-label">🚪 Entradas</div>
-            <div class="card-value" style="color: #06b6d4;" id="card-entrada">0 / Bs. 0</div>
-        </div>
+    <div id="toast"></div>
 
-    </div>
+    <script>
+        const API_URL = '/api';
+        const API_TOKEN = 'token_secreto_bar_123';
+        let planillaData = [];
 
-    <!-- TABLA -->
-    <div class="tabla-wrap">
-        <div class="tabla-header">
-            <h2>Contabilización por Apartado</h2>
-        </div>
-        <div style="overflow-x: auto;">
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width: 150px;">BOTELLA</th>
-                        <th style="width: 70px; text-align: center;">INICIAL</th>
-
-                        <th colspan="2" class="section-header sec-promo">🎉 PROMO</th>
-                        <th colspan="2" class="section-header sec-normal">🥃 NORMAL</th>
-                        <th colspan="2" class="section-header sec-vaso">🍺 VASO</th>
-                        <th colspan="2" class="section-header sec-entrada">🚪 ENTRADA</th>
-
-                        <th style="width: 70px; text-align: center; border-bottom: 2px solid var(--yellow);">
-                            <span style="color: var(--yellow);">RESTANTE</span><br>
-                            <span style="font-size: 0.55rem; color: var(--muted);">botellas llenas</span>
-                        </th>
-                        <th colspan="1" class="section-header sec-total">TOTAL Bs. </th>
-                    </tr>
-                    <tr>
-                        <th></th><th></th>
-                        <th class="center" style="color: var(--purple);">Cant</th>
-                        <th class="center" style="color: var(--purple);">Bs. </th>
-                        <th class="center" style="color: var(--orange);">Cant</th>
-                        <th class="center" style="color: var(--orange);">Bs. </th>
-                        <th class="center" style="color: var(--blue);">Cant</th>
-                        <th class="center" style="color: var(--blue);">Bs. </th>
-                        <th class="center" style="color: #06b6d4;">Cant</th>
-                        <th class="center" style="color: #06b6d4;">Bs. </th>
-                        <th></th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody id="tbody-planilla">
-                    <tr><td colspan="12" class="estado-tabla">
-                        <div class="icon">📋</div>
-                        <div>Seleccioná fecha y toca "Cargar"</div>
-                    </td></tr>
-                </tbody>
-                <tfoot id="tfoot-planilla"></tfoot>
-            </table>
-        </div>
-    </div>
-
-</div>
-
-<div id="toast"></div>
-
-<script>
-const API_URL = '/api';
-const API_TOKEN = 'token_secreto_bar_123';
-let planillaData = [];
-
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('fecha-planilla').value = new Date().toISOString().slice(0, 10);
-});
-
-async function cargarPlanilla() {
-    const fecha = document.getElementById('fecha-planilla').value;
-    if (!fecha) { toast('Seleccioná una fecha', 'err'); return; }
-
-    const tbody = document.getElementById('tbody-planilla');
-    tbody.innerHTML = `<tr><td colspan="12" class="estado-tabla"><div class="icon">⏳</div></td></tr>`;
-
-    try {
-        const res = await fetch(`${API_URL}/planilla/${fecha}`, {
-            headers: { 'Authorization': `Bearer ${API_TOKEN}` }
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('fecha-planilla').value = new Date().toISOString().slice(0, 10);
         });
-        const data = await res.json();
 
-        if (!res.ok || !data.success) {
-            tbody.innerHTML = `<tr><td colspan="12" class="estado-tabla">⚠️ ${data.error || 'Sin datos'}</td></tr>`;
-            return;
+        async function cargarPlanilla() {
+            const fecha = document.getElementById('fecha-planilla').value;
+            if (!fecha) { toast('Seleccioná una fecha', 'err'); return; }
+
+            const tbody = document.getElementById('tbody-planilla');
+            tbody.innerHTML = `<tr><td colspan="12" class="estado-tabla"><div class="icon">⏳</div></td></tr>`;
+
+            try {
+                const res = await fetch(`${API_URL}/planilla/${fecha}`, {
+                    headers: { 'Authorization': `Bearer ${API_TOKEN}` }
+                });
+                const data = await res.json();
+
+                if (!res.ok || !data.success) {
+                    tbody.innerHTML = `<tr><td colspan="12" class="estado-tabla">⚠️ ${data.error || 'Sin datos'}</td></tr>`;
+                    return;
+                }
+
+                planillaData = data.filas || [];
+                renderizarTabla(planillaData, data.totales || {});
+                renderizarDetalle(data.detalle_ventas || []);
+                document.getElementById('label-fecha').textContent = new Date(fecha).toLocaleDateString('es');
+                document.getElementById('resumen').style.display = 'grid';
+                document.getElementById('btn-exportar').disabled = false;
+
+            } catch (err) {
+                console.error(err);
+                tbody.innerHTML = `<tr><td colspan="12" class="estado-tabla">❌ Error de conexión</td></tr>`;
+            }
         }
 
-        planillaData = data.filas || [];
-        renderizarTabla(planillaData, data.totales || {});
-        document.getElementById('label-fecha').textContent = new Date(fecha).toLocaleDateString('es');
-        document.getElementById('resumen').style.display = 'grid';
-        document.getElementById('btn-exportar').disabled = false;
+        function renderizarTabla(filas, totales) {
+            const tbody = document.getElementById('tbody-planilla');
 
-    } catch (err) {
-        console.error(err);
-        tbody.innerHTML = `<tr><td colspan="12" class="estado-tabla">❌ Error de conexión</td></tr>`;
-    }
-}
+            if (!filas || filas.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="12" class="estado-tabla">Sin ventas para esta fecha</td></tr>';
+                return;
+            }
 
-function renderizarTabla(filas, totales) {
-    const tbody = document.getElementById('tbody-planilla');
-    
-    if (!filas || filas.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="12" class="estado-tabla">Sin ventas para esta fecha</td></tr>';
-        return;
-    }
-
-    tbody.innerHTML = filas.map((f, i) => `
+            tbody.innerHTML = filas.map((f, i) => `
         <tr>
             <td><strong>${f.nombre}</strong></td>
             <td class="num-inicial">${parseInt(f.stock_inicial)}</td>
@@ -174,7 +207,7 @@ function renderizarTabla(filas, totales) {
 
             <!-- RESTANTE (calculado: stock_inicial - promo - normal) -->
             <td style="text-align: center; font-family: var(--mono); font-weight: 700; color: var(--yellow);">
-                ${f.restante ?? (parseInt(f.stock_inicial) - (f.promo_unidades||0) - (f.normal_unidades||0))}
+                ${f.restante ?? (parseInt(f.stock_inicial) - (f.promo_unidades || 0) - (f.normal_unidades || 0))}
             </td>
 
             <!-- TOTAL RECAUDADO -->
@@ -182,9 +215,9 @@ function renderizarTabla(filas, totales) {
         </tr>
     `).join('');
 
-    // FILA TOTAL
-    const tfoot = document.getElementById('tfoot-planilla');
-    tfoot.innerHTML = `
+            // FILA TOTAL
+            const tfoot = document.getElementById('tfoot-planilla');
+            tfoot.innerHTML = `
         <tr class="fila-total">
             <td><strong>TOTAL</strong></td>
             <td class="num"></td>
@@ -201,15 +234,15 @@ function renderizarTabla(filas, totales) {
         </tr>
     `;
 
-    // ACTUALIZAR CARDS
-    document.getElementById('card-total').textContent = `Bs. ${parseFloat(totales.total_recaudado || 0).toFixed(2)}`;
-    document.getElementById('card-promo').textContent = `${totales.promo_unidades || 0} / Bs. ${parseFloat(totales.promo_recaudado || 0).toFixed(2)}`;
-    document.getElementById('card-normal').textContent = `${totales.normal_unidades || 0} / Bs. ${parseFloat(totales.normal_recaudado || 0).toFixed(2)}`;
-    document.getElementById('card-vaso').textContent = `${totales.vaso_unidades || 0} / Bs. ${parseFloat(totales.vaso_recaudado || 0).toFixed(2)}`;
-    document.getElementById('card-entrada').textContent = `${totales.entrada_unidades || 0} / Bs. ${parseFloat(totales.entrada_recaudado || 0).toFixed(2)}`;
-}
+            // ACTUALIZAR CARDS
+            document.getElementById('card-total').textContent = `Bs. ${parseFloat(totales.total_recaudado || 0).toFixed(2)}`;
+            document.getElementById('card-promo').textContent = `${totales.promo_unidades || 0} / Bs. ${parseFloat(totales.promo_recaudado || 0).toFixed(2)}`;
+            document.getElementById('card-normal').textContent = `${totales.normal_unidades || 0} / Bs. ${parseFloat(totales.normal_recaudado || 0).toFixed(2)}`;
+            document.getElementById('card-vaso').textContent = `${totales.vaso_unidades || 0} / Bs. ${parseFloat(totales.vaso_recaudado || 0).toFixed(2)}`;
+            document.getElementById('card-entrada').textContent = `${totales.entrada_unidades || 0} / Bs. ${parseFloat(totales.entrada_recaudado || 0).toFixed(2)}`;
+        }
 
-function renderizarDetalle(detalle) {
+        function renderizarDetalle(detalle) {
             const tbody = document.getElementById('tbody-detalle');
             if (!detalle || detalle.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="3" class="estado-tabla">No hay ventas registradas</td></tr>';
@@ -219,7 +252,7 @@ function renderizarDetalle(detalle) {
             tbody.innerHTML = detalle.map(d => {
                 let colorNombre = 'inherit';
                 let styleExtras = '';
-                
+
                 if (d.nombre.includes('🥤 (Acompañante')) {
                     colorNombre = 'var(--sub)';
                     styleExtras = 'font-style: italic; opacity: 0.9;';
@@ -238,43 +271,44 @@ function renderizarDetalle(detalle) {
         }
 
         function exportarExcel() {
-    if (!planillaData.length) return;
-    
-    const ws_data = [
-        ['BOTELLA', 'INICIAL', 'PROMO cant', 'PROMO Bs. ', 'NORMAL cant', 'NORMAL Bs. ', 'VASO cant', 'VASO Bs. ', 'ENTRADA cant', 'ENTRADA Bs. ', 'RESTANTE', 'TOTAL Bs. ']
-    ];
+            if (!planillaData.length) return;
 
-    planillaData.forEach(f => {
-        ws_data.push([
-            f.nombre,
-            f.stock_inicial,
-            f.promo_unidades || 0,
-            f.promo_recaudado || 0,
-            f.normal_unidades || 0,
-            f.normal_recaudado || 0,
-            f.vaso_unidades || 0,
-            f.vaso_recaudado || 0,
-            f.entrada_unidades || 0,
-            f.entrada_recaudado || 0,
-            f.restante ?? (parseInt(f.stock_inicial) - (f.promo_unidades||0) - (f.normal_unidades||0)),
-            f.total_recaudado || 0
-        ]);
-    });
+            const ws_data = [
+                ['BOTELLA', 'INICIAL', 'PROMO cant', 'PROMO Bs. ', 'NORMAL cant', 'NORMAL Bs. ', 'VASO cant', 'VASO Bs. ', 'ENTRADA cant', 'ENTRADA Bs. ', 'RESTANTE', 'TOTAL Bs. ']
+            ];
 
-    const ws = XLSX.utils.aoa_to_sheet(ws_data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Planilla');
-    XLSX.writeFile(wb, `Planilla_${document.getElementById('fecha-planilla').value}.xlsx`);
-    toast('✓ Exportado', 'ok');
-}
+            planillaData.forEach(f => {
+                ws_data.push([
+                    f.nombre,
+                    f.stock_inicial,
+                    f.promo_unidades || 0,
+                    f.promo_recaudado || 0,
+                    f.normal_unidades || 0,
+                    f.normal_recaudado || 0,
+                    f.vaso_unidades || 0,
+                    f.vaso_recaudado || 0,
+                    f.entrada_unidades || 0,
+                    f.entrada_recaudado || 0,
+                    f.restante ?? (parseInt(f.stock_inicial) - (f.promo_unidades || 0) - (f.normal_unidades || 0)),
+                    f.total_recaudado || 0
+                ]);
+            });
 
-function toast(msg, tipo = 'ok') {
-    const el = document.getElementById('toast');
-    el.textContent = msg;
-    el.className = `show ${tipo}`;
-    setTimeout(() => el.className = tipo, 3500);
-}
-</script>
+            const ws = XLSX.utils.aoa_to_sheet(ws_data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Planilla');
+            XLSX.writeFile(wb, `Planilla_${document.getElementById('fecha-planilla').value}.xlsx`);
+            toast('✓ Exportado', 'ok');
+        }
+
+        function toast(msg, tipo = 'ok') {
+            const el = document.getElementById('toast');
+            el.textContent = msg;
+            el.className = `show ${tipo}`;
+            setTimeout(() => el.className = tipo, 3500);
+        }
+    </script>
 
 </body>
+
 </html>

@@ -16,6 +16,14 @@ document.addEventListener('DOMContentLoaded', () => {
     actualizarReloj();
     setInterval(actualizarReloj, 1000);
     cargarMenu();
+
+    try {
+        const guardadas = localStorage.getItem('babel_ventas_recientes');
+        if (guardadas) {
+            ventasRecientes = JSON.parse(guardadas);
+            renderizarVentasRecientes();
+        }
+    } catch (e) { }
 });
 
 function actualizarReloj() {
@@ -196,6 +204,7 @@ function agregarVentaReciente(venta) {
     ventasRecientes.unshift(venta);
     if (ventasRecientes.length > 30) ventasRecientes.pop();
     renderizarVentasRecientes();
+    localStorage.setItem('babel_ventas_recientes', JSON.stringify(ventasRecientes));
 }
 
 function renderizarVentasRecientes() {
@@ -458,19 +467,16 @@ function confirmarExtra() {
     const desc = document.getElementById('ex-desc').value.trim();
     const precio = parseFloat(document.getElementById('ex-precio').value) || 0;
     if (!desc) { mostrarToast('Escribí una descripción'); return; }
-    const fakeId = 'EXTRA_' + Date.now();
-    // Si ya hay uno igual, incrementa cantidad
-    const existe = ticket.find(t => t.nombre === desc && t.es_extra);
-    if (existe) { existe.cantidad++; }
-    else {
-        ticket.push({
-            trago_id: fakeId, nombre: desc, precio,
-            cantidad: 1, tipo_venta: exTipo, es_extra: true,
-        });
-    }
+
+    const payload = {
+        items: [],
+        items_extra: [{ nombre: desc, precio: precio, cantidad: 1, tipo_venta: exTipo }],
+        tipo_pago: 'EFECTIVO',
+        efectivo_recibido: precio
+    };
+
+    enviarCobroRapido(payload, precio, `➕ ${desc}`);
     cerrarModalExtra();
-    renderTicket();
-    mostrarToast('✓ Extra añadido');
 }
 document.getElementById('modal-extra').addEventListener('click', e => {
     if (e.target.id === 'modal-extra') cerrarModalExtra();
@@ -539,20 +545,25 @@ function confirmarCombo() {
         Math.round((comboLicorSeleccionado.precio + comboRefrescoSeleccionado.precio) * 0.9 * 100) / 100;
     if (precioCombo <= 0) { mostrarToast('Ingresa un precio válido'); return; }
 
-    ticket.push({
-        trago_id: 'COMBO_' + Date.now(),
-        nombre: `${comboLicorSeleccionado.nombre} + ${comboRefrescoSeleccionado.nombre}`,
-        precio: precioCombo,
-        cantidad: 1,
-        tipo_venta: 'COMBO',
-        es_combo: true,
-        licor_id: comboLicorSeleccionado.id,
-        refresco_id: comboRefrescoSeleccionado.id,
-        vasos_por_botella: 0
-    });
+    const descCombo = `${comboLicorSeleccionado.nombre} + ${comboRefrescoSeleccionado.nombre}`;
+
+    const payload = {
+        items: [{
+            trago_id: 'COMBO_CUSTOM', // No importa el trago_id, el backend usa licor_id y refresco_id
+            cantidad: 1,
+            es_combo: true,
+            licor_id: comboLicorSeleccionado.id,
+            refresco_id: comboRefrescoSeleccionado.id,
+            precio: precioCombo,
+            nombre: descCombo
+        }],
+        items_extra: [],
+        tipo_pago: 'EFECTIVO',
+        efectivo_recibido: precioCombo
+    };
+
+    enviarCobroRapido(payload, precioCombo, `🎁 ${descCombo}`);
     cerrarModalCombo();
-    renderTicket();
-    mostrarToast('✓ Combo agregado');
 }
 document.getElementById('modal-combo').addEventListener('click', e => {
     if (e.target.id === 'modal-combo') cerrarModalCombo();
