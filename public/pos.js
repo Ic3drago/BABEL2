@@ -340,9 +340,7 @@ async function confirmarCobro() {
             mostrarExito(total, vuelto > 0 ? vuelto : 0, data.id_ticket);
 
             // Limpiar ticket
-            ticket.forEach(t => actualizarBadgeBoton(t.trago_id, 0));
             ticket = [];
-            renderTicket();
             cargarMenu();
         } else {
             mostrarToast(data.error || 'Error al procesar el cobro');
@@ -394,9 +392,7 @@ async function procesarFiado() {
         const data = await res.json();
         if (res.ok && data.success) {
             mostrarExito(ticket.reduce((s, i) => s + i.precio * i.cantidad, 0), 0, data.id_ticket);
-            ticket.forEach(t => actualizarBadgeBoton(t.trago_id, 0));
             ticket = [];
-            renderTicket();
             cargarMenu();
         } else {
             mostrarToast(data.error || 'Error al registrar fiado');
