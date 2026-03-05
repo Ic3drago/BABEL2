@@ -17,7 +17,18 @@
     <div id="panel-left">
         <header class="pos-header">
             <h1>BABEL / CAJA</h1>
-            <div class="turno">Turno: <span id="turno-hora">--:--</span></div>
+            <div class="turno" style="display:flex; align-items:center; gap:15px;">
+                <span>Turno: <span id="turno-hora">--:--</span></span>
+                <div
+                    style="background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:4px; display:flex; gap:4px;">
+                    <button id="t-m-efectivo" onclick="setMetodoRapido('EFECTIVO')"
+                        style="padding:4px 12px; border-radius:6px; border:none; font-weight:bold; cursor:pointer; background:var(--text); color:var(--bg); transition:0.2s;">💵
+                        Efectivo</button>
+                    <button id="t-m-qr" onclick="setMetodoRapido('QR')"
+                        style="padding:4px 12px; border-radius:6px; border:none; font-weight:bold; cursor:pointer; background:transparent; color:var(--sub); transition:0.2s;">📲
+                        QR</button>
+                </div>
+            </div>
             <div style="display: flex; gap: 10px;">
                 <button class="btn-extra"
                     style="padding: 8px 16px; background: var(--green); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;"
@@ -103,7 +114,7 @@
                 <button class="pago-opt selected" data-metodo="EFECTIVO" onclick="seleccionarPago(this)">💵
                     Efectivo</button>
                 <button class="pago-opt" data-metodo="TARJETA" onclick="seleccionarPago(this)">💳 Tarjeta</button>
-                <button class="pago-opt" data-metodo="TRANSFER" onclick="seleccionarPago(this)">📲 Transfer</button>
+                <button class="pago-opt" data-metodo="QR" onclick="seleccionarPago(this)">📲 QR</button>
             </div>
 
             <div id="efectivo-wrap" class="visible">

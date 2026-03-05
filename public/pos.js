@@ -7,7 +7,25 @@ const API_TOKEN = 'token_secreto_bar_123';
 let menuItems = [];
 let ticket = [];   // [{ trago_id, nombre, precio, vasos_por_botella, cantidad }]
 let metodoPago = 'EFECTIVO';
+let metodoRapidoGlobal = 'EFECTIVO';
 let categoriaActual = 'TODOS';
+
+function setMetodoRapido(metodo) {
+    metodoRapidoGlobal = metodo;
+    const btnE = document.getElementById('t-m-efectivo');
+    const btnQ = document.getElementById('t-m-qr');
+    if (metodo === 'EFECTIVO') {
+        btnE.style.background = 'var(--text)';
+        btnE.style.color = 'var(--bg)';
+        btnQ.style.background = 'transparent';
+        btnQ.style.color = 'var(--sub)';
+    } else {
+        btnQ.style.background = 'var(--purple)';
+        btnQ.style.color = 'white';
+        btnE.style.background = 'transparent';
+        btnE.style.color = 'var(--sub)';
+    }
+}
 
 // ═══════════════════════════════════════════════════════════
 // INIT
@@ -157,7 +175,7 @@ function agregarAlTicket(item) {
     const payload = {
         items: [{ trago_id: item.id, cantidad: 1 }],
         items_extra: [],
-        tipo_pago: 'EFECTIVO',
+        tipo_pago: metodoRapidoGlobal,
         efectivo_recibido: item.precio
     };
     enviarCobroRapido(payload, item.precio, item.nombre_boton);
@@ -186,7 +204,8 @@ async function enviarCobroRapido(payload, totalEsperado, nombreItemResumen) {
                 nombre: nombreItemResumen,
                 tipo: payload.items && payload.items[0] ? (payload.items[0].es_combo ? 'COMBO' : 'NORMAL') : '',
                 total: totalEsperado,
-                hora: new Date().toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' })
+                hora: new Date().toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' }),
+                pago: payload.tipo_pago
             });
             restarStockLocal(payload);
         } else {
@@ -245,7 +264,7 @@ function renderizarVentasRecientes() {
                 <span style="font-weight:bold;font-size:0.95rem;">${v.nombre}</span>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;color:var(--sub);font-size:0.75rem;font-family:var(--mono);">
-                <span>#${v.ticket.substring(0, 8)} &middot; <span style="color:var(--green);font-weight:bold;">Bs. ${parseFloat(v.total).toFixed(2)}</span></span>
+                <span>#${v.ticket.substring(0, 8)} &middot; <span style="color:var(--green);font-weight:bold;">Bs. ${parseFloat(v.total).toFixed(2)}</span>${v.pago === 'QR' ? ' &middot; 📲 QR' : ''}</span>
                 <span>${v.hora}</span>
             </div>
         </div>`).join('');
@@ -577,7 +596,7 @@ function confirmarExtra() {
     const payload = {
         items: [],
         items_extra: [{ nombre: desc, precio: precio, cantidad: 1, tipo_venta: exTipo }],
-        tipo_pago: 'EFECTIVO',
+        tipo_pago: metodoRapidoGlobal,
         efectivo_recibido: precio
     };
 
@@ -665,7 +684,7 @@ function confirmarCombo() {
             nombre: descCombo
         }],
         items_extra: [],
-        tipo_pago: 'EFECTIVO',
+        tipo_pago: metodoRapidoGlobal,
         efectivo_recibido: precioCombo
     };
 

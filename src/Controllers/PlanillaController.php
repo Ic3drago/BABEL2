@@ -164,6 +164,27 @@ class PlanillaController {
             foreach ($totales as $k => $v) {
                 if (str_contains($k, 'recaudado')) $totales[$k] = round((float)$v, 2);
             }
+            
+            // Buscar totales por método de pago de manera directa:
+            $stmtMetodos = $this->db->prepare("
+                SELECT tipo_pago, SUM(total_cobrado) as total 
+                FROM ventas_tickets 
+                WHERE created_at >= :fechaInicio AND created_at <= :fechaFin 
+                GROUP BY tipo_pago
+            ");
+            $stmtMetodos->execute(['fechaInicio' => $fechaInicio, 'fechaFin' => $fechaFin]);
+            $metodos = $stmtMetodos->fetchAll(\PDO::FETCH_ASSOC);
+            
+            $totales['efectivo_recaudado'] = 0.0;
+            $totales['qr_recaudado'] = 0.0;
+            $totales['transfer_recaudado'] = 0.0;
+            
+            foreach($metodos as $m) {
+                if($m['tipo_pago'] === 'EFECTIVO') $totales['efectivo_recaudado'] += (float)$m['total'];
+                elseif($m['tipo_pago'] === 'QR') $totales['qr_recaudado'] += (float)$m['total'];
+                elseif($m['tipo_pago'] === 'TRANSFER') $totales['transfer_recaudado'] += (float)$m['total'];
+            }
+
             // 3. Detalle exacto de productos vendidos (Agrupado)
             $stmtDetalle = $this->db->prepare("
                 SELECT 

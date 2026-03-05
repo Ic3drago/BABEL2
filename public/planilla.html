@@ -43,6 +43,8 @@
             <div class="card">
                 <div class="card-label">Total Recaudado</div>
                 <div class="card-value green" id="card-total">Bs. 0.00</div>
+                <div style="font-size:0.75rem; color:var(--sub); margin-top:4px;" id="card-desglose">💵 0.00 / 📲 0.00
+                </div>
             </div>
             <div class="card">
                 <div class="card-label">🎉 Promos</div>
@@ -243,6 +245,10 @@
 
             // ACTUALIZAR CARDS
             document.getElementById('card-total').textContent = `Bs. ${parseFloat(totales.total_recaudado || 0).toFixed(2)}`;
+            const desglose = document.getElementById('card-desglose');
+            if (desglose) {
+                desglose.textContent = `💵 Bs. ${parseFloat(totales.efectivo_recaudado || 0).toFixed(2)}  /  📲 Bs. ${parseFloat(totales.qr_recaudado || 0).toFixed(2)}`;
+            }
             document.getElementById('card-promo').textContent = `${totales.promo_unidades || 0} / Bs. ${parseFloat(totales.promo_recaudado || 0).toFixed(2)}`;
             document.getElementById('card-normal').textContent = `${totales.normal_unidades || 0} / Bs. ${parseFloat(totales.normal_recaudado || 0).toFixed(2)}`;
             document.getElementById('card-vaso').textContent = `${totales.vaso_unidades || 0} / Bs. ${parseFloat(totales.vaso_recaudado || 0).toFixed(2)}`;
