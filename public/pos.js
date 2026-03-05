@@ -726,6 +726,33 @@ function abrirModalExtra() {
         btnAddQ.style.display = 'block';
     }
 }
+
+function abrirModalSobrante() {
+    document.getElementById('ex-desc').value = 'Vaso Sobrante [    ]';
+    document.getElementById('ex-precio').value = '';
+    exTipo = 'VASO';
+    document.querySelectorAll('.mex-tipo').forEach(b => b.classList.remove('sel'));
+    document.querySelector('[data-t="VASO"]').classList.add('sel');
+    document.getElementById('modal-extra').classList.add('open');
+    setTimeout(() => {
+        const inp = document.getElementById('ex-desc');
+        inp.focus();
+        inp.setSelectionRange(15, 19); // Select the brackets space for quick typing
+    }, 80);
+
+    // Ajustar botones según el modo de venta
+    const btnAddE = document.getElementById('extra-btn-add-efectivo');
+    const btnAddQ = document.getElementById('extra-btn-add-qr');
+    if (modeVentaGlobal === 'MULTIPLE') {
+        btnAddE.textContent = 'AÑADIR AL TICKET';
+        btnAddE.style.background = 'var(--blue)';
+        btnAddQ.style.display = 'none';
+    } else {
+        btnAddE.textContent = '💵 EFECTIVO';
+        btnAddE.style.background = 'var(--green)';
+        btnAddQ.style.display = 'block';
+    }
+}
 function cerrarModalExtra() {
     document.getElementById('modal-extra').classList.remove('open');
 }

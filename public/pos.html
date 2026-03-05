@@ -41,6 +41,9 @@
                 <button class="btn-extra"
                     style="padding: 8px 16px; background: var(--purple); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;"
                     onclick="abrirModalExtra()">➕ EXTRA</button>
+                <button class="btn-extra"
+                    style="padding: 8px 16px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; border: 1px solid #60a5fa;"
+                    onclick="abrirModalSobrante()">💧 SOBRANTE</button>
                 <button
                     style="padding: 8px 16px; background: var(--red); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;"
                     onclick="abrirModalSalir()">Salir</button>
@@ -99,6 +102,11 @@
             <button class="btn-extra" onclick="abrirModalExtra()"
                 title="Registrar algo vendido que no está en el menú (ej: cortesía, botella especial)">
                 ➕ EXTRA / FUERA DEL MENÚ
+            </button>
+            <button class="btn-extra" onclick="abrirModalSobrante()"
+                style="border-color:#3b82f6; color:#60a5fa; margin-top:-2px;"
+                title="Registrar vasos que rindieron extra de una botella. Se sumará el dinero pero NO descontará botellas de inventario.">
+                💧 VASO SOBRANTE
             </button>
         </div>
     </div>
