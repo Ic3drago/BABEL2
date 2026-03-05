@@ -69,6 +69,11 @@ body {
     justify-content: space-between;
     background: var(--surface);
     flex-shrink: 0;
+    flex-wrap: wrap;
+    gap: 15px;
+    position: relative;
+    z-index: 50;
+    /* Ensure header buttons are clickable over any floating content */
 }
 
 .pos-header h1 {
@@ -214,8 +219,10 @@ body.promo-on .trago-btn[data-tipo="PROMO"] .trago-nombre {
     overflow-y: auto;
     padding: 16px 20px;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    /* Aumentado de 140px a 170px */
+    gap: 15px;
+    /* Más espacio entre tragos */
     align-content: start;
 }
 
@@ -235,17 +242,20 @@ body.promo-on .trago-btn[data-tipo="PROMO"] .trago-nombre {
 .trago-btn {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 14px 10px;
+    border-radius: 12px;
+    padding: 20px 14px;
+    /* Más padding para hacerlo más grande verticalmente */
     cursor: pointer;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
+    justify-content: center;
+    gap: 10px;
     transition: all 0.15s;
     position: relative;
     overflow: hidden;
-    min-height: 110px;
+    min-height: 140px;
+    /* Tarjeta más alta */
 }
 
 .trago-btn:hover:not(:disabled) {
@@ -334,7 +344,7 @@ body.promo-on .trago-btn[data-tipo="PROMO"] .trago-nombre {
 }
 
 .trago-nombre {
-    font-size: 0.82rem;
+    font-size: 1.1rem;
     font-weight: 700;
     text-align: center;
     line-height: 1.3;
@@ -343,7 +353,7 @@ body.promo-on .trago-btn[data-tipo="PROMO"] .trago-nombre {
 
 .trago-precio {
     font-family: var(--mono);
-    font-size: 1rem;
+    font-size: 1.15rem;
     font-weight: 700;
     color: var(--green);
 }
@@ -739,10 +749,15 @@ body.promo-on .trago-btn[data-tipo="PROMO"] .trago-nombre {
     padding: 10px 12px;
     color: var(--text);
     font-family: var(--sans);
-    font-size: .9rem;
     outline: none;
     transition: border-color .15s;
     margin-bottom: 14px;
+}
+
+/* Fix para botones con span/iconos - Evitar que los hijos capturen el click */
+.btn-extra *,
+.pos-header button * {
+    pointer-events: none;
 }
 
 .mex-inp:focus {
