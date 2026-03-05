@@ -34,12 +34,18 @@ function setModoVenta(modo) {
     }
 }
 
+function abrirModalSalir() {
+    document.getElementById('modal-salir').classList.add('open');
+}
+
+function cerrarModalSalir() {
+    document.getElementById('modal-salir').classList.remove('open');
+}
+
 function cerrarSesion() {
-    if (confirm('¿Seguro que quieres salir a la pantalla principal?')) {
-        localStorage.removeItem('babel_token');
-        localStorage.removeItem('babel_role');
-        window.location.href = '/login';
-    }
+    localStorage.removeItem('babel_token');
+    localStorage.removeItem('babel_role');
+    window.location.href = '/login';
 }
 
 // ═══════════════════════════════════════════════════════════

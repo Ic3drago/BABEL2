@@ -43,7 +43,7 @@
                     onclick="abrirModalExtra()">➕ EXTRA</button>
                 <button
                     style="padding: 8px 16px; background: var(--red); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;"
-                    onclick="cerrarSesion()">Salir</button>
+                    onclick="abrirModalSalir()">Salir</button>
             </div>
         </header>
 
@@ -209,6 +209,27 @@
                 <button onclick="confirmarAnular()" id="btn-confirm-anular"
                     style="flex:1; padding:12px; background:var(--red); border:none; border-radius:8px; color:white; font-weight:bold; cursor:pointer;">
                     Sí, ANULAR
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════ MODAL SALIR (SANDBOX) ═══════════════ -->
+    <div id="modal-salir">
+        <div class="modal-anular-box" style="text-align:center;">
+            <div style="font-size:3rem; margin-bottom:10px;">🚪</div>
+            <h2 style="color:var(--red); font-size:1.4rem; margin-bottom:10px;">¿Cerrar Sesión?</h2>
+            <p style="color:var(--sub); font-size:0.9rem; margin-bottom:20px; line-height:1.4;">
+                Saldrás a la pantalla principal y tendrás que volver a ingresar tu código.
+            </p>
+            <div style="display:flex; gap:10px;">
+                <button onclick="cerrarModalSalir()"
+                    style="flex:1; padding:12px; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); font-weight:bold; cursor:pointer;">
+                    Me quedo
+                </button>
+                <button onclick="cerrarSesion()"
+                    style="flex:1; padding:12px; background:var(--red); border:none; border-radius:8px; color:white; font-weight:bold; cursor:pointer;">
+                    Sí, Salir
                 </button>
             </div>
         </div>
