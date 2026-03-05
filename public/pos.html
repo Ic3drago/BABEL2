@@ -274,10 +274,16 @@
                     style="padding:11px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--sub);font-weight:700;cursor:pointer;font-family:var(--sans)">
                     Cancelar
                 </button>
-                <button id="btn-confirmar-extra" onclick="confirmarExtra()"
-                    style="padding:11px;background:var(--purple);border:none;border-radius:8px;color:#fff;font-family:var(--mono);font-weight:700;cursor:pointer">
-                    VENDER CON EFECTIVO
-                </button>
+                <div style="display:flex; gap:10px; flex:1;">
+                    <button id="extra-btn-add-efectivo" onclick="confirmarExtra('EFECTIVO')"
+                        style="flex:1; padding:11px;background:var(--green);border:none;border-radius:8px;color:#fff;font-family:var(--mono);font-weight:700;cursor:pointer">
+                        💵 EFECTIVO
+                    </button>
+                    <button id="extra-btn-add-qr" onclick="confirmarExtra('QR')"
+                        style="flex:1; padding:11px;background:var(--purple);border:none;border-radius:8px;color:#fff;font-family:var(--mono);font-weight:700;cursor:pointer">
+                        📲 QR
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -316,11 +322,18 @@
                 <span class="combo-price-value" id="combo-precio-mostrado">Bs. 0.00</span>
             </div>
 
-            <div class="combo-actions">
+            <div class="combo-actions" style="grid-template-columns: auto 1fr; gap:15px; display:grid;">
                 <button class="combo-btn-cancel" onclick="cerrarModalCombo()">Cancelar</button>
-                <button class="combo-btn-add" id="combo-btn-add" onclick="confirmarCombo()" disabled>
-                    VENDER AL CONTADO
-                </button>
+                <div style="display:flex; gap:10px;">
+                    <button class="combo-btn-add" id="combo-btn-add-efectivo" onclick="confirmarCombo('EFECTIVO')"
+                        disabled style="flex:1; background:var(--green);">
+                        💵 EFECTIVO
+                    </button>
+                    <button class="combo-btn-add" id="combo-btn-add-qr" onclick="confirmarCombo('QR')" disabled
+                        style="flex:1; background:var(--purple);">
+                        📲 QR
+                    </button>
+                </div>
             </div>
         </div>
     </div>

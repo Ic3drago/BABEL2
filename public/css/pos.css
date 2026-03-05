@@ -1496,3 +1496,23 @@ body.promo-on .trago-btn[data-tipo="PROMO"] .trago-nombre {
         font-size: 0.75rem !important;
     }
 }
+
+/* ── MODAL PAGO RAPIDO (NUEVO) ── */
+#modal-pago-rapido {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 150;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+}
+
+#modal-pago-rapido.visible {
+    opacity: 1;
+    pointer-events: all;
+}
