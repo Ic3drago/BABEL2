@@ -7,32 +7,9 @@ const API_TOKEN = 'token_secreto_bar_123';
 let menuItems = [];
 let ticket = [];   // [{ trago_id, nombre, precio, vasos_por_botella, cantidad }]
 let metodoPago = 'EFECTIVO';
-let metodoRapidoGlobal = 'EFECTIVO';
 let categoriaActual = 'TODOS';
 
-function setMetodoRapido(metodo) {
-    metodoRapidoGlobal = metodo;
-    const btnE = document.getElementById('t-m-efectivo');
-    const btnQ = document.getElementById('t-m-qr');
-    if (metodo === 'EFECTIVO') {
-        btnE.style.background = 'var(--text)';
-        btnE.style.color = 'var(--bg)';
-        btnQ.style.background = 'transparent';
-        btnQ.style.color = 'var(--sub)';
-    } else {
-        btnQ.style.background = 'var(--purple)';
-        btnQ.style.color = 'white';
-        btnE.style.background = 'transparent';
-        btnE.style.color = 'var(--sub)';
-    }
-
-    // Update texts in modals
-    const modalExtraBtn = document.getElementById('btn-confirmar-extra');
-    if (modalExtraBtn) modalExtraBtn.textContent = `VENDER CON ${metodo}`;
-
-    const modalComboBtn = document.getElementById('combo-btn-add');
-    if (modalComboBtn) modalComboBtn.textContent = `VENDER CON ${metodo}`;
-}
+let itemPendientePago = null; // Guardará el payload temporal de la venta rápida antes de elegir método
 
 function cerrarSesion() {
     if (confirm('¿Seguro que quieres salir a la pantalla principal?')) {
@@ -183,17 +160,38 @@ function filtrar(tipo, tabEl) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// 4. TICKET
+// 4. TICKET (Y PAGO RÁPIDO)
 // ═══════════════════════════════════════════════════════════
 let ventasRecientes = [];
+
 function agregarAlTicket(item) {
-    const payload = {
-        items: [{ trago_id: item.id, cantidad: 1 }],
-        items_extra: [],
-        tipo_pago: metodoRapidoGlobal,
-        efectivo_recibido: item.precio
+    itemPendientePago = {
+        payload: {
+            items: [{ trago_id: item.id, cantidad: 1 }],
+            items_extra: []
+        },
+        precio: item.precio,
+        nombre: item.nombre_boton
     };
-    enviarCobroRapido(payload, item.precio, item.nombre_boton);
+
+    document.getElementById('pago-rapido-desc').textContent = `${item.nombre_boton} - Bs. ${item.precio.toFixed(2)}`;
+    document.getElementById('modal-pago-rapido').classList.add('visible');
+}
+
+function cerrarPagoRapido() {
+    itemPendientePago = null;
+    document.getElementById('modal-pago-rapido').classList.remove('visible');
+}
+
+function confirmarPagoRapido(metodo) {
+    if (!itemPendientePago) return;
+
+    const payload = itemPendientePago.payload;
+    payload.tipo_pago = metodo;
+    payload.efectivo_recibido = itemPendientePago.precio;
+
+    enviarCobroRapido(payload, itemPendientePago.precio, itemPendientePago.nombre);
+    cerrarPagoRapido();
 }
 
 async function enviarCobroRapido(payload, totalEsperado, nombreItemResumen) {
@@ -603,7 +601,7 @@ function selExTipo(btn) {
     btn.classList.add('sel');
     exTipo = btn.dataset.t;
 }
-function confirmarExtra() {
+function confirmarExtra(metodo) {
     const desc = document.getElementById('ex-desc').value.trim();
     const precio = parseFloat(document.getElementById('ex-precio').value) || 0;
     if (!desc) { mostrarToast('Escribí una descripción'); return; }
@@ -611,7 +609,7 @@ function confirmarExtra() {
     const payload = {
         items: [],
         items_extra: [{ nombre: desc, precio: precio, cantidad: 1, tipo_venta: exTipo }],
-        tipo_pago: metodoRapidoGlobal,
+        tipo_pago: metodo,
         efectivo_recibido: precio
     };
 
@@ -660,11 +658,13 @@ function actualizarPrecioCombo() {
     const licorVal = document.getElementById('combo-licor').value;
     const refrescVal = document.getElementById('combo-refresco').value;
     const precioInput = parseFloat(document.getElementById('combo-precio-input').value) || 0;
-    const btnAdd = document.getElementById('combo-btn-add');
+    const btnAddE = document.getElementById('combo-btn-add-efectivo');
+    const btnAddQ = document.getElementById('combo-btn-add-qr');
 
     if (!licorVal || !refrescVal) {
         document.getElementById('combo-precio-mostrado').textContent = 'Bs. 0.00';
-        btnAdd.disabled = true;
+        btnAddE.disabled = true;
+        btnAddQ.disabled = true;
         return;
     }
     try {
@@ -676,9 +676,10 @@ function actualizarPrecioCombo() {
         Math.round((comboLicorSeleccionado.precio + comboRefrescoSeleccionado.precio) * 0.9 * 100) / 100;
 
     document.getElementById('combo-precio-mostrado').textContent = `Bs. ${precioFinal.toFixed(2)}`;
-    btnAdd.disabled = false;
+    btnAddE.disabled = false;
+    btnAddQ.disabled = false;
 }
-function confirmarCombo() {
+function confirmarCombo(metodo) {
     if (!comboLicorSeleccionado || !comboRefrescoSeleccionado) {
         mostrarToast('Selecciona licor y refresco'); return;
     }
@@ -699,7 +700,7 @@ function confirmarCombo() {
             nombre: descCombo
         }],
         items_extra: [],
-        tipo_pago: metodoRapidoGlobal,
+        tipo_pago: metodo,
         efectivo_recibido: precioCombo
     };
 
