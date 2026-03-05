@@ -1425,6 +1425,15 @@ body.promo-on .trago-btn[data-tipo="PROMO"] .trago-nombre {
         padding: 10px 12px !important;
     }
 
+    /* Ocultar texto de botones superiores en móviles muy estrechos para que entren */
+    .header-btn .txt {
+        display: none;
+    }
+
+    .header-btn {
+        padding: 8px 10px !important;
+    }
+
     .cat-tabs {
         padding: 8px 12px !important;
     }
