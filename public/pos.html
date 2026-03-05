@@ -36,6 +36,9 @@
                 <button class="btn-extra"
                     style="padding: 8px 16px; background: var(--purple); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;"
                     onclick="abrirModalExtra()">➕ EXTRA</button>
+                <button
+                    style="padding: 8px 16px; background: var(--red); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;"
+                    onclick="cerrarSesion()">Salir</button>
             </div>
         </header>
 
@@ -240,9 +243,9 @@
                     style="padding:11px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--sub);font-weight:700;cursor:pointer;font-family:var(--sans)">
                     Cancelar
                 </button>
-                <button onclick="confirmarExtra()"
+                <button id="btn-confirmar-extra" onclick="confirmarExtra()"
                     style="padding:11px;background:var(--purple);border:none;border-radius:8px;color:#fff;font-family:var(--mono);font-weight:700;cursor:pointer">
-                    VENDER AL CONTADO
+                    VENDER CON EFECTIVO
                 </button>
             </div>
         </div>

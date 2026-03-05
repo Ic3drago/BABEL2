@@ -25,6 +25,21 @@ function setMetodoRapido(metodo) {
         btnE.style.background = 'transparent';
         btnE.style.color = 'var(--sub)';
     }
+
+    // Update texts in modals
+    const modalExtraBtn = document.getElementById('btn-confirmar-extra');
+    if (modalExtraBtn) modalExtraBtn.textContent = `VENDER CON ${metodo}`;
+
+    const modalComboBtn = document.getElementById('combo-btn-add');
+    if (modalComboBtn) modalComboBtn.textContent = `VENDER CON ${metodo}`;
+}
+
+function cerrarSesion() {
+    if (confirm('¿Seguro que quieres salir a la pantalla principal?')) {
+        localStorage.removeItem('babel_token');
+        localStorage.removeItem('babel_role');
+        window.location.href = '/login';
+    }
 }
 
 // ═══════════════════════════════════════════════════════════
