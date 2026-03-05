@@ -15,12 +15,12 @@
 <body>
 
     <div id="panel-left">
-        <header class="pos-header">
-            <h1>BABEL / CAJA</h1>
-            <div class="turno" style="display:flex; align-items:center; gap:15px;">
+        <header class="pos-header" style="flex-wrap: wrap; gap: 15px;">
+            <h1 style="margin-right: auto;">BABEL / CAJA</h1>
+            <div class="turno" style="display:flex; align-items:center; gap:15px; flex-wrap: wrap;">
                 <span>Turno: <span id="turno-hora">--:--</span></span>
                 <div
-                    style="background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:4px; display:flex; gap:4px; align-items:center; margin-left:10px;">
+                    style="background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:4px; display:flex; gap:4px; align-items:center;">
                     <span
                         style="font-size:0.75rem; color:var(--sub); font-weight:bold; padding-left:5px; text-transform:uppercase;">Modo
                         Venta:</span>
@@ -117,28 +117,30 @@
                 <div class="modal-total-num" id="modal-total-num">Bs. 0.00</div>
             </div>
 
-            <div class="pago-label">Método de Pago</div>
-            <div class="pago-opciones">
-                <button class="pago-opt selected" data-metodo="EFECTIVO" onclick="seleccionarPago(this)">💵
+            <div class="pago-label" style="text-align:center; font-size:1.1rem; margin-bottom:10px;">¿CÓMO PAGÓ?</div>
+            <div class="pago-opciones" style="display:flex; justify-content:center; gap:10px; margin-bottom:20px;">
+                <button class="pago-opt selected" data-metodo="EFECTIVO" onclick="seleccionarPago(this)"
+                    style="flex:1; padding:20px; font-size:1.1rem; font-weight:bold; border-radius:12px; transition: transform 0.1s;">💵
                     Efectivo</button>
-                <button class="pago-opt" data-metodo="TARJETA" onclick="seleccionarPago(this)">💳 Tarjeta</button>
-                <button class="pago-opt" data-metodo="QR" onclick="seleccionarPago(this)">📲 QR</button>
+                <button class="pago-opt" data-metodo="QR" onclick="seleccionarPago(this)"
+                    style="flex:1; padding:20px; font-size:1.1rem; font-weight:bold; border-radius:12px; transition: transform 0.1s;">📲
+                    QR</button>
             </div>
 
             <div id="efectivo-wrap" class="visible">
-                <label>Dinero Recibido (Bs. )</label>
+                <label>Dinero Recibido en Efectivo (Bs.)</label>
                 <input type="number" id="input-efectivo" class="input-efectivo" placeholder="0.00" min="0" step="0.50"
                     oninput="calcularVuelto()">
                 <div class="vuelto-display" id="vuelto-display">
-                    <span class="label">Vuelto:</span>
+                    <span class="label">Vuelto a dar:</span>
                     <span class="monto" id="vuelto-monto">—</span>
                 </div>
             </div>
 
-            <div class="modal-acciones">
+            <div class="modal-acciones" style="margin-top:20px;">
                 <button class="btn-cancelar-modal" onclick="cerrarModalCobro()">← Cancelar</button>
                 <button class="btn-confirmar-cobro" id="btn-confirmar" onclick="confirmarCobro()">
-                    CONFIRMAR COBRO
+                    PROCEDER AL COBRO
                 </button>
             </div>
         </div>
