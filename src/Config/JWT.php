@@ -3,10 +3,14 @@ namespace App\Config;
 
 class JWT {
     private static function getSecret(): string {
+        // Intentar múltiples fuentes para leer el secret
         $secret = getenv('JWT_SECRET');
+        if (!$secret) $secret = $_ENV['JWT_SECRET'] ?? '';
+        if (!$secret) $secret = $_SERVER['JWT_SECRET'] ?? '';
+        
         if (!$secret) {
             http_response_code(500);
-            echo json_encode(['error' => 'JWT_SECRET no configurado en variables de entorno']);
+            echo json_encode(['error' => 'JWT_SECRET no configurado']);
             exit;
         }
         return $secret;
