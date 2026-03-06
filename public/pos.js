@@ -736,6 +736,7 @@ function abrirModalExtra() {
         btnAddE.style.background = 'var(--green)';
         btnAddQ.style.display = 'block';
     }
+    actualizarUIExtra();
 }
 
 function onSelectExTrago() {
@@ -850,7 +851,51 @@ function selExTipo(btn) {
     document.querySelectorAll('.mex-tipo').forEach(b => b.classList.remove('sel'));
     btn.classList.add('sel');
     exTipo = btn.dataset.t;
+    actualizarUIExtra();
 }
+
+function actualizarUIExtra() {
+    const esCortesia = exTipo === 'CORTESIA';
+    // Ocultar precio si es cortesía (es gratis)
+    document.getElementById('ex-precio-wrap').style.display = esCortesia ? 'none' : 'block';
+    // Mostrar botones correctos
+    document.getElementById('ex-btns-pago').style.display = esCortesia ? 'none' : 'grid';
+    document.getElementById('ex-btns-cortesia').style.display = esCortesia ? 'grid' : 'none';
+    // Si es cortesía, limpiar precio
+    if (esCortesia) {
+        document.getElementById('ex-precio').value = '0';
+    }
+}
+
+function confirmarCortesia() {
+    const desc = document.getElementById('ex-desc').value.trim();
+    if (!desc) { mostrarToast('Escribí qué se regaló'); return; }
+
+    const payload = {
+        items: [],
+        items_extra: [{ nombre: `🎂 ${desc}`, precio: 0, cantidad: 1, tipo_venta: 'CORTESIA' }],
+        tipo_pago: 'CORTESIA',
+        efectivo_recibido: 0
+    };
+
+    if (modeVentaGlobal === 'RAPIDO') {
+        enviarCobroRapido(payload, 0, `CORTESÍA: ${desc}`);
+        cerrarModalExtra();
+    } else {
+        ticket.push({
+            trago_id: null,
+            es_combo: false,
+            nombre: `CORTESÍA: ${desc}`,
+            precio: 0,
+            cantidad: 1,
+            es_extra: true,
+            extra_tipo: 'CORTESIA'
+        });
+        renderizarTicket();
+        cerrarModalExtra();
+    }
+}
+
 function confirmarExtra(metodo) {
     const desc = document.getElementById('ex-desc').value.trim();
     const precio = parseFloat(document.getElementById('ex-precio').value) || 0;

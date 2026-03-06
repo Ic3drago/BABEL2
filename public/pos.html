@@ -292,9 +292,11 @@
             <label class="mex-label">Descripción</label>
             <input type="text" id="ex-desc" class="mex-inp" placeholder="Ej: Cortesía ron, Botella de vino…"
                 autocomplete="off">
-            <label class="mex-label">Precio (Bs.)</label>
-            <input type="number" id="ex-precio" class="mex-inp" placeholder="0.00" min="0" step="0.5"
-                autocomplete="off">
+            <div id="ex-precio-wrap">
+                <label class="mex-label">Precio (Bs.)</label>
+                <input type="number" id="ex-precio" class="mex-inp" placeholder="0.00" min="0" step="0.5"
+                    autocomplete="off">
+            </div>
             <label class="mex-label">Tipo (para la planilla)</label>
             <div class="mex-tipos">
                 <button class="mex-tipo sel" data-t="VASO" onclick="selExTipo(this)">🥃 Vaso suelto</button>
@@ -302,7 +304,7 @@
                 <button class="mex-tipo" data-t="COMBO" onclick="selExTipo(this)">🎁 Combo</button>
                 <button class="mex-tipo" data-t="CORTESIA" onclick="selExTipo(this)">🎂 Cortesía</button>
             </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div id="ex-btns-pago" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
                 <button onclick="cerrarModalExtra()"
                     style="padding:11px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--sub);font-weight:700;cursor:pointer;font-family:var(--sans)">
                     Cancelar
@@ -317,6 +319,16 @@
                         📲 QR
                     </button>
                 </div>
+            </div>
+            <div id="ex-btns-cortesia" style="display:none; grid-template-columns:1fr 1fr; gap:10px">
+                <button onclick="cerrarModalExtra()"
+                    style="padding:11px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--sub);font-weight:700;cursor:pointer;font-family:var(--sans)">
+                    Cancelar
+                </button>
+                <button onclick="confirmarCortesia()"
+                    style="padding:11px;background:#f59e0b;border:none;border-radius:8px;color:#1a1a1a;font-family:var(--mono);font-weight:700;cursor:pointer;font-size:0.85rem">
+                    🎂 REGISTRAR CORTESÍA
+                </button>
             </div>
         </div>
     </div>
