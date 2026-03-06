@@ -706,13 +706,23 @@ window.addEventListener('storage', e => {
 let exTipo = 'VASO';
 
 function abrirModalExtra() {
+    // Poblar el select con los tragos del menú
+    const sel = document.getElementById('ex-trago-select');
+    sel.innerHTML = '<option value="">-- Escribir manual --</option>';
+    menuItems.forEach(item => {
+        const opt = document.createElement('option');
+        opt.value = JSON.stringify({ nombre: item.nombre_boton, precio: item.precio, tipo: item.tipo_venta });
+        opt.textContent = `${item.nombre_boton} · Bs. ${item.precio.toFixed(2)}`;
+        sel.appendChild(opt);
+    });
+
     document.getElementById('ex-desc').value = '';
     document.getElementById('ex-precio').value = '';
-    exTipo = 'VASO';
+    exTipo = 'CORTESIA';
     document.querySelectorAll('.mex-tipo').forEach(b => b.classList.remove('sel'));
-    document.querySelector('[data-t="VASO"]').classList.add('sel');
+    document.querySelector('[data-t="CORTESIA"]').classList.add('sel');
     document.getElementById('modal-extra').classList.add('open');
-    setTimeout(() => document.getElementById('ex-desc').focus(), 80);
+    setTimeout(() => document.getElementById('ex-trago-select').focus(), 80);
 
     // Ajustar botones según el modo de venta
     const btnAddE = document.getElementById('extra-btn-add-efectivo');
@@ -726,24 +736,46 @@ function abrirModalExtra() {
         btnAddE.style.background = 'var(--green)';
         btnAddQ.style.display = 'block';
     }
+}
+
+function onSelectExTrago() {
+    const val = document.getElementById('ex-trago-select').value;
+    if (!val) {
+        document.getElementById('ex-desc').value = '';
+        document.getElementById('ex-precio').value = '';
+        return;
+    }
+    try {
+        const data = JSON.parse(val);
+        document.getElementById('ex-desc').value = data.nombre;
+        document.getElementById('ex-precio').value = data.precio;
+        // Auto-seleccionar tipo basado en el trago
+        const tipoMap = { VASO: 'VASO', BOTELLA: 'BOTELLA', COMBO: 'COMBO', NORMAL: 'VASO', PROMO: 'VASO', ENTRADA: 'VASO' };
+        exTipo = tipoMap[data.tipo] || 'VASO';
+        document.querySelectorAll('.mex-tipo').forEach(b => b.classList.remove('sel'));
+        const btn = document.querySelector(`[data-t="${exTipo}"]`);
+        if (btn) btn.classList.add('sel');
+    } catch (e) { }
 }
 
 function abrirModalSobrante() {
-    document.getElementById('ex-desc').value = 'Vaso Sobrante [    ]';
-    document.getElementById('ex-precio').value = '';
-    exTipo = 'VASO';
-    document.querySelectorAll('.mex-tipo').forEach(b => b.classList.remove('sel'));
-    document.querySelector('[data-t="VASO"]').classList.add('sel');
-    document.getElementById('modal-extra').classList.add('open');
-    setTimeout(() => {
-        const inp = document.getElementById('ex-desc');
-        inp.focus();
-        inp.setSelectionRange(15, 19); // Select the brackets space for quick typing
-    }, 80);
+    // Poblar el select con los tragos del menú
+    const sel = document.getElementById('sob-trago-select');
+    sel.innerHTML = '<option value="">-- Selecciona el trago --</option>';
+    menuItems.forEach(item => {
+        const opt = document.createElement('option');
+        opt.value = JSON.stringify({ nombre: item.nombre_boton, precio: item.precio });
+        opt.textContent = `${item.nombre_boton} · Bs. ${item.precio.toFixed(2)}`;
+        sel.appendChild(opt);
+    });
+
+    document.getElementById('sob-precio').value = '';
+    document.getElementById('modal-sobrante').classList.add('open');
+    setTimeout(() => document.getElementById('sob-trago-select').focus(), 80);
 
     // Ajustar botones según el modo de venta
-    const btnAddE = document.getElementById('extra-btn-add-efectivo');
-    const btnAddQ = document.getElementById('extra-btn-add-qr');
+    const btnAddE = document.getElementById('sob-btn-efectivo');
+    const btnAddQ = document.getElementById('sob-btn-qr');
     if (modeVentaGlobal === 'MULTIPLE') {
         btnAddE.textContent = 'AÑADIR AL TICKET';
         btnAddE.style.background = 'var(--blue)';
@@ -754,6 +786,63 @@ function abrirModalSobrante() {
         btnAddQ.style.display = 'block';
     }
 }
+
+function onSelectSobTrago() {
+    const val = document.getElementById('sob-trago-select').value;
+    if (!val) {
+        document.getElementById('sob-precio').value = '';
+        return;
+    }
+    try {
+        const data = JSON.parse(val);
+        document.getElementById('sob-precio').value = data.precio;
+    } catch (e) { }
+}
+
+function cerrarModalSobrante() {
+    document.getElementById('modal-sobrante').classList.remove('open');
+}
+
+function confirmarSobrante(metodo) {
+    const selVal = document.getElementById('sob-trago-select').value;
+    const precio = parseFloat(document.getElementById('sob-precio').value) || 0;
+
+    if (!selVal) { mostrarToast('Selecciona el trago que sobró'); return; }
+    if (precio <= 0) { mostrarToast('Precio inválido'); return; }
+
+    let nombre;
+    try { nombre = JSON.parse(selVal).nombre; } catch (e) { nombre = 'Sobrante'; }
+    const desc = `Sobrante: ${nombre}`;
+
+    const payload = {
+        items: [],
+        items_extra: [{ nombre: desc, precio: precio, cantidad: 1, tipo_venta: 'VASO' }],
+        tipo_pago: metodo,
+        efectivo_recibido: precio
+    };
+
+    if (modeVentaGlobal === 'RAPIDO') {
+        enviarCobroRapido(payload, precio, desc);
+        cerrarModalSobrante();
+    } else {
+        ticket.push({
+            trago_id: null,
+            es_combo: false,
+            nombre: desc,
+            precio: precio,
+            cantidad: 1,
+            es_extra: true,
+            extra_tipo: 'VASO'
+        });
+        renderizarTicket();
+        cerrarModalSobrante();
+    }
+}
+
+document.getElementById('modal-sobrante').addEventListener('click', e => {
+    if (e.target.id === 'modal-sobrante') cerrarModalSobrante();
+});
+
 function cerrarModalExtra() {
     document.getElementById('modal-extra').classList.remove('open');
 }

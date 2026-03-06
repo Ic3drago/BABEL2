@@ -717,6 +717,30 @@ body.promo-on .trago-btn[data-tipo="PROMO"] .trago-nombre {
     pointer-events: all;
 }
 
+/* Modal Sobrante */
+#modal-sobrante {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .88);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 120;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s;
+}
+
+#modal-sobrante.open {
+    opacity: 1;
+    pointer-events: all;
+}
+
+#modal-sobrante.open .mex-box {
+    transform: scale(1) translateY(0);
+}
+
 .mex-box {
     background: var(--surface);
     border: 1px solid var(--border);
