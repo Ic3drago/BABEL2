@@ -1,6 +1,5 @@
 .vercel
-.env
-.env.*
+vendor/
 vendor/
 node_modules/
 *.log

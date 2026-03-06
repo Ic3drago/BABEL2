@@ -4,12 +4,26 @@
  */
 declare(strict_types=1);
 
+// ── Cargar .env si existe (para desarrollo local y Vercel) ──
+$envFile = __DIR__ . '/../.env';
+if (file_exists($envFile)) {
+    $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        $line = trim($line);
+        if ($line === '' || $line[0] === '#') continue;
+        if (strpos($line, '=') !== false) {
+            list($key, $value) = explode('=', $line, 2);
+            $key = trim($key);
+            $value = trim($value);
+            if (!getenv($key)) { // No sobreescribir si ya existe (ej: Vercel dashboard)
+                putenv("$key=$value");
+            }
+        }
+    }
+}
+
 header('Content-Type: application/json');
-$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-$allowedOrigins = [getenv('ALLOWED_ORIGIN') ?: ''];
-if (in_array($origin, $allowedOrigins) && $origin !== '') {
-    header('Access-Control-Allow-Origin: ' . $origin);
-} 
+header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
