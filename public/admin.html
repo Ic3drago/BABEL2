@@ -134,24 +134,34 @@
                                 <button class="btn-save" onclick="guardarTrago()">Guardar Trago</button>
                             </div>
                         </div>
-
-                        <table class="base-table">
-                            <thead>
-                                <tr>
-                                    <th>Nombre</th>
-                                    <th>Tipo default</th>
-                                    <th>Licor</th>
-                                    <th>Vasos/Btl</th>
-                                    <th>Precio base</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody id="menu-body">
-                                <tr>
-                                    <td colspan="6" class="empty-state">Cargando...</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <!-- Buscador + contador -->
+                        <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px;">
+                            <input type="text" id="buscar-trago" class="form-input" placeholder="🔍 Buscar trago..."
+                                oninput="filtrarTragos()" autocomplete="off"
+                                style="flex:1; max-width:300px; padding:8px 12px; font-size:0.8rem;">
+                            <span id="menu-count"
+                                style="font-size:0.75rem; color:var(--sub); font-family:var(--mono);"></span>
+                        </div>
+                        <div
+                            style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px;">
+                            <table class="base-table">
+                                <thead style="position:sticky; top:0; background: var(--card); z-index:1;">
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Tipo</th>
+                                        <th>Licor</th>
+                                        <th>Detalle</th>
+                                        <th>Precio</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="menu-body">
+                                    <tr>
+                                        <td colspan="6" class="empty-state">Cargando...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
@@ -764,6 +774,24 @@
             </div></td>
         </tr>`;
                 }).join('');
+
+                // Actualizar contador
+                const countEl = document.getElementById('menu-count');
+                if (countEl) countEl.textContent = `${tragosBase.length} tragos`;
+            }
+
+            function filtrarTragos() {
+                const q = document.getElementById('buscar-trago').value.toLowerCase().trim();
+                const rows = document.querySelectorAll('#menu-body tr');
+                let visible = 0;
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    const show = !q || text.includes(q);
+                    row.style.display = show ? '' : 'none';
+                    if (show) visible++;
+                });
+                const countEl = document.getElementById('menu-count');
+                if (countEl) countEl.textContent = q ? `${visible} de ${tragosBase.length}` : `${tragosBase.length} tragos`;
             }
 
             function toggleFormTrago() {
