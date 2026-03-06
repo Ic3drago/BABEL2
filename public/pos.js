@@ -685,6 +685,7 @@ document.getElementById('modal-cobro').addEventListener('click', function (e) {
 function verificarModoPromo() {
     const on = localStorage.getItem('babel_modo_promo') === '1';
     const banner = document.getElementById('banner-promo');
+    if (!banner) return; // Guard against missing element
     if (on) {
         banner.classList.add('visible');
         document.body.classList.add('promo-on');
