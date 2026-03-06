@@ -2,7 +2,8 @@
 // ESTADO GLOBAL
 // ═══════════════════════════════════════════════════════════
 const API_URL = '/api';
-const API_TOKEN = 'token_secreto_bar_123';
+const API_TOKEN = localStorage.getItem('babel_token');
+if (!API_TOKEN) { window.location.href = '/login'; }
 
 let menuItems = [];
 let ticket = [];   // [{ trago_id, nombre, precio, vasos_por_botella, cantidad }]

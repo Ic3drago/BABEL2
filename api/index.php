@@ -5,7 +5,11 @@
 declare(strict_types=1);
 
 header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+$allowedOrigins = [getenv('ALLOWED_ORIGIN') ?: ''];
+if (in_array($origin, $allowedOrigins) && $origin !== '') {
+    header('Access-Control-Allow-Origin: ' . $origin);
+} 
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
@@ -41,12 +45,7 @@ $token = str_replace('Bearer ', '', $authHeader);
 $payload = \App\Config\JWT::decode($token);
 
 if (!$payload) {
-    // Check fallback for old token just in case there's an active session on old devices during migration (optional, removing for strictness)
-    if ($token !== 'token_secreto_bar_123') {
-        http_response_code(401); echo json_encode(['error' => 'No autorizado o token expirado']); exit;
-    } else {
-        $payload = ['role' => 'admin']; // Assume admin for old hardcoded dev token temporarily
-    }
+    http_response_code(401); echo json_encode(['error' => 'No autorizado o token expirado']); exit;
 }
 
 $userRole = $payload['role'];

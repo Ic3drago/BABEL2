@@ -147,7 +147,7 @@
 
     <script>
         const API_URL = '/api';
-        const API_TOKEN = 'token_secreto_bar_123';
+        const API_TOKEN = localStorage.getItem('babel_token');
         let planillaData = [];
 
         document.addEventListener('DOMContentLoaded', () => {

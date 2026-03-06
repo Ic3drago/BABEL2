@@ -2,22 +2,32 @@
 namespace App\Config;
 
 class JWT {
-    private static $secret = 'token_secreto_bar_123_SUPER_SECRET_KEY';
+    private static function getSecret(): string {
+        $secret = getenv('JWT_SECRET');
+        if (!$secret) {
+            http_response_code(500);
+            echo json_encode(['error' => 'JWT_SECRET no configurado en variables de entorno']);
+            exit;
+        }
+        return $secret;
+    }
 
     public static function encode(array $payload): string {
+        $secret = self::getSecret();
         $header = json_encode(['typ' => 'JWT', 'alg' => 'HS256']);
         $payload = json_encode($payload);
 
         $base64UrlHeader = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($header));
         $base64UrlPayload = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($payload));
 
-        $signature = hash_hmac('sha256', $base64UrlHeader . "." . $base64UrlPayload, self::$secret, true);
+        $signature = hash_hmac('sha256', $base64UrlHeader . "." . $base64UrlPayload, $secret, true);
         $base64UrlSignature = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($signature));
 
         return $base64UrlHeader . "." . $base64UrlPayload . "." . $base64UrlSignature;
     }
 
     public static function decode(string $jwt) {
+        $secret = self::getSecret();
         $tokenParts = explode('.', $jwt);
         if (count($tokenParts) != 3) {
             return false;
@@ -29,7 +39,7 @@ class JWT {
 
         $base64UrlHeader = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($header));
         $base64UrlPayload = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($payload));
-        $signature = hash_hmac('sha256', $base64UrlHeader . "." . $base64UrlPayload, self::$secret, true);
+        $signature = hash_hmac('sha256', $base64UrlHeader . "." . $base64UrlPayload, $secret, true);
         $base64UrlSignature = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($signature));
 
         if ($base64UrlSignature === $signature_provided) {

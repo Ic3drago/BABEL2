@@ -14,11 +14,17 @@ class Database
     {
         if (self::$connection === null) {
 
-            $host   = getenv('DB_HOST')   ?: 'aws-0-us-west-2.pooler.supabase.com';
+            $host   = getenv('DB_HOST');
             $port   = getenv('DB_PORT')   ?: '5432';
             $dbname = getenv('DB_NAME')   ?: 'postgres';
-            $user   = getenv('DB_USER')   ?: 'postgres.ajuxnzakkfcihjurlopl';
-            $pass   = getenv('DB_PASS')   ?: 'Omeg@mode66/';
+            $user   = getenv('DB_USER');
+            $pass   = getenv('DB_PASS');
+
+            if (!$host || !$user || !$pass) {
+                http_response_code(500);
+                echo json_encode(['error' => 'Configuración de base de datos incompleta. Verificar variables de entorno.']);
+                exit;
+            }
 
             $dsn = "pgsql:host=$host;port=$port;dbname=$dbname;sslmode=require";
 
@@ -34,7 +40,7 @@ class Database
                 );
             } catch (PDOException $e) {
                 http_response_code(500);
-                echo json_encode(['error' => 'Error de conexión a la base de datos: ' . $e->getMessage()]);
+                echo json_encode(['error' => 'Error de conexión a la base de datos']);
                 exit;
             }
         }
@@ -44,7 +50,6 @@ class Database
 
     /**
      * Alias de connect() — usado por todos los controllers.
-     * Mantener ambos para compatibilidad.
      */
     public static function getConnection(): PDO
     {
