@@ -333,6 +333,56 @@
         </div>
     </div>
 
+    <!-- ══ MODAL RESET SISTEMA (SANDBOX) ══ -->
+    <div class="modal-backdrop" id="modal-reset">
+        <div class="modal" style="max-width:420px; border: 2px solid var(--red);">
+            <div class="modal-header" style="background: rgba(239, 68, 68, 0.1);">
+                <span class="modal-title" style="color:var(--red)">⚠️ BARRER TODAS LAS VENTAS</span>
+                <button class="modal-close" onclick="cerrarModal('modal-reset')">✕</button>
+            </div>
+            <div style="padding: 20px;">
+                <!-- Paso 1 -->
+                <div id="reset-paso-1">
+                    <p style="color: var(--text); font-size: 0.9rem; line-height: 1.6; margin-bottom: 16px;">
+                        Esta acción eliminará <strong style="color:var(--red)">PERMANENTEMENTE</strong>:
+                    </p>
+                    <ul
+                        style="color: var(--sub); font-size: 0.8rem; line-height: 2; margin-bottom: 20px; padding-left: 20px;">
+                        <li>📋 Todas las planillas</li>
+                        <li>🧾 Todos los tickets y ventas</li>
+                        <li>📊 Todo el historial de cierres</li>
+                    </ul>
+                    <p style="color: var(--green); font-size: 0.8rem; margin-bottom: 20px;">
+                        ✅ Se mantienen: Stock de botellas y Menú de tragos
+                    </p>
+                    <div class="modal-footer">
+                        <button class="btn-cancel" onclick="cerrarModal('modal-reset')">Cancelar</button>
+                        <button class="btn-danger" onclick="mostrarPaso2Reset()">Continuar →</button>
+                    </div>
+                </div>
+                <!-- Paso 2 -->
+                <div id="reset-paso-2" style="display:none;">
+                    <p style="color: var(--red); font-size: 0.9rem; font-weight: 700; margin-bottom: 12px;">
+                        🚨 ÚLTIMO AVISO — IRREVERSIBLE
+                    </p>
+                    <p style="color: var(--sub); font-size: 0.8rem; margin-bottom: 16px;">
+                        Escribe <strong style="color:var(--text)">BORRAR</strong> para confirmar:
+                    </p>
+                    <input type="text" id="reset-confirmacion" class="form-input" placeholder="Escribe BORRAR aquí"
+                        autocomplete="off"
+                        style="text-align:center; font-size: 1rem; font-weight:700; letter-spacing: 2px; border-color: var(--red);">
+                    <div class="modal-footer" style="margin-top: 16px;">
+                        <button class="btn-cancel" onclick="cerrarModal('modal-reset')">Cancelar</button>
+                        <button class="btn-danger" id="btn-reset-final" onclick="ejecutarReset()" disabled
+                            style="opacity: 0.4; transition: opacity 0.2s;">
+                            🗑️ BORRAR TODO
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="toast"></div>
 
     <script>
@@ -368,14 +418,37 @@
         }
 
         // ── RESET DATA ──
-        async function resetearSistema() {
-            if (!confirm('¿ESTAS TOTALMENTE SEGURO? Se borrarán TODAS las Planillas, Tickets y Cierres. Solo sobrevivirá el Stock de Botellas y el Menú.')) return;
-            if (!confirm('ULTIMO AVISO: Esta acción es IRREVERSIBLE. ¿Continuar y borrar todo el historial de ventas?')) return;
+        function resetearSistema() {
+            document.getElementById('reset-paso-1').style.display = 'block';
+            document.getElementById('reset-paso-2').style.display = 'none';
+            document.getElementById('reset-confirmacion').value = '';
+            document.getElementById('btn-reset-final').disabled = true;
+            document.getElementById('btn-reset-final').style.opacity = '0.4';
+            abrirModal('modal-reset');
+        }
+
+        function mostrarPaso2Reset() {
+            document.getElementById('reset-paso-1').style.display = 'none';
+            document.getElementById('reset-paso-2').style.display = 'block';
+            const inp = document.getElementById('reset-confirmacion');
+            inp.value = '';
+            inp.focus();
+            inp.addEventListener('input', () => {
+                const ok = inp.value.trim() === 'BORRAR';
+                document.getElementById('btn-reset-final').disabled = !ok;
+                document.getElementById('btn-reset-final').style.opacity = ok ? '1' : '0.4';
+            });
+        }
+
+        async function ejecutarReset() {
+            const inp = document.getElementById('reset-confirmacion');
+            if (inp.value.trim() !== 'BORRAR') return;
 
             try {
                 const res = await api('/admin/reset_ventas', 'DELETE');
                 if (res.success) {
                     toast(res.mensaje || 'Sistema reseteado con éxito.', 'ok');
+                    cerrarModal('modal-reset');
                     cargarBotellas();
                     cargarMenu();
                 } else {
