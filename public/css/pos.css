@@ -309,6 +309,24 @@ body.promo-on .trago-btn[data-tipo="PROMO"] .trago-nombre {
     box-shadow: 0 8px 24px rgba(249, 115, 22, 0.2);
 }
 
+.trago-btn[data-tipo="SHOT"] {
+    border-color: #500724;
+}
+
+.trago-btn[data-tipo="SHOT"]:hover:not(:disabled) {
+    border-color: #ec4899;
+    box-shadow: 0 8px 24px rgba(236, 72, 153, 0.2);
+}
+
+.trago-btn[data-tipo="CERVEZA"] {
+    border-color: #1a2e05;
+}
+
+.trago-btn[data-tipo="CERVEZA"]:hover:not(:disabled) {
+    border-color: #84cc16;
+    box-shadow: 0 8px 24px rgba(132, 204, 22, 0.2);
+}
+
 .trago-badge {
     font-size: 0.6rem;
     font-weight: 700;
@@ -341,6 +359,16 @@ body.promo-on .trago-btn[data-tipo="PROMO"] .trago-nombre {
 .badge-ENTRADA {
     background: #1e3a5f;
     color: var(--blue);
+}
+
+.badge-SHOT {
+    background: #500724;
+    color: #ec4899;
+}
+
+.badge-CERVEZA {
+    background: #1a2e05;
+    color: #84cc16;
 }
 
 .trago-nombre {
@@ -790,10 +818,12 @@ body.promo-on .trago-btn[data-tipo="PROMO"] .trago-nombre {
 
 .mex-tipos {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 8px;
     margin-bottom: 16px;
 }
+
+
 
 .mex-tipo {
     padding: 9px;
