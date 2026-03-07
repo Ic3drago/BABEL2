@@ -46,12 +46,16 @@ function toggleMobileTicket() {
 }
 
 function updateMobileTicketBtn() {
-    const btn = document.getElementById('btn-mobile-ticket');
-    if (!btn) return;
-    const isMobile = window.innerWidth <= 768;
-    btn.style.display = (isMobile && modeVentaGlobal === 'MULTIPLE') ? 'flex' : 'none';
-    // Show close button on mobile
+    const btnTicket = document.getElementById('btn-mobile-ticket');
+    const btnRecientes = document.getElementById('btn-mobile-recientes');
     const cerrarBtn = document.getElementById('btn-cerrar-ticket');
+    const isMobile = window.innerWidth <= 768;
+
+    // Ticket button: only in MULTIPLE mode on mobile
+    if (btnTicket) btnTicket.style.display = (isMobile && modeVentaGlobal === 'MULTIPLE') ? 'flex' : 'none';
+    // Recientes button: only in RAPIDO mode on mobile
+    if (btnRecientes) btnRecientes.style.display = (isMobile && modeVentaGlobal === 'RAPIDO') ? 'flex' : 'none';
+    // Close button in ticket header
     if (cerrarBtn) cerrarBtn.style.display = (isMobile && modeVentaGlobal === 'MULTIPLE') ? '' : 'none';
 }
 
