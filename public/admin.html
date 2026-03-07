@@ -62,8 +62,8 @@
                 <div class="section-header">
                     <div>
                         <h2 style="color:var(--green)">2 · Tragos de Esta Noche</h2>
-                        <p>Activá los que se venden hoy. Los apartados están separados por categoría: promos, normales,
-                            vasos y combos.</p>
+                        <p>Activá los que se venden hoy. Separados por: promos, botellas normales,
+                            vasos, shots, cervezas y combos.</p>
                     </div>
                 </div>
                 <div class="section-body">
@@ -585,14 +585,17 @@
 
             // Agrupar por tipo_venta
             const grupos = {
-                'PROMO': { emoji: '🎉', label: 'PROMOS', color: 'purple', items: [] },
-                'NORMAL': { emoji: '🥃', label: 'NORMALES', color: 'orange', items: [] },
+                'PROMO': { emoji: '🎉', label: 'BOTELLAS PROMO', color: 'purple', items: [] },
+                'BOTELLA': { emoji: '🍾', label: 'BOTELLAS NORMAL', color: 'orange', items: [] },
                 'VASO': { emoji: '🍺', label: 'VASOS', color: 'blue', items: [] },
+                'SHOT': { emoji: '🥃', label: 'SHOTS', color: 'red', items: [] },
+                'CERVEZA': { emoji: '🍻', label: 'CERVEZAS', color: 'green', items: [] },
                 'COMBO': { emoji: '🎁', label: 'COMBOS', color: 'green', items: [] }
             };
 
             tragosBase.forEach(m => {
                 let tipo = m.tipo_venta || 'VASO';
+                if (tipo === 'NORMAL') tipo = 'BOTELLA'; // legacy
                 if (!grupos[tipo]) tipo = 'VASO';
                 grupos[tipo].items.push(m);
             });
@@ -600,7 +603,7 @@
             // Renderizar cada grupo
             cont.innerHTML = Object.entries(grupos).map(([key, grupo]) => {
                 const items = grupo.items;
-                const varColor = `var(--${grupo.color === 'purple' ? 'purple' : grupo.color === 'orange' ? 'orange' : grupo.color === 'blue' ? 'blue' : 'green'})`;
+                const varColor = `var(--${grupo.color})`;
 
                 return `
         <div style="grid-column: 1/-1; border-top: 2px solid ${varColor}; padding-top: 20px; margin-top: 20px;">
@@ -623,8 +626,8 @@
             const tipo = estadoGuardado ? estadoGuardado.tipo : m.tipo_venta;
             const precio = estadoGuardado ? estadoGuardado.precio : parseFloat(m.precio).toFixed(2);
 
-            const tipoEmoji = { PROMO: '🎉', NORMAL: '🥃', VASO: '🍺', COMBO: '🎁' }[tipo] || '🥃';
-            const tipoLabel = { PROMO: 'PROMO', NORMAL: 'NORMAL', VASO: 'VASO', COMBO: 'COMBO' }[tipo] || tipo;
+            const tipoEmoji = { PROMO: '🎉', BOTELLA: '🍾', VASO: '🍺', SHOT: '🥃', CERVEZA: '🍻', COMBO: '🎁' }[tipo] || '🥃';
+            const tipoLabel = { PROMO: 'PROMO', BOTELLA: 'BOTELLA', VASO: 'VASO', SHOT: 'SHOT', CERVEZA: 'CERVEZA', COMBO: 'COMBO' }[tipo] || tipo;
 
             return `
     <div style="background: var(--bg); border: 2px solid ${activo ? 'var(--green)' : 'var(--border)'}; border-radius: 10px; padding: 12px; transition: all 0.2s;">
@@ -644,10 +647,11 @@
                 <div class="form-group" style="margin: 0;">
                     <label style="font-size: 0.65rem;">Tipo</label>
                     <select class="form-select" id="tipo-${m.id}" style="padding: 5px 8px; font-size: 0.75rem;">
-                        <option value="PROMO" ${tipo === 'PROMO' ? 'selected' : ''}>🎉 Promo</option>
-                        <option value="NORMAL" ${tipo === 'NORMAL' ? 'selected' : ''}>🥃 Normal</option>
-                        <option value="VASO" ${tipo === 'VASO' ? 'selected' : ''}>🍺 Vaso</option>
-                       
+                        <option value="VASO" ${tipo === 'VASO' ? 'selected' : ''}>� Vaso</option>
+                        <option value="SHOT" ${tipo === 'SHOT' ? 'selected' : ''}>🥃 Shot</option>
+                        <option value="BOTELLA" ${tipo === 'BOTELLA' ? 'selected' : ''}>🍾 Botella</option>
+                        <option value="PROMO" ${tipo === 'PROMO' ? 'selected' : ''}>� Promo</option>
+                        <option value="CERVEZA" ${tipo === 'CERVEZA' ? 'selected' : ''}>🍻 Cerveza</option>
                     </select>
                 </div>
                 <div class="form-group" style="margin: 0;">
