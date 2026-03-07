@@ -1422,7 +1422,7 @@ body.promo-on .trago-btn[data-tipo="PROMO"] .trago-nombre {
         overflow: hidden !important;
     }
 
-    /* Ajustar panel de recientes para que sea flotante/desplegable en móvil */
+    /* Recientes panel: drawer from bottom */
     #panel-recientes {
         position: fixed !important;
         top: auto !important;
@@ -1457,29 +1457,50 @@ body.promo-on .trago-btn[data-tipo="PROMO"] .trago-nombre {
         display: block !important;
     }
 
+    /* ── PANEL LEFT: toma todo el alto ── */
     #panel-left {
-        flex: 1.5 !important;
+        flex: 1 !important;
         max-height: unset !important;
         border-right: none !important;
-        border-bottom: 2px solid var(--purple) !important;
+        border-bottom: none !important;
         display: flex;
         flex-direction: column;
+        overflow: hidden;
     }
 
+    /* ── TICKET PANEL: drawer slide-up en mobile ── */
     #panel-ticket {
-        flex: 1 !important;
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
         width: 100% !important;
-        height: auto !important;
-        min-height: unset !important;
+        height: 80vh !important;
+        z-index: 160 !important;
+        background: var(--surface) !important;
+        border-top: 2px solid var(--green) !important;
         border-left: none !important;
+        border-radius: 20px 20px 0 0 !important;
+        box-shadow: 0 -15px 50px rgba(0, 0, 0, 0.9) !important;
+        transform: translateY(110%) !important;
+        transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        flex-direction: column !important;
     }
 
-    /* Reducir tamaño de header y tabs para ahorrar espacio vertical */
+    #panel-ticket.mobile-open {
+        transform: translateY(0) !important;
+    }
+
+    /* ── Botón flotante para abrir el ticket ── */
+    #btn-mobile-ticket {
+        display: flex !important;
+    }
+
+    /* Header y tabs compactos */
     .pos-header {
         padding: 10px 12px !important;
     }
 
-    /* Ocultar texto de botones superiores en móviles muy estrechos para que entren */
     .header-btn .txt {
         display: none;
     }
@@ -1489,19 +1510,22 @@ body.promo-on .trago-btn[data-tipo="PROMO"] .trago-nombre {
     }
 
     .cat-tabs {
-        padding: 8px 12px !important;
+        padding: 8px 10px !important;
+        gap: 4px !important;
     }
 
     .cat-tab {
-        font-size: 0.75rem !important;
-        padding: 6px 12px !important;
+        font-size: 0.7rem !important;
+        padding: 5px 10px !important;
     }
 
-    /* Hacer el grid de botones de la caja mucho más denso */
+    /* Grid de tragos ocupa todo */
     #grid-tragos {
         grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)) !important;
         padding: 10px !important;
         gap: 8px !important;
+        flex: 1 !important;
+        overflow-y: auto !important;
     }
 
     .trago-btn {
@@ -1524,7 +1548,7 @@ body.promo-on .trago-btn[data-tipo="PROMO"] .trago-nombre {
         padding: 2px 4px !important;
     }
 
-    /* Hacer el ticket más compacto para que entren más items */
+    /* Ticket interior compacto */
     .ticket-header {
         padding: 10px 14px !important;
     }
@@ -1535,6 +1559,8 @@ body.promo-on .trago-btn[data-tipo="PROMO"] .trago-nombre {
 
     #lista-ticket {
         padding: 6px !important;
+        flex: 1 !important;
+        overflow-y: auto !important;
     }
 
     .ticket-item {
@@ -1547,11 +1573,10 @@ body.promo-on .trago-btn[data-tipo="PROMO"] .trago-nombre {
     }
 
     .qty-btn {
-        width: 20px !important;
-        height: 20px !important;
+        width: 24px !important;
+        height: 24px !important;
     }
 
-    /* Footer del ticket apegado abajo */
     .ticket-footer {
         padding: 10px 14px !important;
         gap: 6px !important;
@@ -1564,7 +1589,7 @@ body.promo-on .trago-btn[data-tipo="PROMO"] .trago-nombre {
     }
 
     .btn-cobrar {
-        padding: 10px !important;
+        padding: 12px !important;
         font-size: 0.9rem !important;
     }
 
@@ -1573,6 +1598,43 @@ body.promo-on .trago-btn[data-tipo="PROMO"] .trago-nombre {
         padding: 8px !important;
         font-size: 0.75rem !important;
     }
+}
+
+/* ── Botón flotante ticket (oculto en desktop) ── */
+#btn-mobile-ticket {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 155;
+    background: var(--green);
+    color: #000;
+    border: none;
+    border-radius: 50px;
+    padding: 14px 20px;
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 6px 24px rgba(16, 185, 129, 0.5);
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+#btn-mobile-ticket:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 30px rgba(16, 185, 129, 0.6);
+}
+
+#btn-mobile-ticket .badge-count {
+    background: #000;
+    color: var(--green);
+    font-size: 0.75rem;
+    padding: 2px 7px;
+    border-radius: 20px;
+    min-width: 20px;
+    text-align: center;
 }
 
 /* ── MODAL PAGO RAPIDO (NUEVO) ── */

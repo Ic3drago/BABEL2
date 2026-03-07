@@ -24,6 +24,7 @@ function setModoVenta(modo) {
         btnM.style.background = 'transparent';
         btnM.style.color = 'var(--sub)';
         document.getElementById('panel-ticket').style.display = 'none';
+        document.getElementById('panel-ticket').classList.remove('mobile-open');
         document.getElementById('panel-recientes').style.display = 'flex';
     } else {
         btnM.style.background = 'var(--green)';
@@ -33,7 +34,28 @@ function setModoVenta(modo) {
         document.getElementById('panel-ticket').style.display = 'flex';
         document.getElementById('panel-recientes').style.display = 'none';
     }
+    updateMobileTicketBtn();
 }
+
+function toggleMobileTicket() {
+    const panel = document.getElementById('panel-ticket');
+    const cerrarBtn = document.getElementById('btn-cerrar-ticket');
+    panel.classList.toggle('mobile-open');
+    // Toggle close button visibility
+    if (cerrarBtn) cerrarBtn.style.display = panel.classList.contains('mobile-open') ? '' : 'none';
+}
+
+function updateMobileTicketBtn() {
+    const btn = document.getElementById('btn-mobile-ticket');
+    if (!btn) return;
+    const isMobile = window.innerWidth <= 768;
+    btn.style.display = (isMobile && modeVentaGlobal === 'MULTIPLE') ? 'flex' : 'none';
+    // Show close button on mobile
+    const cerrarBtn = document.getElementById('btn-cerrar-ticket');
+    if (cerrarBtn) cerrarBtn.style.display = (isMobile && modeVentaGlobal === 'MULTIPLE') ? '' : 'none';
+}
+
+window.addEventListener('resize', updateMobileTicketBtn);
 
 function abrirModalSalir() {
     document.getElementById('modal-salir').classList.add('open');
@@ -273,6 +295,9 @@ function renderizarTicket() {
     document.getElementById('resumen-subtotal').textContent = `Bs. ${totalBs.toFixed(2)}`;
     document.getElementById('resumen-total').textContent = `Bs. ${totalBs.toFixed(2)}`;
     document.getElementById('btn-cobrar').disabled = false;
+    // Sync mobile floating button badge
+    const mobileCount = document.getElementById('mobile-ticket-count');
+    if (mobileCount) mobileCount.textContent = totalItems;
 }
 
 function sumarAlTicket(index) {
