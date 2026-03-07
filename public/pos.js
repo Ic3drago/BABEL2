@@ -153,7 +153,7 @@ function renderizarGrid(items) {
 
         btn.innerHTML = `
             ${qty > 0 ? `<div class="trago-qty-badge" id="qty-${item.id}">${qty}</div>` : `<div class="trago-qty-badge" id="qty-${item.id}" style="display:none">${qty}</div>`}
-            <span class="trago-badge badge-${item.tipo_venta}">${{ VASO: '🥃 Vaso', BOTELLA: '🍾 Botella', COMBO: '🎁 Combo', PROMO: '🎉 Promo', NORMAL: '🥃 Normal', ENTRADA: '🎫 Entrada' }[item.tipo_venta] || item.tipo_venta
+            <span class="trago-badge badge-${item.tipo_venta}">${{ VASO: '🍺 Vaso', SHOT: '🥃 Shot', BOTELLA: '🍾 Botella', PROMO: '🎉 Promo', CERVEZA: '🍻 Cerveza', COMBO: '🎁 Combo', ENTRADA: '🎫 Entrada' }[item.tipo_venta] || item.tipo_venta
             }</span>
             <span class="trago-nombre">${item.nombre_boton}</span>
             <span class="trago-precio">Bs. ${item.precio.toFixed(2)}</span>
