@@ -118,18 +118,21 @@
                             </div>
                             <div class="form-group">
                                 <label>Tipo de Venta</label>
-                                <select id="t-tipo" class="form-select">
-                                    <option value="PROMO">🎉 Promo</option>
-                                    <option value="NORMAL">🥃 Normal</option>
-                                    <option value="VASO">🍺 Vaso</option>
+                                <select id="t-tipo" class="form-select" onchange="togglePromoField('crear')">
+                                    <option value="VASO">� Vaso</option>
                                     <option value="SHOT">🥃 Shot</option>
-                                    <option value="BOTELLA">🍾 Botella</option>
+                                    <option value="BOTELLA">� Botella</option>
                                     <option value="CERVEZA">🍻 Cerveza</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>Precio Bs.</label>
+                                <label>Precio (Bs.)</label>
                                 <input type="number" id="t-precio" class="form-input" step="0.50" min="0">
+                            </div>
+                            <div class="form-group" id="wrap-promo-crear" style="display:none;">
+                                <label>💜 Precio Promo (Bs.)</label>
+                                <input type="number" id="t-precio-promo" class="form-input" step="0.50" min="0"
+                                    placeholder="Dejar vacío si no tiene promo">
                             </div>
                             <div class="form-actions">
                                 <button class="btn-cancel" onclick="toggleFormTrago()">Cancelar</button>
@@ -234,10 +237,8 @@
                         <select id="edit-t-botella" class="form-select"></select>
                     </div>
                     <div class="form-group">
-                        <label>Tipo default</label>
-                        <select id="edit-t-tipo" class="form-select">
-                            <option value="PROMO">🎉 Promo</option>
-                            <option value="NORMAL">🥃 Normal</option>
+                        <label>Tipo de Venta</label>
+                        <select id="edit-t-tipo" class="form-select" onchange="togglePromoField('editar')">
                             <option value="VASO">🍺 Vaso</option>
                             <option value="SHOT">🥃 Shot</option>
                             <option value="BOTELLA">🍾 Botella</option>
@@ -249,6 +250,11 @@
                     <div class="form-group">
                         <label>Precio (Bs.)</label>
                         <input type="number" id="edit-t-precio" class="form-input" step="0.50" min="0">
+                    </div>
+                    <div class="form-group" id="wrap-promo-editar" style="display:none;">
+                        <label>💜 Precio Promo (Bs.)</label>
+                        <input type="number" id="edit-t-precio-promo" class="form-input" step="0.50" min="0"
+                            placeholder="Si tiene promo">
                     </div>
                 </div>
             </div>
@@ -773,7 +779,7 @@
             <td style="font-weight:700">${m.nombre_boton}</td>
             <td><span style="background: ${tipoColor}33; color: ${tipoColor}; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600;">${tipoLabel}</span></td>
             <td style="color:var(--sub);font-size:.78rem">${m.nombre_botella}</td>
-            <td class="precio-cell">Bs.${parseFloat(m.precio).toFixed(2)}</td>
+            <td class="precio-cell">Bs.${parseFloat(m.precio).toFixed(2)}${m.precio_promo ? `<br><span style="color:#a855f7;font-size:0.7rem;">🎉 Promo: Bs.${parseFloat(m.precio_promo).toFixed(2)}</span>` : ''}</td>
             <td><div class="td-actions">
                 <button class="btn-icn btn-icn-edit" onclick="abrirEditTrago(decodeURIComponent('${mJson}'))">✎</button>
                 <button class="btn-icn btn-icn-del"  onclick="confirmarEliminar('trago','${m.id}','${m.nombre_boton.replace(/'/g, "\\'")}','¿Eliminar <strong>${m.nombre_boton}</strong> del catálogo?')">✕</button>
@@ -798,6 +804,7 @@
                                 <div>
                                     <div style="font-size:0.75rem; color:var(--sub);">${m.nombre_botella}</div>
                                     <div style="font-family:var(--mono); font-weight:700; color:var(--green); font-size:0.85rem;">Bs.${parseFloat(m.precio).toFixed(2)}</div>
+                                    ${m.precio_promo ? `<div style="font-size:0.7rem; color:#a855f7;">🎉 Promo: Bs.${parseFloat(m.precio_promo).toFixed(2)}</div>` : ''}
                                 </div>
                                 <div style="display:flex; gap:6px;">
                                     <button class="btn-icn btn-icn-edit" onclick="abrirEditTrago(decodeURIComponent('${mJson}'))" style="padding:6px 10px;">✎</button>
@@ -867,12 +874,22 @@
             }
         }
 
+        function togglePromoField(modo) {
+            const tipo = document.getElementById(modo === 'editar' ? 'edit-t-tipo' : 't-tipo').value;
+            const wrap = document.getElementById(modo === 'editar' ? 'wrap-promo-editar' : 'wrap-promo-crear');
+            // Solo BOTELLA puede tener precio promo
+            wrap.style.display = tipo === 'BOTELLA' ? '' : 'none';
+        }
+
         async function guardarTrago() {
+            const tipo = document.getElementById('t-tipo').value;
+            const promoVal = document.getElementById('t-precio-promo').value;
             const payload = {
                 nombre_boton: document.getElementById('t-nombre').value.trim(),
                 botella_id: document.getElementById('t-botella').value,
-                tipo_venta: document.getElementById('t-tipo').value,
+                tipo_venta: tipo,
                 precio: parseFloat(document.getElementById('t-precio').value),
+                precio_promo: (tipo === 'BOTELLA' && promoVal) ? parseFloat(promoVal) : null,
                 combo_desc: ''
             };
 
@@ -887,7 +904,9 @@
                 toggleFormTrago();
                 document.getElementById('t-nombre').value = '';
                 document.getElementById('t-precio').value = '';
+                document.getElementById('t-precio-promo').value = '';
                 document.getElementById('t-tipo').value = 'VASO';
+                togglePromoField('crear');
                 await cargarMenu();
             } else {
                 toast(data.error || 'Error', 'err');
@@ -899,8 +918,15 @@
             const m = JSON.parse(mJson);
             document.getElementById('edit-trago-id').value = m.id;
             document.getElementById('edit-t-nombre').value = m.nombre_boton;
-            document.getElementById('edit-t-tipo').value = m.tipo_venta;
+
+            // Si el tipo es PROMO o NORMAL (legacy), mapearlo a BOTELLA
+            let tipo = m.tipo_venta;
+            if (tipo === 'PROMO' || tipo === 'NORMAL') tipo = 'BOTELLA';
+            document.getElementById('edit-t-tipo').value = tipo;
+
             document.getElementById('edit-t-precio').value = parseFloat(m.precio).toFixed(2);
+            document.getElementById('edit-t-precio-promo').value = m.precio_promo ? parseFloat(m.precio_promo).toFixed(2) : '';
+            togglePromoField('editar');
 
             const sel = document.getElementById('edit-t-botella');
             sel.innerHTML = '<option value="">— Selecciona —</option>';
@@ -912,11 +938,14 @@
 
         async function guardarEditTrago() {
             const id = document.getElementById('edit-trago-id').value;
+            const tipo = document.getElementById('edit-t-tipo').value;
+            const promoVal = document.getElementById('edit-t-precio-promo').value;
             const p = {
                 nombre_boton: document.getElementById('edit-t-nombre').value.trim(),
-                tipo_venta: document.getElementById('edit-t-tipo').value,
+                tipo_venta: tipo,
                 botella_id: document.getElementById('edit-t-botella').value,
                 precio: parseFloat(document.getElementById('edit-t-precio').value),
+                precio_promo: (tipo === 'BOTELLA' && promoVal) ? parseFloat(promoVal) : null,
                 combo_desc: ''
             };
             if (!p.nombre_boton || !p.botella_id || isNaN(p.precio)) { toast('Completa todos los campos', 'err'); return; }
