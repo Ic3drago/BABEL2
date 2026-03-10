@@ -1,0 +1,29 @@
+-- Migration: Upgrade password hashing from SHA-256 to bcrypt
+-- Date: 2026-03-09
+--
+-- NOTA: Esta migración NO necesita ejecutarse manualmente.
+-- El código PHP implementa migración gradual:
+--
+-- 1. Cuando un usuario hace login con un hash SHA-256 viejo,
+--    el sistema verifica la contraseña con SHA-256.
+-- 2. Si es válida, automáticamente actualiza el hash a bcrypt.
+-- 3. Las nuevas contraseñas (login o cambio) siempre usan bcrypt.
+--
+-- Después de que todos los usuarios hayan hecho login al menos una vez,
+-- se puede eliminar el fallback SHA-256 del código PHP.
+--
+-- Hashes bcrypt tienen el formato: $2y$12$...
+-- Hashes SHA-256 tienen el formato: cadena hexadecimal de 64 caracteres
+--
+-- Para verificar qué usuarios aún tienen hash viejo:
+-- SELECT username FROM users WHERE LENGTH(password_hash) = 64;
+--
+-- Para resetear una contraseña manualmente a bcrypt (PHP CLI):
+-- php -r "echo password_hash('nueva_contraseña', PASSWORD_BCRYPT, ['cost' => 12]);"
+--
+-- Cambios de seguridad implementados:
+-- 1. password_hash() con PASSWORD_BCRYPT y cost=12 (en vez de SHA-256)
+-- 2. Rate limiting: 5 intentos de login por IP cada 15 minutos
+-- 3. Sanitización: límite de longitud en username (50) y password (255)
+-- 4. Mínimo 6 caracteres para nuevas contraseñas
+-- 5. Headers de seguridad: X-Content-Type-Options, X-Frame-Options, X-XSS-Protection

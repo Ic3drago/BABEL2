@@ -26,6 +26,9 @@ header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: DENY');
+header('X-XSS-Protection: 1; mode=block');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
 
@@ -39,6 +42,7 @@ $uri    = rtrim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
 
 // PUBLIC ROUTES
 if ($method === 'POST' && $uri === '/api/login') {
+    \App\Middleware\RateLimiter::check('login', 5, 900); // 5 intentos en 15 min
     $db = \App\Config\Database::getConnection();
     $authCtrl = new \App\Controllers\AuthController($db);
     $authCtrl->login();
